@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python · os/sys · Networking · Security — Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<style>
+:root{
+  --bg:#0e1117;
+  --bg-elevated:#141924;
+  --bg-card:#121722;
+  --border:#232a38;
+  --border-soft:#1a202c;
+  --text:#dfe3ea;
+  --text-dim:#8891a3;
+  --text-faint:#565f70;
+  --py:#6f96e0;
+  --py-soft:#6f96e01c;
+  --sh:#5fae94;
+  --sh-soft:#5fae941c;
+  --warn:#e0a23d;
+  --warn-soft:#e0a23d1c;
+  --danger:#d97a6c;
+  --danger-soft:#d97a6c1c;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.62;}
+a{color:inherit;}
+code{font-family:var(--mono);}
+
+.shell{display:flex;max-width:1360px;margin:0 auto;}
+.sidebar{
+  width:268px;flex-shrink:0;height:100vh;position:sticky;top:0;overflow-y:auto;
+  border-right:1px solid var(--border-soft);padding:26px 18px 60px;background:var(--bg-elevated);
+}
+.sidebar::-webkit-scrollbar{width:6px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.brand{font-family:var(--mono);font-weight:700;font-size:1rem;margin-bottom:2px;}
+.brand-sub{font-size:.72rem;color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:24px;}
+.nav-sec{margin-bottom:4px;}
+.nav-top{
+  display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;text-decoration:none;
+  color:var(--text);font-size:.86rem;font-weight:600;transition:background .15s;
+}
+.nav-top:hover{background:var(--bg-card);}
+.nav-top .num{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);width:16px;flex-shrink:0;}
+.nav-top.active{background:var(--py-soft);color:var(--py);}
+.nav-top.active .num{color:var(--py);}
+.nav-sub{display:block;padding:5px 10px 5px 35px;font-size:.78rem;color:var(--text-dim);text-decoration:none;border-radius:6px;}
+.nav-sub:hover{color:var(--text);background:var(--bg-card);}
+.nav-sub.active{color:var(--sh);}
+
+.main{flex:1;min-width:0;padding:0 0 120px;}
+.container{max-width:860px;margin:0 auto;padding:0 40px;}
+@media(max-width:920px){.sidebar{display:none;}.container{padding:0 20px;}}
+
+.hero{max-width:860px;margin:0 auto;padding:56px 40px 30px;}
+@media(max-width:920px){.hero{padding:40px 20px 24px;}}
+.eyebrow{font-family:var(--mono);font-size:.75rem;color:var(--sh);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
+h1{font-family:var(--mono);font-size:2.15rem;font-weight:700;line-height:1.15;letter-spacing:-.01em;margin:0 0 14px;}
+h1 .dot{color:var(--py);}
+.lede{color:var(--text-dim);max-width:660px;font-size:.98rem;}
+.note-card{
+  margin-top:26px;border:1px solid var(--border);border-left:3px solid var(--sh);border-radius:0 10px 10px 0;
+  background:var(--bg-card);padding:16px 20px;font-size:.9rem;color:var(--text-dim);
+}
+.note-card strong{color:var(--sh);}
+.note-card.danger{border-left-color:var(--warn);}
+.note-card.danger strong{color:var(--warn);}
+
+.toc-key{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;font-size:.8rem;font-family:var(--mono);color:var(--text-faint);}
+.toc-key span{display:flex;align-items:center;gap:7px;}
+.swatch{width:12px;height:12px;border-radius:3px;}
+.swatch.py{background:var(--py);}
+.swatch.sh{background:var(--sh);}
+.swatch.warn{background:var(--warn);}
+
+section.topsec{max-width:860px;margin:0 auto;padding:52px 40px 0;scroll-margin-top:24px;}
+@media(max-width:920px){section.topsec{padding:44px 20px 0;}}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;}
+.sec-num{font-family:var(--mono);font-size:.85rem;color:var(--py);background:var(--py-soft);padding:3px 10px;border-radius:6px;}
+.sec-head h2{font-family:var(--mono);font-size:1.5rem;margin:0;font-weight:700;}
+.sec-sub{color:var(--text-dim);font-size:.92rem;margin:6px 0 30px;max-width:640px;}
+
+h3.subhead{font-family:var(--mono);font-size:1.02rem;font-weight:600;margin:34px 0 12px;padding-top:6px;color:var(--text);scroll-margin-top:24px;}
+h3.subhead:first-of-type{margin-top:8px;}
+
+table.duo{width:100%;border-collapse:collapse;font-size:.85rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:6px;}
+table.duo thead th{text-align:left;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);background:var(--bg-elevated);padding:9px 14px;border-bottom:1px solid var(--border);}
+table.duo thead th.py-col{color:var(--py);}
+table.duo thead th.sh-col{color:var(--sh);}
+table.duo tbody td{padding:10px 14px;border-bottom:1px solid var(--border-soft);vertical-align:top;color:var(--text-dim);}
+table.duo tbody tr:last-child td{border-bottom:none;}
+table.duo tbody tr:hover{background:var(--bg-elevated);}
+td.task-cell{color:var(--text);font-weight:500;white-space:nowrap;}
+td.py-cell code{color:var(--py);background:var(--py-soft);padding:2px 6px;border-radius:5px;}
+td.sh-cell code{color:var(--sh);background:var(--sh-soft);padding:2px 6px;border-radius:5px;}
+td.py-cell, td.sh-cell{font-size:.83rem;}
+
+p.body-p{color:var(--text-dim);font-size:.94rem;margin:14px 0;}
+p.body-p strong{color:var(--text);}
+p.body-p code{color:var(--text);background:var(--bg-card);border:1px solid var(--border);padding:1px 6px;border-radius:4px;}
+
+.code-wrap{position:relative;margin:16px 0 20px;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.code-tag{display:flex;justify-content:space-between;align-items:center;background:var(--bg-elevated);padding:8px 14px;font-family:var(--mono);font-size:.7rem;color:var(--text-faint);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em;}
+.copy-btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:.66rem;padding:3px 9px;border-radius:5px;cursor:pointer;text-transform:none;letter-spacing:0;transition:all .15s;}
+.copy-btn:hover{border-color:var(--sh);color:var(--sh);}
+.copy-btn:focus-visible,.nav-top:focus-visible,.nav-sub:focus-visible{outline:2px solid var(--sh);outline-offset:2px;}
+pre{margin:0;padding:16px 18px;overflow-x:auto;background:#0a0d12;font-size:.82rem;}
+pre code{font-family:var(--mono) !important;background:transparent !important;}
+.hljs{background:#0a0d12 !important;}
+
+.callout{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--sh);border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;font-size:.89rem;color:var(--text-dim);}
+.callout strong{color:var(--sh);}
+.callout.mistake{border-left-color:var(--danger);}
+.callout.mistake strong{color:var(--danger);}
+
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:14px 0 22px;}
+.mode-card{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;padding:12px 14px;}
+.mode-card code{color:var(--py);font-weight:600;}
+.mode-card p{margin:6px 0 0;color:var(--text-dim);font-size:.83rem;}
+
+.mistakes{margin:14px 0 22px;padding:0;list-style:none;}
+.mistakes li{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:10px;font-size:.89rem;color:var(--text-dim);}
+.mistakes li strong{color:var(--danger);}
+
+.ethics-banner{
+  margin:6px 0 30px;padding:20px 22px;border-radius:12px;background:var(--warn-soft);
+  border:1px solid var(--warn);
+}
+.ethics-banner .eb-title{font-family:var(--mono);color:var(--warn);font-weight:700;font-size:.9rem;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.ethics-banner p{margin:6px 0;font-size:.89rem;color:var(--text);opacity:.92;}
+
+/* checklist layers */
+.layers{max-width:860px;margin:0 auto;padding:0 40px;}
+@media(max-width:920px){.layers{padding:0 20px;}}
+.layer{
+  position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+  padding:22px 24px 18px;margin-bottom:18px;
+}
+.layer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.layer-title-wrap{display:flex;align-items:center;gap:12px;}
+.layer-badge{font-family:var(--mono);font-size:.72rem;background:var(--sh-soft);color:var(--sh);padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.layer h3{font-family:var(--mono);font-size:1.05rem;margin:0;font-weight:600;}
+.layer-progress-text{font-family:var(--mono);font-size:.76rem;color:var(--text-faint);}
+.check-item{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;border-bottom:1px solid var(--border-soft);cursor:pointer;}
+.check-item:last-child{border-bottom:none;}
+.check-item input{margin-top:3px;accent-color:var(--sh);width:15px;height:15px;flex-shrink:0;cursor:pointer;}
+.check-item label{font-size:.88rem;color:var(--text-dim);cursor:pointer;line-height:1.5;}
+.check-item label code{color:var(--text);background:var(--bg-elevated);border:1px solid var(--border);padding:1px 5px;border-radius:4px;}
+.check-item.checked label{color:var(--text-faint);text-decoration:line-through;text-decoration-color:var(--border);}
+.check-sub{margin:6px 0 4px 25px;}
+
+.overall-progress{
+  max-width:860px;margin:0 auto 30px;padding:0 40px;
+}
+@media(max-width:920px){.overall-progress{padding:0 20px;}}
+.op-bar-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:16px;}
+.op-track{flex:1;height:8px;background:var(--bg-elevated);border-radius:4px;overflow:hidden;}
+.op-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--py),var(--sh));transition:width .3s;}
+.op-label{font-family:var(--mono);font-size:.8rem;color:var(--text-dim);white-space:nowrap;}
+.op-label strong{color:var(--sh);}
+
+.honest-summary{max-width:860px;margin:30px auto 0;padding:0 40px;}
+@media(max-width:920px){.honest-summary{padding:0 20px;}}
+.hs-card{border:1px solid var(--border);border-radius:14px;padding:28px 30px;background:linear-gradient(135deg,var(--py-soft),var(--sh-soft));}
+.hs-card h3{font-family:var(--mono);margin:0 0 12px;font-size:1.15rem;}
+.hs-card p{color:var(--text);opacity:.88;font-size:.93rem;margin:0 0 10px;}
+
+footer{max-width:860px;margin:56px auto 0;padding:24px 40px 0;border-top:1px solid var(--border-soft);color:var(--text-faint);font-size:.82rem;}
+@media(max-width:920px){footer{padding:24px 20px 0;}}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--sh);color:#0a0d12;font-family:var(--mono);font-size:.82rem;font-weight:600;padding:9px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:300;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">py · os/sys · net · sec</div>
+    <div class="brand-sub">Reference &amp; hardening checklist</div>
+
+    <div class="nav-sec">
+      <a class="nav-top" href="#sec-1"><span class="num">01</span>File Handling</a>
+      <a class="nav-sub" href="#s1-reading">Reading files</a>
+      <a class="nav-sub" href="#s1-writing">Writing files</a>
+      <a class="nav-sub" href="#s1-modes">File modes</a>
+      <a class="nav-sub" href="#s1-pathlib">pathlib</a>
+      <a class="nav-sub" href="#s1-manip">Copy / move / delete</a>
+      <a class="nav-sub" href="#s1-structured">JSON &amp; CSV</a>
+      <a class="nav-sub" href="#s1-mistakes">Common mistakes</a>
+    </div>
+
+    <div class="nav-sec">
+      <a class="nav-top" href="#sec-2"><span class="num">02</span>The os Module</a>
+      <a class="nav-sub" href="#s2-dirpath">Directory &amp; path ops</a>
+      <a class="nav-sub" href="#s2-fileops">File operations</a>
+      <a class="nav-sub" href="#s2-process">Process &amp; environment</a>
+    </div>
+
+    <div class="nav-sec">
+      <a class="nav-top" href="#sec-3"><span class="num">03</span>The sys Module</a>
+      <a class="nav-sub" href="#s3-argv">Command-line args</a>
+      <a class="nav-sub" href="#s3-stdin">Piped input</a>
+    </div>
+
+    <div class="nav-sec">
+      <a class="nav-top" href="#sec-4"><span class="num">04</span>Networking Basics</a>
+      <a class="nav-sub" href="#s4-http">HTTP requests</a>
+      <a class="nav-sub" href="#s4-sockets">Low-level sockets</a>
+      <a class="nav-sub" href="#s4-dns">DNS &amp; connectivity</a>
+    </div>
+
+    <div class="nav-sec">
+      <a class="nav-top" href="#sec-5"><span class="num">05</span>Pentesting <span style="color:var(--warn);">⚠</span></a>
+      <a class="nav-sub" href="#s5-scanner">Port scanner</a>
+      <a class="nav-sub" href="#s5-nmap">Calling nmap</a>
+      <a class="nav-sub" href="#s5-tls">TLS expiry check</a>
+      <a class="nav-sub" href="#s5-secrets">Secret hygiene</a>
+    </div>
+
+    <div class="nav-sec">
+      <a class="nav-top" href="#sec-6"><span class="num">06</span>Hardening Checklist</a>
+      <a class="nav-sub" href="#layer-1">Layer 1 — App code</a>
+      <a class="nav-sub" href="#layer-2">Layer 2 — Auth</a>
+      <a class="nav-sub" href="#layer-3">Layer 3 — Network</a>
+      <a class="nav-sub" href="#layer-4">Layer 4 — Host/OS</a>
+      <a class="nav-sub" href="#layer-5">Layer 5 — Data</a>
+      <a class="nav-sub" href="#layer-6">Layer 6 — Monitoring</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <header class="hero">
+      <div class="eyebrow">Reference · with Linux command equivalents</div>
+      <h1>Python File Handling, <span class="dot">os</span>/<span class="dot">sys</span>, Networking &amp; Security</h1>
+      <p class="lede">A working reference, not a theory book — every entry pairs the Python you'd write with the Linux command it mirrors, plus a hardening checklist you actually run before every deploy.</p>
+
+      <div class="toc-key">
+        <span><span class="swatch py"></span>Python</span>
+        <span><span class="swatch sh"></span>Linux equivalent</span>
+        <span><span class="swatch warn"></span>Authorized-use-only</span>
+      </div>
+
+      <div class="note-card">
+        <strong>Before you use the security sections:</strong> "Zero vulnerability" and "bulletproof" aren't achievable states — no deployed system is perfectly secure. What this document actually gives you is <strong>defense in depth</strong>: enough independent layers that one mistake doesn't become a full compromise. Treat the Section 06 checklist as "meaningfully reduce risk," not "guarantee safety."
+      </div>
+      <div class="note-card danger">
+        <strong>On the pentesting section specifically:</strong> every technique shown is standard, widely-taught security education — for testing systems you own or have explicit written authorization to test. Scanning or probing systems you don't own or have permission to test is illegal in most jurisdictions, independent of intent.
+      </div>
+    </header>
+
+    <!-- SECTION 1 -->
+    <section class="topsec" id="sec-1">
+      <div class="sec-head"><span class="sec-num">01</span><h2>Python File Handling &amp; Manipulation</h2></div>
+      <p class="sec-sub">Reading, writing, path handling with <code>pathlib</code>, structured formats, and the mistakes worth avoiding.</p>
+
+      <h3 class="subhead" id="s1-reading">Opening and reading files</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col">Code</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="task-cell">Open and read whole file</td><td class="py-cell"><code>with open('file.txt') as f: content = f.read()</code></td><td class="sh-cell"><code>cat file.txt</code></td></tr>
+        <tr><td class="task-cell">Read line by line</td><td class="py-cell"><code>with open('file.txt') as f: for line in f: print(line)</code></td><td class="sh-cell"><code>while read -r line; do echo "$line"; done &lt; file.txt</code></td></tr>
+        <tr><td class="task-cell">Read all lines into a list</td><td class="py-cell"><code>with open('file.txt') as f: lines = f.readlines()</code></td><td class="sh-cell"><code>mapfile -t lines &lt; file.txt</code></td></tr>
+        <tr><td class="task-cell">Read first N lines</td><td class="py-cell"><code>with open('file.txt') as f: [next(f) for _ in range(5)]</code></td><td class="sh-cell"><code>head -n 5 file.txt</code></td></tr>
+        <tr><td class="task-cell">Read last N lines</td><td class="py-cell"><code>lines[-5:]</code> (after reading all lines)</td><td class="sh-cell"><code>tail -n 5 file.txt</code></td></tr>
+      </tbody></table>
+      <p class="body-p"><strong>Why <code>with open(...) as f:</code> instead of <code>f = open(...)</code>:</strong> the <code>with</code> block (a context manager) guarantees the file is closed automatically, even if an exception happens partway through — the same discipline as always cleaning up a resource you opened, without having to remember a matching <code>f.close()</code> on every code path.</p>
+
+      <h3 class="subhead" id="s1-writing">Writing files</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col">Code</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="task-cell">Write (overwrite)</td><td class="py-cell"><code>with open('file.txt', 'w') as f: f.write('hello')</code></td><td class="sh-cell"><code>echo "hello" > file.txt</code></td></tr>
+        <tr><td class="task-cell">Append</td><td class="py-cell"><code>with open('file.txt', 'a') as f: f.write('more\n')</code></td><td class="sh-cell"><code>echo "more" >> file.txt</code></td></tr>
+        <tr><td class="task-cell">Write multiple lines</td><td class="py-cell"><code>f.writelines(['line1\n', 'line2\n'])</code></td><td class="sh-cell"><code>printf 'line1\nline2\n' > file.txt</code></td></tr>
+        <tr><td class="task-cell">Write binary data</td><td class="py-cell"><code>with open('file.bin', 'wb') as f: f.write(b'\x00\x01')</code></td><td class="sh-cell"><code>printf '\x00\x01' > file.bin</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s1-modes">File modes cheat sheet</h3>
+      <div class="mode-grid">
+        <div class="mode-card"><code>'r'</code><p>Read (default) — file must exist</p></div>
+        <div class="mode-card"><code>'w'</code><p>Write — creates the file, <strong>overwrites</strong> if it exists</p></div>
+        <div class="mode-card"><code>'a'</code><p>Append — creates the file if missing, adds to the end if it exists</p></div>
+        <div class="mode-card"><code>'x'</code><p>Exclusive create — fails if the file already exists (safe "don't overwrite" mode)</p></div>
+        <div class="mode-card"><code>'b'</code><p>Binary mode — combine with the above, e.g. <code>'rb'</code>, <code>'wb'</code></p></div>
+        <div class="mode-card"><code>'+'</code><p>Read and write together, e.g. <code>'r+'</code></p></div>
+      </div>
+
+      <h3 class="subhead" id="s1-pathlib">Working with paths — pathlib (the modern approach)</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col">Code</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="task-cell">Build a path</td><td class="py-cell"><code>from pathlib import Path; p = Path('folder') / 'file.txt'</code></td><td class="sh-cell"><code>folder/file.txt</code></td></tr>
+        <tr><td class="task-cell">Check existence</td><td class="py-cell"><code>p.exists()</code></td><td class="sh-cell"><code>test -e folder/file.txt</code></td></tr>
+        <tr><td class="task-cell">Check if directory</td><td class="py-cell"><code>p.is_dir()</code></td><td class="sh-cell"><code>test -d folder</code></td></tr>
+        <tr><td class="task-cell">Create directories</td><td class="py-cell"><code>p.mkdir(parents=True, exist_ok=True)</code></td><td class="sh-cell"><code>mkdir -p folder</code></td></tr>
+        <tr><td class="task-cell">List directory contents</td><td class="py-cell"><code>list(Path('.').iterdir())</code></td><td class="sh-cell"><code>ls</code></td></tr>
+        <tr><td class="task-cell">Find files by pattern</td><td class="py-cell"><code>list(Path('.').glob('*.log'))</code></td><td class="sh-cell"><code>find . -maxdepth 1 -name "*.log"</code></td></tr>
+        <tr><td class="task-cell">Find files recursively</td><td class="py-cell"><code>list(Path('.').rglob('*.log'))</code></td><td class="sh-cell"><code>find . -name "*.log"</code></td></tr>
+        <tr><td class="task-cell">Get filename only</td><td class="py-cell"><code>p.name</code></td><td class="sh-cell"><code>basename path/to/file.txt</code></td></tr>
+        <tr><td class="task-cell">Get parent directory</td><td class="py-cell"><code>p.parent</code></td><td class="sh-cell"><code>dirname path/to/file.txt</code></td></tr>
+        <tr><td class="task-cell">Get extension</td><td class="py-cell"><code>p.suffix</code></td><td class="sh-cell">(no direct single command)</td></tr>
+        <tr><td class="task-cell">Read text (no with needed)</td><td class="py-cell"><code>p.read_text()</code></td><td class="sh-cell"><code>cat file.txt</code></td></tr>
+        <tr><td class="task-cell">Write text (no with needed)</td><td class="py-cell"><code>p.write_text('hello')</code></td><td class="sh-cell"><code>echo "hello" > file.txt</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s1-manip">File manipulation — copy, move, delete</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col">Code</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="task-cell">Copy a file</td><td class="py-cell"><code>import shutil; shutil.copy('a.txt', 'b.txt')</code></td><td class="sh-cell"><code>cp a.txt b.txt</code></td></tr>
+        <tr><td class="task-cell">Copy a directory tree</td><td class="py-cell"><code>shutil.copytree('src/', 'dest/')</code></td><td class="sh-cell"><code>cp -r src/ dest/</code></td></tr>
+        <tr><td class="task-cell">Move/rename</td><td class="py-cell"><code>shutil.move('old.txt', 'new.txt')</code></td><td class="sh-cell"><code>mv old.txt new.txt</code></td></tr>
+        <tr><td class="task-cell">Delete a file</td><td class="py-cell"><code>import os; os.remove('file.txt')</code></td><td class="sh-cell"><code>rm file.txt</code></td></tr>
+        <tr><td class="task-cell">Delete an empty directory</td><td class="py-cell"><code>os.rmdir('folder')</code></td><td class="sh-cell"><code>rmdir folder</code></td></tr>
+        <tr><td class="task-cell">Delete a directory tree</td><td class="py-cell"><code>shutil.rmtree('folder')</code></td><td class="sh-cell"><code>rm -r folder</code></td></tr>
+        <tr><td class="task-cell">Get file size</td><td class="py-cell"><code>os.path.getsize('file.txt')</code></td><td class="sh-cell"><code>stat -c%s file.txt</code> or <code>du -b file.txt</code></td></tr>
+        <tr><td class="task-cell">Check permissions numerically</td><td class="py-cell"><code>oct(os.stat('file.txt').st_mode)[-3:]</code></td><td class="sh-cell"><code>stat -c%a file.txt</code></td></tr>
+        <tr><td class="task-cell">Change permissions</td><td class="py-cell"><code>os.chmod('script.sh', 0o755)</code></td><td class="sh-cell"><code>chmod 755 script.sh</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s1-structured">Structured file formats</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col" colspan="2">Code</th></tr></thead><tbody>
+        <tr><td class="task-cell">Read JSON</td><td class="py-cell" colspan="2"><code>import json; data = json.load(open('data.json'))</code></td></tr>
+        <tr><td class="task-cell">Write JSON</td><td class="py-cell" colspan="2"><code>json.dump(data, open('data.json', 'w'), indent=2)</code></td></tr>
+        <tr><td class="task-cell">Read CSV</td><td class="py-cell" colspan="2"><code>import csv; rows = list(csv.reader(open('data.csv')))</code></td></tr>
+        <tr><td class="task-cell">Read CSV as dicts</td><td class="py-cell" colspan="2"><code>rows = list(csv.DictReader(open('data.csv')))</code></td></tr>
+        <tr><td class="task-cell">Write CSV</td><td class="py-cell" colspan="2"><code>csv.writer(open('out.csv', 'w')).writerows(rows)</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s1-mistakes">Common mistakes to avoid</h3>
+      <ul class="mistakes">
+        <li><strong>Not using <code>with</code></strong> — leaves file handles open, which can exhaust the OS's file descriptor limit under load, and risks losing unflushed writes if the program crashes.</li>
+        <li><strong>Using string concatenation for paths</strong> (<code>'folder' + '/' + 'file.txt'</code>) instead of <code>Path('folder') / 'file.txt'</code> or <code>os.path.join()</code> — breaks on Windows and is easy to get wrong with slashes.</li>
+        <li><strong>Reading a huge file with <code>.read()</code></strong> — loads the entire file into memory at once; for large files, iterate line by line instead (<code>for line in f:</code>), which reads lazily.</li>
+        <li><strong>Forgetting binary mode for non-text files</strong> — opening an image or executable in text mode (<code>'r'</code>) corrupts it; always use <code>'rb'</code>/<code>'wb'</code> for anything that isn't plain text.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="topsec" id="sec-2">
+      <div class="sec-head"><span class="sec-num">02</span><h2>The os Module</h2></div>
+      <p class="sec-sub">Python's direct interface to operating system functionality — most of it maps almost one-to-one to a shell command.</p>
+
+      <h3 class="subhead" id="s2-dirpath">Directory &amp; path operations</h3>
+      <table class="duo"><thead><tr><th class="py-col">Python (os)</th><th>What It Does</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="py-cell"><code>os.getcwd()</code></td><td class="task-cell" style="white-space:normal;font-weight:400;color:var(--text-dim);">Returns the current working directory</td><td class="sh-cell"><code>pwd</code></td></tr>
+        <tr><td class="py-cell"><code>os.chdir(path)</code></td><td style="color:var(--text-dim);">Changes the current working directory</td><td class="sh-cell"><code>cd path</code></td></tr>
+        <tr><td class="py-cell"><code>os.listdir(path)</code></td><td style="color:var(--text-dim);">Lists contents of a directory</td><td class="sh-cell"><code>ls path</code></td></tr>
+        <tr><td class="py-cell"><code>os.mkdir(path)</code></td><td style="color:var(--text-dim);">Creates a single directory</td><td class="sh-cell"><code>mkdir path</code></td></tr>
+        <tr><td class="py-cell"><code>os.makedirs(path, exist_ok=True)</code></td><td style="color:var(--text-dim);">Creates nested directories</td><td class="sh-cell"><code>mkdir -p path</code></td></tr>
+        <tr><td class="py-cell"><code>os.rmdir(path)</code></td><td style="color:var(--text-dim);">Removes an empty directory</td><td class="sh-cell"><code>rmdir path</code></td></tr>
+        <tr><td class="py-cell"><code>os.removedirs(path)</code></td><td style="color:var(--text-dim);">Removes nested empty directories</td><td class="sh-cell"><code>rmdir -p path</code></td></tr>
+        <tr><td class="py-cell"><code>os.walk(path)</code></td><td style="color:var(--text-dim);">Recursively walks a directory tree, yielding (dirpath, dirnames, filenames)</td><td class="sh-cell"><code>find path</code></td></tr>
+        <tr><td class="py-cell"><code>os.path.join(a, b)</code></td><td style="color:var(--text-dim);">Joins path components correctly for the OS</td><td class="sh-cell"><code>a/b</code></td></tr>
+        <tr><td class="py-cell"><code>os.path.exists(path)</code></td><td style="color:var(--text-dim);">Checks if a path exists</td><td class="sh-cell"><code>test -e path</code></td></tr>
+        <tr><td class="py-cell"><code>os.path.isfile / isdir(path)</code></td><td style="color:var(--text-dim);">Checks if a path is a file / directory</td><td class="sh-cell"><code>test -f path</code> / <code>test -d path</code></td></tr>
+        <tr><td class="py-cell"><code>os.path.abspath(path)</code></td><td style="color:var(--text-dim);">Converts a relative path to absolute</td><td class="sh-cell"><code>realpath path</code></td></tr>
+        <tr><td class="py-cell"><code>os.path.getmtime(path)</code></td><td style="color:var(--text-dim);">Gets last-modified timestamp</td><td class="sh-cell"><code>stat -c%Y path</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s2-fileops">File operations</h3>
+      <table class="duo"><thead><tr><th class="py-col">Python (os)</th><th>What It Does</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="py-cell"><code>os.remove(path)</code></td><td style="color:var(--text-dim);">Deletes a file</td><td class="sh-cell"><code>rm path</code></td></tr>
+        <tr><td class="py-cell"><code>os.rename(src, dst)</code></td><td style="color:var(--text-dim);">Renames/moves a file</td><td class="sh-cell"><code>mv src dst</code></td></tr>
+        <tr><td class="py-cell"><code>os.chmod(path, 0o644)</code></td><td style="color:var(--text-dim);">Changes file permissions</td><td class="sh-cell"><code>chmod 644 path</code></td></tr>
+        <tr><td class="py-cell"><code>os.chown(path, uid, gid)</code></td><td style="color:var(--text-dim);">Changes file owner/group (needs root)</td><td class="sh-cell"><code>chown uid:gid path</code></td></tr>
+        <tr><td class="py-cell"><code>os.stat(path)</code></td><td style="color:var(--text-dim);">Returns detailed file metadata</td><td class="sh-cell"><code>stat path</code></td></tr>
+        <tr><td class="py-cell"><code>os.access(path, os.R_OK)</code></td><td style="color:var(--text-dim);">Checks if the current process can read/write/execute a path</td><td class="sh-cell"><code>test -r path</code></td></tr>
+        <tr><td class="py-cell"><code>os.symlink(src, dst)</code></td><td style="color:var(--text-dim);">Creates a symbolic link</td><td class="sh-cell"><code>ln -s src dst</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s2-process">Process &amp; environment operations</h3>
+      <table class="duo"><thead><tr><th class="py-col">Python (os)</th><th>What It Does</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="py-cell"><code>os.environ</code></td><td style="color:var(--text-dim);">Dict-like access to environment variables</td><td class="sh-cell"><code>env</code></td></tr>
+        <tr><td class="py-cell"><code>os.environ.get('HOME')</code></td><td style="color:var(--text-dim);">Reads one environment variable safely</td><td class="sh-cell"><code>echo $HOME</code></td></tr>
+        <tr><td class="py-cell"><code>os.environ['KEY'] = 'value'</code></td><td style="color:var(--text-dim);">Sets an environment variable for this process</td><td class="sh-cell"><code>export KEY=value</code></td></tr>
+        <tr><td class="py-cell"><code>os.getpid()</code></td><td style="color:var(--text-dim);">Returns the current process's ID</td><td class="sh-cell"><code>echo $$</code></td></tr>
+        <tr><td class="py-cell"><code>os.getppid()</code></td><td style="color:var(--text-dim);">Returns the parent process's ID</td><td class="sh-cell"><code>ps -o ppid= -p $$</code></td></tr>
+        <tr><td class="py-cell"><code>os.system(cmd)</code></td><td style="color:var(--text-dim);">Runs a shell command (output goes to the terminal, not captured)</td><td class="sh-cell">(runs any shell command directly)</td></tr>
+        <tr><td class="py-cell"><code>os.kill(pid, signal)</code></td><td style="color:var(--text-dim);">Sends a signal to a process</td><td class="sh-cell"><code>kill -&lt;signal&gt; pid</code></td></tr>
+        <tr><td class="py-cell"><code>os.getlogin()</code></td><td style="color:var(--text-dim);">Returns the current logged-in username</td><td class="sh-cell"><code>whoami</code></td></tr>
+        <tr><td class="py-cell"><code>os.cpu_count()</code></td><td style="color:var(--text-dim);">Returns the number of available CPU cores</td><td class="sh-cell"><code>nproc</code></td></tr>
+        <tr><td class="py-cell"><code>os.uname()</code></td><td style="color:var(--text-dim);">Returns system/kernel info</td><td class="sh-cell"><code>uname -a</code></td></tr>
+      </tbody></table>
+
+      <div class="callout"><strong>Why subprocess.run() is preferred over os.system() in real code:</strong> <code>os.system()</code> just hands a string to the shell — this makes it easy to accidentally build a command from untrusted input and get shell injection (someone passing <code>; rm -rf /</code> as part of a filename, for instance). <code>subprocess.run(['ls', '-la'])</code> passes arguments as a list, never invoking a shell to interpret them, which is both safer and gives you the command's actual output/exit code back in Python instead of just seeing it printed.</div>
+
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import subprocess
+result = subprocess.run(['ls', '-la'], capture_output=True, text=True)
+print(result.stdout)
+print(result.returncode)</code></pre></div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="topsec" id="sec-3">
+      <div class="sec-head"><span class="sec-num">03</span><h2>The sys Module</h2></div>
+      <p class="sec-sub"><code>sys</code> is about the Python interpreter itself — its inputs, its outputs, and how it exits — rather than the operating system broadly (that's <code>os</code>'s job).</p>
+
+      <table class="duo"><thead><tr><th class="py-col">Python (sys)</th><th>What It Does</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="py-cell"><code>sys.argv</code></td><td style="color:var(--text-dim);">List of command-line arguments passed to the script</td><td class="sh-cell"><code>$1</code>, <code>$2</code>, … in a bash script</td></tr>
+        <tr><td class="py-cell"><code>sys.exit(code)</code></td><td style="color:var(--text-dim);">Exits the program with a given status code</td><td class="sh-cell"><code>exit code</code> in bash</td></tr>
+        <tr><td class="py-cell"><code>sys.stdin.read()</code></td><td style="color:var(--text-dim);">Reads from standard input (useful for piping data in)</td><td class="sh-cell"><code>cat</code> reading from a pipe</td></tr>
+        <tr><td class="py-cell"><code>sys.stdout.write(text)</code></td><td style="color:var(--text-dim);">Writes to standard output (like print, but no auto-newline)</td><td class="sh-cell"><code>echo -n text</code></td></tr>
+        <tr><td class="py-cell"><code>sys.stderr.write(text)</code></td><td style="color:var(--text-dim);">Writes to standard error, separate from normal output</td><td class="sh-cell"><code>echo text &gt;&amp;2</code></td></tr>
+        <tr><td class="py-cell"><code>sys.path</code></td><td style="color:var(--text-dim);">List of directories Python searches when importing modules</td><td class="sh-cell"><code>echo $PYTHONPATH</code> / <code>echo $PATH</code></td></tr>
+        <tr><td class="py-cell"><code>sys.platform</code></td><td style="color:var(--text-dim);">Identifies the OS Python is running on ('linux', 'darwin', 'win32')</td><td class="sh-cell"><code>uname -s</code></td></tr>
+        <tr><td class="py-cell"><code>sys.version</code></td><td style="color:var(--text-dim);">The running Python interpreter's version string</td><td class="sh-cell"><code>python3 --version</code></td></tr>
+        <tr><td class="py-cell"><code>sys.executable</code></td><td style="color:var(--text-dim);">Full path to the Python interpreter currently running</td><td class="sh-cell"><code>which python3</code></td></tr>
+        <tr><td class="py-cell"><code>sys.getsizeof(obj)</code></td><td style="color:var(--text-dim);">Size in bytes of a Python object in memory</td><td class="sh-cell">(no direct shell equivalent)</td></tr>
+        <tr><td class="py-cell"><code>sys.modules</code></td><td style="color:var(--text-dim);">Dict of all currently imported modules</td><td class="sh-cell">(no direct shell equivalent)</td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s3-argv">Reading command-line arguments (sys.argv)</h3>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import sys
+
+if len(sys.argv) &lt; 2:
+    print("Usage: python script.py &lt;filename&gt;")
+    sys.exit(1)
+
+filename = sys.argv[1]
+print(f"Processing {filename}")</code></pre></div>
+      <p class="body-p">Run as: <code>python script.py report.txt</code> → <code>sys.argv</code> is <code>['script.py', 'report.txt']</code>.</p>
+      <p class="body-p"><strong>Why sys.exit(1) and not just letting the script end normally:</strong> exit codes are how shell scripts and CI pipelines detect success/failure. <code>0</code> means success by convention; any nonzero value signals an error — <code>command1 && command2</code> relies on this exact convention to decide whether to run <code>command2</code> at all.</p>
+
+      <h3 class="subhead" id="s3-stdin">Reading piped input</h3>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import sys
+for line in sys.stdin:
+    print(line.strip().upper())</code></pre></div>
+      <p class="body-p">Run as: <code>cat names.txt | python uppercase.py</code> — this script behaves like a Linux filter command (<code>tr</code>, <code>sort</code>, <code>grep</code>), reading from stdin and writing to stdout, which is what lets it be chained with <code>|</code> into any pipeline.</p>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section class="topsec" id="sec-4">
+      <div class="sec-head"><span class="sec-num">04</span><h2>Python Networking Basics</h2></div>
+      <p class="sec-sub">From <code>requests</code> down to the raw sockets it's built on.</p>
+
+      <h3 class="subhead" id="s4-http">Making HTTP requests</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col">Code</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="task-cell">Simple GET request</td><td class="py-cell"><code>import requests; r = requests.get('https://api.example.com')</code></td><td class="sh-cell"><code>curl https://api.example.com</code></td></tr>
+        <tr><td class="task-cell">GET with query params</td><td class="py-cell"><code>requests.get(url, params={'q': 'search'})</code></td><td class="sh-cell"><code>curl "url?q=search"</code></td></tr>
+        <tr><td class="task-cell">POST JSON data</td><td class="py-cell"><code>requests.post(url, json={'key': 'value'})</code></td><td class="sh-cell"><code>curl -X POST -H "Content-Type: application/json" -d '{"key":"value"}' url</code></td></tr>
+        <tr><td class="task-cell">Custom headers</td><td class="py-cell"><code>requests.get(url, headers={'Authorization': 'Bearer token'})</code></td><td class="sh-cell"><code>curl -H "Authorization: Bearer token" url</code></td></tr>
+        <tr><td class="task-cell">Set a timeout</td><td class="py-cell"><code>requests.get(url, timeout=5)</code></td><td class="sh-cell"><code>curl --max-time 5 url</code></td></tr>
+        <tr><td class="task-cell">Download a file</td><td class="py-cell"><code>open('file.zip', 'wb').write(requests.get(url).content)</code></td><td class="sh-cell"><code>curl -O url</code> or <code>wget url</code></td></tr>
+        <tr><td class="task-cell">Check status code</td><td class="py-cell"><code>r.status_code</code></td><td class="sh-cell"><code>curl -o /dev/null -w "%{http_code}" url</code></td></tr>
+      </tbody></table>
+
+      <h3 class="subhead" id="s4-sockets">Low-level sockets (what requests is built on top of)</h3>
+      <div class="code-wrap"><div class="code-tag">python — minimal TCP client</div><pre><code class="language-python">import socket
+
+# A minimal TCP client
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(('example.com', 80))
+sock.sendall(b'GET / HTTP/1.1\r\nHost: example.com\r\n\r\n')
+response = sock.recv(4096)
+print(response.decode())
+sock.close()</code></pre></div>
+      <p class="body-p">This is, at a low level, exactly what <code>curl example.com</code> and <code>requests.get('http://example.com')</code> are doing underneath — opening a TCP connection, writing raw HTTP text, reading the raw response.</p>
+
+      <div class="code-wrap"><div class="code-tag">python — minimal TCP server</div><pre><code class="language-python">import socket
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server.bind(('0.0.0.0', 9000))
+server.listen(1)
+print("Listening on port 9000...")
+
+conn, addr = server.accept()
+print(f"Connection from {addr}")
+data = conn.recv(1024)
+conn.sendall(b'Echo: ' + data)
+conn.close()</code></pre></div>
+      <p class="body-p">Test it with: <code>nc localhost 9000</code> or <code>curl telnet://localhost:9000</code> in another terminal — this is the same fundamental pattern a Django dev server or an Actix service is built on, just without a web framework wrapped around it.</p>
+
+      <h3 class="subhead" id="s4-dns">DNS &amp; connectivity</h3>
+      <table class="duo"><thead><tr><th>Task</th><th class="py-col">Code</th><th class="sh-col">Linux Equivalent</th></tr></thead><tbody>
+        <tr><td class="task-cell">Resolve a hostname to an IP</td><td class="py-cell"><code>socket.gethostbyname('example.com')</code></td><td class="sh-cell"><code>dig example.com +short</code></td></tr>
+        <tr><td class="task-cell">Get your own hostname</td><td class="py-cell"><code>socket.gethostname()</code></td><td class="sh-cell"><code>hostname</code></td></tr>
+        <tr><td class="task-cell">Check if a port is open</td><td class="py-cell">(see the port-scanner example, Section 05)</td><td class="sh-cell"><code>nc -zv host port</code></td></tr>
+      </tbody></table>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section class="topsec" id="sec-5">
+      <div class="sec-head"><span class="sec-num">05</span><h2>Networking for Cybersecurity &amp; Pentesting</h2></div>
+      <p class="sec-sub">Authorized use only.</p>
+
+      <div class="ethics-banner">
+        <div class="eb-title">⚠ Scope and ethics, stated plainly</div>
+        <p>Every technique below is standard defensive/offensive security education — the same material covered in any introductory security course, <code>nmap</code>'s own documentation, or the Python <code>socket</code> module docs.</p>
+        <p>Use these only against systems you own, or have explicit written authorization to test (a home lab, a CTF platform, or a client engagement with a signed scope document).</p>
+        <p><strong>Running these against systems you don't control is illegal in most places, regardless of intent</strong> — treat that as a hard boundary, not a suggestion.</p>
+      </div>
+
+      <h3 class="subhead" id="s5-scanner">A basic TCP port scanner</h3>
+      <p class="body-p">The classic "how port scanning actually works" example — useful for understanding what tools like <code>nmap</code> are doing, and for quick checks on your own infrastructure.</p>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import socket
+
+def scan_port(host, port, timeout=1):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    result = sock.connect_ex((host, port))   # returns 0 if the port is open
+    sock.close()
+    return result == 0
+
+def scan_range(host, start_port, end_port):
+    open_ports = []
+    for port in range(start_port, end_port + 1):
+        if scan_port(host, port):
+            open_ports.append(port)
+    return open_ports
+
+if __name__ == '__main__':
+    target = '127.0.0.1'          # only ever a host you own/control
+    print(f"Scanning {target}...")
+    for port in scan_range(target, 1, 1024):
+        print(f"Port {port} is OPEN")</code></pre></div>
+      <div class="callout"><strong>Why connect_ex instead of connect:</strong> <code>connect()</code> raises an exception on a closed/filtered port, which would require wrapping every check in try/except. <code>connect_ex()</code> returns an error code instead of raising — <code>0</code> specifically means the TCP handshake succeeded, i.e. the port is open — which makes scanning a range of ports a clean loop instead of a loop full of exception handling.</div>
+      <div class="callout"><strong>Why this is educational, not a replacement for nmap:</strong> a real scanner needs to handle timing, retries, service fingerprinting (what's actually running on an open port, not just that it's open), and evasion of intrusion detection — all of which <code>nmap</code> already does correctly and efficiently. Writing your own is for understanding the mechanism, not for actual engagement work.</div>
+
+      <h3 class="subhead" id="s5-nmap">Calling nmap from Python (the practical approach)</h3>
+      <p class="body-p">For real work, call the actual tool and parse its output rather than reimplementing it:</p>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import subprocess
+import json
+
+def run_nmap_scan(target, ports='1-1024'):
+    result = subprocess.run(
+        ['nmap', '-p', ports, '-oX', '-', target],   # -oX - outputs XML to stdout
+        capture_output=True, text=True
+    )
+    return result.stdout   # parse this XML with xml.etree.ElementTree for structured results</code></pre></div>
+      <p class="body-p">Again: <code>subprocess.run</code> with a list of arguments, not a shell string — same injection-avoidance reasoning as Section 02.</p>
+
+      <h3 class="subhead" id="s5-tls">Checking your own TLS/SSL certificate expiry</h3>
+      <p class="body-p">A genuinely useful, purely defensive script — checking that a certificate on your own server isn't about to expire:</p>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import ssl
+import socket
+from datetime import datetime
+
+def check_cert_expiry(hostname, port=443):
+    context = ssl.create_default_context()
+    with socket.create_connection((hostname, port), timeout=5) as sock:
+        with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+            cert = ssock.getpeercert()
+            expires = datetime.strptime(cert['notAfter'], '%b %d %H:%M:%S %Y %Z')
+            days_left = (expires - datetime.utcnow()).days
+            print(f"{hostname} certificate expires in {days_left} days")
+
+check_cert_expiry('example.com')</code></pre></div>
+      <p class="body-p">This is the kind of check worth running as a scheduled <code>cron</code> job against your own domains — a lapsed TLS certificate is one of the most common, entirely preventable production incidents.</p>
+
+      <h3 class="subhead" id="s5-secrets">Password/secret hygiene in code — what to actually check for</h3>
+      <table class="duo"><thead><tr><th>Check</th><th>Why It Matters</th><th class="sh-col">How to Check</th></tr></thead><tbody>
+        <tr><td class="task-cell">No hardcoded secrets in source</td><td style="color:var(--text-dim);">A leaked API key/password in Git history is compromised forever, even if deleted later</td><td class="sh-cell"><code>grep -rEn "(password|secret|api_key)\s*=\s*['\"]" .</code></td></tr>
+        <tr><td class="task-cell">Environment variables used instead</td><td style="color:var(--text-dim);">Keeps secrets out of version control entirely</td><td class="sh-cell"><code>os.environ.get('SECRET_KEY')</code> instead of a literal string</td></tr>
+        <tr><td class="task-cell">.env files are gitignored</td><td style="color:var(--text-dim);">Prevents accidentally committing local secrets</td><td class="sh-cell"><code>git check-ignore .env</code> (should print <code>.env</code>)</td></tr>
+        <tr><td class="task-cell">Dependencies aren't leaking secrets in logs</td><td style="color:var(--text-dim);">A crashed request that logs <code>request.POST</code> in full can leak submitted passwords</td><td class="sh-cell">Review logging configuration for what gets logged on error</td></tr>
+      </tbody></table>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section class="topsec" id="sec-6">
+      <div class="sec-head"><span class="sec-num">06</span><h2>Pre-Deployment Hardening Checklist</h2></div>
+      <p class="sec-sub">Run through this before every deploy. Organized in <strong style="color:var(--text);">layers</strong> deliberately — the point of defense in depth is that no single layer is load-bearing on its own; a mistake in one layer should still leave several others standing between an attacker and real damage. Check items off as you go.</p>
+    </section>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-label"><strong id="opDone">0</strong>/<span id="opTotal">0</span> checked</div>
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+      </div>
+    </div>
+
+    <div class="layers">
+      <div class="layer" id="layer-1">
+        <div class="layer-head">
+          <div class="layer-title-wrap"><span class="layer-badge">Layer 1</span><h3>Application code</h3></div>
+          <span class="layer-progress-text" data-progress-for="layer-1">0/7</span>
+        </div>
+        <div class="check-item"><input type="checkbox" id="c1-1"><label for="c1-1"><code>DEBUG = False</code> in production (Django or any framework's equivalent) — a debug page leaking tracebacks, file paths, and settings to the public internet is one of the most common real incidents.</label></div>
+        <div class="check-item"><input type="checkbox" id="c1-2"><label for="c1-2">No secrets (API keys, DB passwords, <code>SECRET_KEY</code>) hardcoded anywhere in source — pulled from environment variables instead (<code>os.environ</code>).</label></div>
+        <div class="check-item"><input type="checkbox" id="c1-3"><label for="c1-3">All user input is validated server-side, not just in JavaScript — client-side validation is a UX nicety, never a security boundary.</label></div>
+        <div class="check-item"><input type="checkbox" id="c1-4"><label for="c1-4">CSRF protection is enabled on every state-changing form.</label></div>
+        <div class="check-item"><input type="checkbox" id="c1-5"><label for="c1-5">Dependencies are pinned and scanned for known vulnerabilities:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">pip install pip-audit
+pip-audit</code></pre></div>
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c1-6"><label for="c1-6">No <code>os.system()</code>/shell-string calls built from user input anywhere — check with <code>grep -rn "os.system\|subprocess.*shell=True" .</code></label></div>
+        <div class="check-item"><input type="checkbox" id="c1-7"><label for="c1-7">Error handling never returns raw exception messages or stack traces to end users.</label></div>
+      </div>
+
+      <div class="layer" id="layer-2">
+        <div class="layer-head">
+          <div class="layer-title-wrap"><span class="layer-badge">Layer 2</span><h3>Authentication &amp; access control</h3></div>
+          <span class="layer-progress-text" data-progress-for="layer-2">0/5</span>
+        </div>
+        <div class="check-item"><input type="checkbox" id="c2-1"><label for="c2-1">Passwords are hashed with a strong, purpose-built algorithm (Django's default, or <code>bcrypt</code>/<code>argon2</code> for custom auth) — never stored in plain text, never custom-rolled.</label></div>
+        <div class="check-item"><input type="checkbox" id="c2-2"><label for="c2-2">Every endpoint that touches private data checks <em>ownership</em>, not just login status — the <code>author=request.user</code> pattern.</label></div>
+        <div class="check-item"><input type="checkbox" id="c2-3"><label for="c2-3">Admin/staff interfaces are not reachable without strong, unique credentials, and ideally two-factor authentication.</label></div>
+        <div class="check-item"><input type="checkbox" id="c2-4"><label for="c2-4">Rate limiting exists on login and any public-facing form, to slow brute-force attempts.</label></div>
+        <div class="check-item"><input type="checkbox" id="c2-5"><label for="c2-5">Sessions expire after a reasonable period of inactivity.</label></div>
+      </div>
+
+      <div class="layer" id="layer-3">
+        <div class="layer-head">
+          <div class="layer-title-wrap"><span class="layer-badge">Layer 3</span><h3>Network &amp; transport</h3></div>
+          <span class="layer-progress-text" data-progress-for="layer-3">0/5</span>
+        </div>
+        <div class="check-item"><input type="checkbox" id="c3-1"><label for="c3-1">HTTPS is enforced everywhere (<code>SECURE_SSL_REDIRECT = True</code> in Django, or equivalent) — no endpoint should be reachable over plain HTTP in production.</label></div>
+        <div class="check-item"><input type="checkbox" id="c3-2"><label for="c3-2">TLS certificate has a real expiry monitor (Section 05's <code>check_cert_expiry</code> script, on a cron job).</label></div>
+        <div class="check-item"><input type="checkbox" id="c3-3"><label for="c3-3">Only the ports actually needed are open — check with:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">sudo ss -tulpn</code></pre></div>
+          Anything listening that you don't recognize needs investigating before deploy, not after.
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c3-4"><label for="c3-4">A firewall is active and default-deny:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">sudo ufw default deny incoming
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 443/tcp   # HTTPS
+sudo ufw enable</code></pre></div>
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c3-5"><label for="c3-5">SSH is hardened: key-based auth only, password auth disabled, root login disabled (<code>/etc/ssh/sshd_config</code>: <code>PasswordAuthentication no</code>, <code>PermitRootLogin no</code>).</label></div>
+      </div>
+
+      <div class="layer" id="layer-4">
+        <div class="layer-head">
+          <div class="layer-title-wrap"><span class="layer-badge">Layer 4</span><h3>Host &amp; OS</h3></div>
+          <span class="layer-progress-text" data-progress-for="layer-4">0/5</span>
+        </div>
+        <div class="check-item"><input type="checkbox" id="c4-1"><label for="c4-1">System packages are up to date:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">sudo apt update && sudo apt list --upgradable</code></pre></div>
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c4-2"><label for="c4-2">Unattended security updates are configured, or a real patching schedule exists.</label></div>
+        <div class="check-item"><input type="checkbox" id="c4-3"><label for="c4-3">File permissions follow least privilege — application files aren't world-writable:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">find /var/www/site -type f -perm -o+w</code></pre></div>
+          (this should return nothing — any result is a file anyone on the system can modify)
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c4-4"><label for="c4-4">No unnecessary services running:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">systemctl list-units --type=service --state=running</code></pre></div>
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c4-5"><label for="c4-5"><code>fail2ban</code> or equivalent is installed to auto-block repeated failed login attempts.</label></div>
+      </div>
+
+      <div class="layer" id="layer-5">
+        <div class="layer-head">
+          <div class="layer-title-wrap"><span class="layer-badge">Layer 5</span><h3>Data &amp; backups</h3></div>
+          <span class="layer-progress-text" data-progress-for="layer-5">0/4</span>
+        </div>
+        <div class="check-item"><input type="checkbox" id="c5-1"><label for="c5-1">Database backups are automated, and — critically — <strong>restore has actually been tested</strong>, not just assumed to work.</label></div>
+        <div class="check-item"><input type="checkbox" id="c5-2"><label for="c5-2">Backups themselves are encrypted and access-controlled, not sitting world-readable on the same server they're backing up.</label></div>
+        <div class="check-item"><input type="checkbox" id="c5-3"><label for="c5-3">Database user accounts follow least privilege — the app's DB user shouldn't have superuser rights it doesn't need.</label></div>
+        <div class="check-item"><input type="checkbox" id="c5-4"><label for="c5-4">Sensitive data at rest (if any) is encrypted, not just protected by access controls alone.</label></div>
+      </div>
+
+      <div class="layer" id="layer-6">
+        <div class="layer-head">
+          <div class="layer-title-wrap"><span class="layer-badge">Layer 6</span><h3>Monitoring &amp; response</h3></div>
+          <span class="layer-progress-text" data-progress-for="layer-6">0/4</span>
+        </div>
+        <div class="check-item"><input type="checkbox" id="c6-1"><label for="c6-1">Application errors are logged somewhere you'll actually see them (not just <code>DEBUG=True</code> in disguise) — a proper logging setup, not <code>print()</code> statements left in production code.</label></div>
+        <div class="check-item"><input type="checkbox" id="c6-2"><label for="c6-2"><code>journalctl</code>/application logs are checked for unusual patterns before and after deploy:
+          <div class="code-wrap check-sub"><div class="code-tag">bash</div><pre><code class="language-bash">journalctl -u yourapp --since "1 hour ago"</code></pre></div>
+        </label></div>
+        <div class="check-item"><input type="checkbox" id="c6-3"><label for="c6-3">There's an actual incident plan — who gets notified, what gets rotated (credentials), how a rollback happens — written down <em>before</em> it's needed, not improvised during an incident.</label></div>
+        <div class="check-item"><input type="checkbox" id="c6-4"><label for="c6-4">Uptime/health checks exist so you find out about an outage from monitoring, not from a user complaint.</label></div>
+      </div>
+    </div>
+
+    <div class="honest-summary">
+      <div class="hs-card">
+        <h3>The honest summary</h3>
+        <p>Working through all six layers meaningfully reduces your attack surface and the blast radius of any single failure — that's what "defense in depth" actually buys you.</p>
+        <p>It does not, and cannot, guarantee "zero vulnerabilities": new vulnerabilities get discovered in dependencies you didn't write, and human error is never fully eliminated.</p>
+        <p style="margin-bottom:0;">The realistic goal is a system where a single missed checkbox doesn't cascade into a full compromise, and where you find out about problems from your own monitoring before an attacker or a user does.</p>
+      </div>
+    </div>
+
+    <footer>
+      Converted from <code>Python_OS_Sys_Networking_Security_Reference.md</code> for onboarding juniors. Checklist state resets on reload — treat it as a run-through tool, not a saved record.
+    </footer>
+  </main>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+
+<script>
+hljs.highlightAll();
+
+// copy buttons
+document.querySelectorAll('.code-wrap').forEach(wrap => {
+  const tag = wrap.querySelector('.code-tag');
+  if(!tag) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', () => {
+    const code = wrap.querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(() => showToast('Copied'));
+  });
+  tag.appendChild(btn);
+});
+
+// copy on click for inline code cells in tables
+document.querySelectorAll('td.py-cell code, td.sh-cell code').forEach(el => {
+  el.style.cursor = 'pointer';
+  el.addEventListener('click', () => {
+    navigator.clipboard.writeText(el.textContent.trim()).then(() => showToast('Copied'));
+  });
+});
+
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1100);
+}
+
+// checklist progress
+const allChecks = Array.from(document.querySelectorAll('.layer input[type="checkbox"]'));
+document.getElementById('opTotal').textContent = allChecks.length;
+
+function updateProgress(){
+  let doneTotal = 0;
+  document.querySelectorAll('.layer').forEach(layer => {
+    const boxes = Array.from(layer.querySelectorAll('input[type="checkbox"]'));
+    const done = boxes.filter(b => b.checked).length;
+    doneTotal += done;
+    const label = layer.querySelector('.layer-progress-text');
+    if(label) label.textContent = `${done}/${boxes.length}`;
+  });
+  document.getElementById('opDone').textContent = doneTotal;
+  document.getElementById('opFill').style.width = (doneTotal / allChecks.length * 100) + '%';
+}
+allChecks.forEach(box => {
+  box.addEventListener('change', () => {
+    box.closest('.check-item').classList.toggle('checked', box.checked);
+    updateProgress();
+  });
+});
+updateProgress();
+
+// scrollspy (top-level sections)
+const topLinks = Array.from(document.querySelectorAll('.nav-top'));
+const subLinks = Array.from(document.querySelectorAll('.nav-sub'));
+const allTargets = [...document.querySelectorAll('section.topsec[id]'), ...document.querySelectorAll('h3.subhead[id]')];
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const id = '#' + entry.target.id;
+    if(entry.isIntersecting){
+      const topLink = topLinks.find(l => l.getAttribute('href') === id);
+      const subLink = subLinks.find(l => l.getAttribute('href') === id);
+      if(topLink){ topLinks.forEach(l => l.classList.remove('active')); topLink.classList.add('active'); }
+      if(subLink){ subLinks.forEach(l => l.classList.remove('active')); subLink.classList.add('active'); }
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+allTargets.forEach(t => spy.observe(t));
+</script>
+</body>
+</html>
