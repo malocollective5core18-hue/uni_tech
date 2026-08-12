@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building SocialSnap — Django + Actix-web Build Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/django.min.js"></script>
+<style>
+:root{
+  --bg:#10141a;
+  --bg-elevated:#161b23;
+  --bg-card:#141922;
+  --border:#262d38;
+  --border-soft:#1c222c;
+  --text:#e9e5da;
+  --text-dim:#8b93a3;
+  --text-faint:#5c6472;
+  --django:#7fb069;
+  --django-soft:#7fb06922;
+  --rust:#d1804f;
+  --rust-soft:#d1804f22;
+  --wire:#6cb3b5;
+  --wire-soft:#6cb3b522;
+  --code-bg:#0b0e13;
+  --mono:'JetBrains Mono',monospace;
+  --display:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  line-height:1.6;
+  font-size:16px;
+}
+a{color:inherit;}
+
+/* progress bar */
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--django),var(--wire),var(--rust));width:0%;z-index:200;transition:width .1s linear;}
+
+/* layout */
+.shell{display:flex;max-width:1400px;margin:0 auto;}
+.sidebar{
+  width:280px;flex-shrink:0;height:100vh;position:sticky;top:0;
+  overflow-y:auto;border-right:1px solid var(--border-soft);
+  padding:28px 20px 60px;background:var(--bg-elevated);
+}
+.sidebar::-webkit-scrollbar{width:6px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.brand{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:-0.01em;margin-bottom:2px;}
+.brand-sub{font-size:.72rem;color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:22px;}
+.nav-group{margin-bottom:6px;}
+.nav-group-label{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text-dim);padding:10px 8px 6px;
+}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot-django{background:var(--django);}
+.dot-rust{background:var(--rust);}
+.dot-wire{background:var(--wire);}
+.nav-link{
+  display:block;padding:6px 8px 6px 26px;font-size:.83rem;color:var(--text-dim);
+  text-decoration:none;border-left:2px solid transparent;border-radius:0 4px 4px 0;
+  transition:color .15s, background .15s, border-color .15s;
+}
+.nav-link:hover{color:var(--text);background:var(--bg-card);}
+.nav-link.active{color:var(--text);border-left-color:var(--wire);background:var(--bg-card);font-weight:500;}
+.nav-link .num{font-family:var(--mono);color:var(--text-faint);margin-right:6px;}
+
+.main{flex:1;min-width:0;padding:0 0 120px;}
+.container{max-width:820px;margin:0 auto;padding:0 40px;}
+
+/* hero */
+.hero{padding:64px 40px 40px;max-width:900px;margin:0 auto;}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--wire);margin-bottom:14px;}
+h1.title{font-family:var(--display);font-size:2.6rem;line-height:1.08;letter-spacing:-0.02em;margin:0 0 10px;font-weight:700;}
+.title .accent1{color:var(--django);}
+.title .accent2{color:var(--rust);}
+.subtitle{font-size:1.05rem;color:var(--text-dim);max-width:640px;margin-bottom:36px;}
+
+/* architecture diagram */
+.diagram-wrap{border:1px solid var(--border);background:var(--bg-elevated);border-radius:14px;padding:28px 24px 20px;margin-bottom:40px;}
+.diagram-caption{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);text-align:center;margin-top:10px;letter-spacing:.03em;}
+
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px;}
+@media(max-width:640px){.scope-grid{grid-template-columns:1fr;}}
+.scope-card{border:1px solid var(--border);border-radius:10px;padding:18px 20px;background:var(--bg-card);}
+.scope-card h3{font-family:var(--mono);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+.scope-card.django{border-top:2px solid var(--django);}
+.scope-card.rust{border-top:2px solid var(--rust);}
+.scope-card ul{margin:0;padding-left:18px;font-size:.9rem;color:var(--text-dim);}
+.scope-card li{margin-bottom:6px;}
+
+.intro-text p{color:var(--text-dim);font-size:.97rem;}
+.intro-text strong{color:var(--text);}
+
+/* part divider */
+.part-divider{
+  max-width:820px;margin:64px auto 8px;padding:0 40px;
+  display:flex;align-items:center;gap:16px;
+}
+.part-divider .line{flex:1;height:1px;background:var(--border);}
+.part-badge{
+  font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;
+  padding:6px 14px;border-radius:20px;white-space:nowrap;
+}
+.part-badge.django{background:var(--django-soft);color:var(--django);border:1px solid var(--django);}
+.part-badge.rust{background:var(--rust-soft);color:var(--rust);border:1px solid var(--rust);}
+.part-badge.wire{background:var(--wire-soft);color:var(--wire);border:1px solid var(--wire);}
+.part-heading{max-width:820px;margin:14px auto 36px;padding:0 40px;}
+.part-heading h2{font-family:var(--display);font-size:1.6rem;margin:0 0 6px;}
+.part-heading p{color:var(--text-dim);margin:0;font-size:.92rem;}
+
+/* step */
+.step{
+  max-width:820px;margin:0 auto 8px;padding:0 40px 34px;
+  border-left:3px solid transparent;
+  scroll-margin-top:24px;
+}
+.step.django{border-left-color:var(--django-soft);}
+.step.rust{border-left-color:var(--rust-soft);}
+.step.wire{border-left-color:var(--wire-soft);}
+.step-head{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;}
+.step-num{
+  font-family:var(--mono);font-weight:600;font-size:.85rem;
+  padding:4px 10px;border-radius:6px;flex-shrink:0;
+}
+.step.django .step-num{background:var(--django-soft);color:var(--django);}
+.step.rust .step-num{background:var(--rust-soft);color:var(--rust);}
+.step.wire .step-num{background:var(--wire-soft);color:var(--wire);}
+.step-title{font-family:var(--display);font-size:1.28rem;font-weight:600;letter-spacing:-0.01em;}
+.step-path{font-family:var(--mono);font-size:.8rem;color:var(--text-faint);margin:-8px 0 16px 0;}
+.step p{color:var(--text-dim);font-size:.95rem;margin:14px 0;}
+.step p strong{color:var(--text);}
+
+/* code blocks */
+.code-wrap{position:relative;margin:14px 0 18px;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.code-tag{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--bg-elevated);padding:8px 14px;font-family:var(--mono);
+  font-size:.72rem;color:var(--text-faint);border-bottom:1px solid var(--border);
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.copy-btn{
+  background:transparent;border:1px solid var(--border);color:var(--text-dim);
+  font-family:var(--mono);font-size:.68rem;padding:3px 9px;border-radius:5px;cursor:pointer;
+  text-transform:none;letter-spacing:0;transition:all .15s;
+}
+.copy-btn:hover{border-color:var(--wire);color:var(--wire);}
+.copy-btn:focus-visible, .nav-link:focus-visible, a:focus-visible{outline:2px solid var(--wire);outline-offset:2px;}
+pre{margin:0;padding:16px 18px;overflow-x:auto;background:var(--code-bg);font-size:.83rem;}
+pre code{font-family:var(--mono) !important;background:transparent !important;}
+.hljs{background:var(--code-bg) !important;}
+
+/* callouts */
+.callout{
+  background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--wire);
+  border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;font-size:.9rem;color:var(--text-dim);
+}
+.callout strong{color:var(--wire);}
+.callout.tip{border-left-color:var(--django);}
+.callout.tip strong{color:var(--django);}
+.callout.warn{border-left-color:var(--rust);}
+.callout.warn strong{color:var(--rust);}
+
+.trace-box{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:16px 0;font-family:var(--mono);font-size:.8rem;color:var(--text-dim);white-space:pre;overflow-x:auto;}
+
+/* file tree */
+.tree{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:20px 24px;font-family:var(--mono);font-size:.82rem;line-height:1.9;overflow-x:auto;white-space:pre;color:var(--text-dim);}
+.tree .f{color:var(--text);}
+.tree .n{color:var(--text-faint);}
+
+/* pattern / final callout */
+.pattern{
+  max-width:820px;margin:20px auto 0;padding:32px 40px;
+}
+.pattern-card{
+  border:1px solid var(--border);border-radius:14px;padding:30px 32px;
+  background:linear-gradient(135deg,var(--django-soft),var(--rust-soft));
+}
+.pattern-card h2{font-family:var(--display);margin:0 0 12px;font-size:1.4rem;}
+.pattern-card p{color:var(--text);opacity:.85;font-size:.95rem;margin:0 0 10px;}
+
+footer{max-width:820px;margin:0 auto;padding:40px 40px 0;color:var(--text-faint);font-size:.82rem;border-top:1px solid var(--border-soft);}
+
+/* mobile */
+.menu-toggle{display:none;}
+@media (max-width:920px){
+  .sidebar{position:fixed;left:0;top:0;z-index:150;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 40px #000a;}
+  .sidebar.open{transform:translateX(0);}
+  .menu-toggle{
+    display:flex;position:fixed;bottom:20px;right:20px;z-index:160;
+    width:48px;height:48px;border-radius:50%;background:var(--wire);color:var(--bg);
+    align-items:center;justify-content:center;border:none;cursor:pointer;font-size:1.2rem;
+    box-shadow:0 4px 20px #0006;
+  }
+  .container,.hero,.part-divider,.part-heading,.step,.pattern,footer{padding-left:22px;padding-right:22px;}
+  h1.title{font-size:2rem;}
+}
+/* final responsive pass */
+img,svg,video,canvas{max-width:100%;height:auto;}
+pre,.trace-box,.tree{max-width:100%;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){
+  .main{padding-bottom:72px;}
+  .container,.hero,.part-divider,.part-heading,.step,.pattern,footer{padding-left:16px;padding-right:16px;}
+  .hero{padding-top:34px;padding-bottom:24px;}
+  h1.title{font-size:clamp(1.75rem,8vw,2.2rem);overflow-wrap:anywhere;}
+  .subtitle{font-size:.95rem;margin-bottom:24px;}
+  .diagram-wrap{padding:14px 10px 12px;margin-bottom:26px;overflow:hidden;}
+  .scope-grid{gap:10px;}
+  .scope-card{padding:14px 15px;}
+  .part-divider{margin-top:40px;gap:9px;}
+  .part-badge{font-size:.65rem;padding:5px 9px;}
+  .part-heading{margin-bottom:24px;}
+  .part-heading h2{font-size:1.35rem;}
+  .step{padding-bottom:26px;}
+  .step-head{align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .step-title{font-size:1.08rem;line-height:1.3;overflow-wrap:anywhere;}
+  .step-path{font-size:.72rem;overflow-wrap:anywhere;}
+  .step p{font-size:.9rem;}
+  .code-tag{gap:8px;align-items:flex-start;flex-wrap:wrap;}
+  .copy-btn{min-height:36px;padding:7px 10px;}
+  pre{padding:12px 13px;font-size:.74rem;}
+  .callout{padding:12px 14px;font-size:.84rem;}
+  .pattern{padding:16px;}
+  .pattern-card{padding:20px 17px;}
+  .pattern-card h2{font-size:1.2rem;}
+  footer{padding-top:26px;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">SocialSnap</div>
+    <div class="brand-sub">Build log · for juniors</div>
+
+    <div class="nav-group">
+      <a class="nav-link" href="#top" style="padding-left:8px;">Overview</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label"><span class="dot dot-django"></span>Part A — Django</div>
+      <a class="nav-link" href="#step-0"><span class="num">00</span>Set up the workspace</a>
+      <a class="nav-link" href="#step-1"><span class="num">01</span>Create the project</a>
+      <a class="nav-link" href="#step-2"><span class="num">02</span>Create accounts &amp; posts apps</a>
+      <a class="nav-link" href="#step-3"><span class="num">03</span>Register apps in settings</a>
+      <a class="nav-link" href="#step-4"><span class="num">04</span>accounts/models.py</a>
+      <a class="nav-link" href="#step-5"><span class="num">05</span>posts/models.py</a>
+      <a class="nav-link" href="#step-6"><span class="num">06</span>Migrate the database</a>
+      <a class="nav-link" href="#step-7"><span class="num">07</span>Register with admin</a>
+      <a class="nav-link" href="#step-8"><span class="num">08</span>Create superuser, seed a user</a>
+      <a class="nav-link" href="#step-9"><span class="num">09</span>posts/views.py — feed</a>
+      <a class="nav-link" href="#step-10"><span class="num">10</span>posts/urls.py</a>
+      <a class="nav-link" href="#step-11"><span class="num">11</span>Project urls.py</a>
+      <a class="nav-link" href="#step-12"><span class="num">12</span>settings.py — statics &amp; login</a>
+      <a class="nav-link" href="#step-13"><span class="num">13</span>templates/base.html</a>
+      <a class="nav-link" href="#step-14"><span class="num">14</span>accounts views/urls/templates</a>
+      <a class="nav-link" href="#step-15"><span class="num">15</span>posts templates</a>
+      <a class="nav-link" href="#step-16"><span class="num">16</span>Liking a post + stubbed call</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label"><span class="dot dot-rust"></span>Part B — Actix-web</div>
+      <a class="nav-link" href="#step-17"><span class="num">17</span>Create the Rust project</a>
+      <a class="nav-link" href="#step-18"><span class="num">18</span>Cargo.toml dependencies</a>
+      <a class="nav-link" href="#step-19"><span class="num">19</span>src/broadcaster.rs</a>
+      <a class="nav-link" href="#step-20"><span class="num">20</span>src/ws_session.rs</a>
+      <a class="nav-link" href="#step-21"><span class="num">21</span>src/main.rs</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label"><span class="dot dot-wire"></span>Part C — Wiring it up</div>
+      <a class="nav-link" href="#step-22"><span class="num">22</span>WebSocket client in feed.html</a>
+      <a class="nav-link" href="#step-23"><span class="num">23</span>Run both, test the full flow</a>
+    </div>
+
+    <div class="nav-group">
+      <a class="nav-link" href="#tree" style="padding-left:8px;">Final project tree</a>
+      <a class="nav-link" href="#pattern" style="padding-left:8px;">The pattern worth remembering</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div id="top"></div>
+    <header class="hero">
+      <div class="eyebrow">Build walkthrough · same format as the last two</div>
+      <h1 class="title">Building <span class="accent1">Social</span><span class="accent2">Snap</span></h1>
+      <p class="subtitle">A simple social media system: <strong style="color:var(--django)">Django</strong> runs the actual app, and a small <strong style="color:var(--rust)">Rust / Actix-web</strong> sidecar pushes live updates to open browser tabs. No theory dump — just the build order: which file gets opened or created, what goes inside it, and why it had to happen right then.</p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 760 220" width="100%" role="img" aria-label="Architecture diagram: Django app connected to a Rust real-time sidecar service via HTTP notify and WebSocket broadcast">
+          <defs>
+            <marker id="arrow-django" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#7fb069"/></marker>
+            <marker id="arrow-wire" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#6cb3b5"/></marker>
+          </defs>
+          <!-- browsers -->
+          <rect x="20" y="20" width="150" height="46" rx="8" fill="#161b23" stroke="#6cb3b5" stroke-width="1.5"/>
+          <text x="95" y="48" text-anchor="middle" fill="#e9e5da" font-family="JetBrains Mono, monospace" font-size="13">Browser tabs</text>
+
+          <!-- django -->
+          <rect x="20" y="140" width="230" height="66" rx="10" fill="#161b23" stroke="#7fb069" stroke-width="2"/>
+          <text x="135" y="168" text-anchor="middle" fill="#e9e5da" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15">Django</text>
+          <text x="135" y="186" text-anchor="middle" fill="#8b93a3" font-family="JetBrains Mono, monospace" font-size="10.5">accounts · posts · feed</text>
+
+          <!-- rust -->
+          <rect x="500" y="140" width="240" height="66" rx="10" fill="#161b23" stroke="#d1804f" stroke-width="2"/>
+          <text x="620" y="168" text-anchor="middle" fill="#e9e5da" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="15">Actix-web</text>
+          <text x="620" y="186" text-anchor="middle" fill="#8b93a3" font-family="JetBrains Mono, monospace" font-size="10.5">ws session · broadcaster</text>
+
+          <!-- browser to rust ws (dashed animated) -->
+          <path d="M170,45 C 420,45 420,45 620,140" fill="none" stroke="#6cb3b5" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#arrow-wire)">
+            <animate attributeName="stroke-dashoffset" from="40" to="0" dur="1.4s" repeatCount="indefinite"/>
+          </path>
+          <text x="430" y="70" text-anchor="middle" fill="#6cb3b5" font-family="JetBrains Mono, monospace" font-size="10.5">ws://…/ws/  (live push)</text>
+
+          <!-- django to rust http -->
+          <path d="M250,168 L 495,168" fill="none" stroke="#7fb069" stroke-width="1.5" marker-end="url(#arrow-django)"/>
+          <text x="372" y="158" text-anchor="middle" fill="#7fb069" font-family="JetBrains Mono, monospace" font-size="10.5">POST /notify</text>
+          <text x="372" y="196" text-anchor="middle" fill="#5c6472" font-family="JetBrains Mono, monospace" font-size="9.5">wrapped in try/except</text>
+
+          <!-- always works label -->
+          <text x="135" y="120" text-anchor="middle" fill="#5c6472" font-family="Inter, sans-serif" font-size="10.5" font-style="italic">works completely alone</text>
+          <text x="620" y="120" text-anchor="middle" fill="#5c6472" font-family="Inter, sans-serif" font-size="10.5" font-style="italic">purely additive</text>
+        </svg>
+        <div class="diagram-caption">Django never breaks because Rust is down. Rust only ever adds the live-update layer on top.</div>
+      </div>
+
+      <div class="intro-text">
+        <p><strong>Why two languages/frameworks, not just Django?</strong> Everything here — accounts, posts, follows, the feed — is regular request/response work Django is great at. The one thing Django's synchronous default setup handles badly is <strong>pushing live updates to open browser tabs</strong> (e.g. "someone just liked this post, update the count without a page refresh"). Doing that properly in Django means Django Channels + an ASGI server + Redis — a real jump in complexity. Actix-web is built around async and WebSockets from the ground up, so a tiny standalone Rust service handles that one job well, while Django keeps doing everything it's already good at.</p>
+        <p><strong>This is the real-world pattern:</strong> a Python/Django monolith with a small Rust "sidecar" service for the one feature that genuinely benefits from it — not a rewrite of the whole app.</p>
+      </div>
+
+      <div class="scope-grid">
+        <div class="scope-card django">
+          <h3><span class="dot dot-django"></span>Django handles</h3>
+          <ul>
+            <li>Registration / login</li>
+            <li>Profiles</li>
+            <li>Follow / unfollow</li>
+            <li>Creating a post</li>
+            <li>A feed of posts from people you follow</li>
+            <li>Liking a post</li>
+          </ul>
+        </div>
+        <div class="scope-card rust">
+          <h3><span class="dot dot-rust"></span>Actix-web handles</h3>
+          <ul>
+            <li>A WebSocket endpoint browsers connect to</li>
+            <li>An HTTP endpoint Django calls to broadcast "this post's like count changed" to every connected browser, live</li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- PART A -->
+    <div class="part-divider"><span class="part-badge django">Part A</span><div class="line"></div></div>
+    <div class="part-heading">
+      <h2>The Django App</h2>
+      <p>Steps 0–16. This half works completely on its own — nothing below depends on Rust existing yet.</p>
+    </div>
+
+    <section class="step django" id="step-0">
+      <div class="step-head"><span class="step-num">Step 00</span><span class="step-title">Terminal: set up the Django workspace</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">mkdir socialsnap &amp;&amp; cd socialsnap
+mkdir django_app &amp;&amp; cd django_app
+python -m venv venv
+source venv/bin/activate
+pip install django requests</code></pre></div>
+      <p><code>requests</code> is installed now, up front, because Step 17 (liking a post) will need Django to make an outbound HTTP call to the Rust service — no point discovering that dependency mid-way and interrupting the flow.</p>
+    </section>
+
+    <section class="step django" id="step-1">
+      <div class="step-head"><span class="step-num">Step 01</span><span class="step-title">Terminal: create the project</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">django-admin startproject social_project .
+python manage.py runserver   # sanity check, then Ctrl+C</code></pre></div>
+    </section>
+
+    <section class="step django" id="step-2">
+      <div class="step-head"><span class="step-num">Step 02</span><span class="step-title">Terminal: create two apps — accounts and posts</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">python manage.py startapp accounts
+python manage.py startapp posts</code></pre></div>
+      <div class="callout"><strong>Why two apps instead of one:</strong> <code>accounts</code> owns "who can log in and who follows whom" — identity and relationships. <code>posts</code> owns "what gets published and liked" — content. Keeping them separate means <code>posts</code> can be reasoned about without needing to know how following works, and vice versa; the same split used for <code>academics</code>/<code>enrollment</code> in the school project.</div>
+    </section>
+
+    <section class="step django" id="step-3">
+      <div class="step-head"><span class="step-num">Step 03</span><span class="step-title">Open social_project/settings.py</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'accounts',      # ← added
+    'posts',         # ← added
+]</code></pre></div>
+    </section>
+
+    <section class="step django" id="step-4">
+      <div class="step-head"><span class="step-num">Step 04</span><span class="step-title">Open accounts/models.py</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.db import models
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.CharField(max_length=200, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+
+    def __str__(self):
+        return f"{self.follower} → {self.following}"</code></pre></div>
+      <div class="callout"><strong>Why <code>related_name='following'</code>/<code>'followers'</code> on the same model pointing at the same User:</strong> without explicit <code>related_name</code>s, Django can't tell "people following me" from "people I follow" — both would collide on the same default reverse name. This is what lets Step 9's feed query read as <code>request.user.following.all()</code> — self-explanatory instead of a generic queryset.</div>
+      <p><code>unique_together</code> again, same reasoning as the school project's <code>Enrollment</code> model: prevent following the same person twice at the database level, not just hope the view remembers to check.</p>
+    </section>
+
+    <section class="step django" id="step-5">
+      <div class="step-head"><span class="step-num">Step 05</span><span class="step-title">Open posts/models.py</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.db import models
+from django.contrib.auth.models import User
+
+class Post(models.Model):
+    author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
+    content = models.TextField(max_length=500)
+    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.author}: {self.content[:30]}"
+
+
+class Like(models.Model):
+    user = models.ForeignKey(User, related_name='likes', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='likes', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')</code></pre></div>
+      <p><code>posts</code> imports <code>User</code> directly rather than importing <code>accounts.models.Profile</code> — a <code>Post</code> belongs to a <code>User</code> (an identity), not to a <code>Profile</code> (a bio/avatar). Keeping this boundary clean means <code>posts</code> doesn't need to know <code>accounts</code> exists at all, beyond Django's own built-in <code>User</code>.</p>
+    </section>
+
+    <section class="step django" id="step-6">
+      <div class="step-head"><span class="step-num">Step 06</span><span class="step-title">Terminal: turn both models into tables</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">python manage.py makemigrations accounts posts
+python manage.py migrate
+pip install Pillow      # needed for ImageField</code></pre></div>
+    </section>
+
+    <section class="step django" id="step-7">
+      <div class="step-head"><span class="step-num">Step 07</span><span class="step-title">Open accounts/admin.py and posts/admin.py</span></div>
+      <div class="step-path">accounts/admin.py</div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.contrib import admin
+from .models import Profile, Follow
+
+admin.site.register(Profile)
+admin.site.register(Follow)</code></pre></div>
+      <div class="step-path">posts/admin.py</div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.contrib import admin
+from .models import Post, Like
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('author', 'content', 'created_at')
+
+admin.site.register(Like)</code></pre></div>
+    </section>
+
+    <section class="step django" id="step-8">
+      <div class="step-head"><span class="step-num">Step 08</span><span class="step-title">Terminal: create an admin login, seed one user</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">python manage.py createsuperuser
+python manage.py runserver</code></pre></div>
+      <p>Log into <code>/admin/</code>, and manually create one extra regular <code>User</code> besides the superuser (e.g. "sam"). Self-registration comes in Step 14 — this one seeded account exists purely so the feed and follow features have <em>someone</em> to interact with while we build them, same reasoning as seeding a teacher before building enrollment in the school project.</p>
+    </section>
+
+    <section class="step django" id="step-9">
+      <div class="step-head"><span class="step-num">Step 09</span><span class="step-title">Open posts/views.py</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .models import Post
+
+@login_required
+def feed(request):
+    following_ids = request.user.following.values_list('following_id', flat=True)
+    posts = Post.objects.filter(author_id__in=list(following_ids) + [request.user.id])
+    return render(request, 'posts/feed.html', {'posts': posts})
+
+@login_required
+def create_post(request):
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            Post.objects.create(author=request.user, content=content)
+        return redirect('posts:feed')
+    return render(request, 'posts/create_post.html')</code></pre></div>
+      <p><code>request.user.following</code> is exactly the <code>related_name</code> from Step 4 — this line only reads cleanly <em>because</em> that name was chosen deliberately back then.</p>
+    </section>
+
+    <section class="step django" id="step-10">
+      <div class="step-head"><span class="step-num">Step 10</span><span class="step-title">Create posts/urls.py (new file)</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.urls import path
+from . import views
+
+app_name = 'posts'
+
+urlpatterns = [
+    path('', views.feed, name='feed'),
+    path('new/', views.create_post, name='create_post'),
+]</code></pre></div>
+    </section>
+
+    <section class="step django" id="step-11">
+      <div class="step-head"><span class="step-num">Step 11</span><span class="step-title">Open social_project/urls.py</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('posts.urls', namespace='posts')),
+    path('accounts/', include('accounts.urls', namespace='accounts')),   # built in Step 14
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)</code></pre></div>
+      <p>Same pattern as both earlier projects: the <code>accounts</code> include is written now so it isn't forgotten, even though the file it points to doesn't exist until Step 14.</p>
+    </section>
+
+    <section class="step django" id="step-12">
+      <div class="step-head"><span class="step-num">Step 12</span><span class="step-title">Open social_project/settings.py again</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],     # ← added
+        'APP_DIRS': True,
+        ...
+    },
+]</code></pre></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'posts:feed'</code></pre></div>
+      <p><code>REALTIME_WS_URL</code> isn't added yet — that's a Part C concern, once the Rust service actually exists to point at.</p>
+    </section>
+
+    <section class="step django" id="step-13">
+      <div class="step-head"><span class="step-num">Step 13</span><span class="step-title">Create templates/base.html</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">mkdir templates</code></pre></div>
+      <div class="code-wrap"><div class="code-tag">html</div><pre><code class="language-django">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;{% block title %}SocialSnap{% endblock %}&lt;/title&gt;
+    {% load static %}
+    &lt;link rel="stylesheet" href="{% static 'css/style.css' %}"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;a href="{% url 'posts:feed' %}"&gt;SocialSnap&lt;/a&gt;
+        {% if user.is_authenticated %}
+            &lt;a href="{% url 'posts:create_post' %}"&gt;New Post&lt;/a&gt;
+            &lt;a href="{% url 'accounts:profile' user.username %}"&gt;{{ user.username }}&lt;/a&gt;
+            &lt;form action="{% url 'accounts:logout' %}" method="post" style="display:inline"&gt;
+                {% csrf_token %}
+                &lt;button type="submit"&gt;Log out&lt;/button&gt;
+            &lt;/form&gt;
+        {% else %}
+            &lt;a href="{% url 'accounts:login' %}"&gt;Log in&lt;/a&gt;
+            &lt;a href="{% url 'accounts:register' %}"&gt;Register&lt;/a&gt;
+        {% endif %}
+    &lt;/header&gt;
+    &lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;
+    {% block extra_js %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div>
+      <p><code>{% block extra_js %}</code> is added deliberately even though nothing fills it yet — Step 22's WebSocket client script only belongs on the feed page, not every page, so a page-specific JS block needs to exist in the base now, ready to be used later.</p>
+    </section>
+
+    <section class="step django" id="step-14">
+      <div class="step-head"><span class="step-num">Step 14</span><span class="step-title">Terminal + files: build accounts views/urls/templates</span></div>
+      <div class="step-path">accounts/views.py</div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
+from .models import Profile, Follow
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            Profile.objects.create(user=user)
+            login(request, user)
+            return redirect('posts:feed')
+    else:
+        form = UserCreationForm()
+    return render(request, 'accounts/register.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('posts:feed')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'accounts/login.html', {'form': form})
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect('posts:feed')
+
+@login_required
+def profile(request, username):
+    target = get_object_or_404(User, username=username)
+    is_following = Follow.objects.filter(follower=request.user, following=target).exists()
+    return render(request, 'accounts/profile.html', {'target': target, 'is_following': is_following})
+
+@require_POST
+@login_required
+def toggle_follow(request, username):
+    target = get_object_or_404(User, username=username)
+    if target != request.user:
+        follow, created = Follow.objects.get_or_create(follower=request.user, following=target)
+        if not created:
+            follow.delete()
+    return redirect('accounts:profile', username=username)</code></pre></div>
+      <p><code>if target != request.user</code> in <code>toggle_follow</code> is the same category of check as the school project's teacher-owns-course lookup — a simple guard against a nonsensical or abusable state (a user following themselves), caught before it ever reaches the database.</p>
+
+      <div class="step-path">accounts/urls.py (new file)</div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">from django.urls import path
+from . import views
+
+app_name = 'accounts'
+
+urlpatterns = [
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('u/&lt;str:username&gt;/', views.profile, name='profile'),
+    path('u/&lt;str:username&gt;/follow/', views.toggle_follow, name='toggle_follow'),
+]</code></pre></div>
+
+      <p><strong>Templates</strong> (<code>mkdir -p accounts/templates/accounts</code>): <code>register.html</code> / <code>login.html</code> use the same minimal <code>{{ form.as_p }}</code> shape used in both earlier projects, so they're not repeated in full here — the only change is the <code>&lt;h1&gt;</code> text and which view/URL name they post to.</p>
+
+      <div class="step-path">accounts/templates/accounts/profile.html</div>
+      <div class="code-wrap"><div class="code-tag">html</div><pre><code class="language-django">{% extends "base.html" %}
+{% block title %}{{ target.username }}{% endblock %}
+{% block content %}
+    &lt;h1&gt;{{ target.username }}&lt;/h1&gt;
+    &lt;p&gt;{{ target.profile.bio }}&lt;/p&gt;
+    {% if target != user %}
+        &lt;form action="{% url 'accounts:toggle_follow' target.username %}" method="post"&gt;
+            {% csrf_token %}
+            &lt;button type="submit"&gt;{% if is_following %}Unfollow{% else %}Follow{% endif %}&lt;/button&gt;
+        &lt;/form&gt;
+    {% endif %}
+{% endblock %}</code></pre></div>
+    </section>
+
+    <section class="step django" id="step-15">
+      <div class="step-head"><span class="step-num">Step 15</span><span class="step-title">Create the posts templates</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">mkdir -p posts/templates/posts</code></pre></div>
+
+      <div class="step-path">posts/templates/posts/create_post.html</div>
+      <div class="code-wrap"><div class="code-tag">html</div><pre><code class="language-django">{% extends "base.html" %}
+{% block title %}New Post{% endblock %}
+{% block content %}
+    &lt;h1&gt;New Post&lt;/h1&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        &lt;textarea name="content" maxlength="500" required&gt;&lt;/textarea&gt;
+        &lt;button type="submit"&gt;Post&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre></div>
+
+      <div class="step-path">posts/templates/posts/feed.html</div>
+      <div class="code-wrap"><div class="code-tag">html</div><pre><code class="language-django">{% extends "base.html" %}
+{% block title %}Feed{% endblock %}
+{% block content %}
+    &lt;h1&gt;Your Feed&lt;/h1&gt;
+    {% for post in posts %}
+        &lt;article class="card" data-post-id="{{ post.id }}"&gt;
+            &lt;p&gt;&lt;a href="{% url 'accounts:profile' post.author.username %}"&gt;{{ post.author.username }}&lt;/a&gt;&lt;/p&gt;
+            &lt;p&gt;{{ post.content }}&lt;/p&gt;
+            &lt;form action="{% url 'posts:like_post' post.id %}" method="post"&gt;
+                {% csrf_token %}
+                &lt;button type="submit"&gt;♥ &lt;span id="like-count-{{ post.id }}"&gt;{{ post.likes.count }}&lt;/span&gt;&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/article&gt;
+    {% empty %}
+        &lt;p&gt;Nobody you follow has posted yet. &lt;a href="{% url 'posts:create_post' %}"&gt;Write the first one.&lt;/a&gt;&lt;/p&gt;
+    {% endfor %}
+{% endblock %}</code></pre></div>
+      <p>That like button already points at <code>posts:like_post</code> and the count already sits inside <code>id="like-count-{{ post.id }}"</code> — both written ahead of the views/JS that will use them, same "write the interface first" habit from both earlier projects. The <code>id</code> naming convention matters: Step 22's JavaScript will target this exact <code>like-count-&lt;id&gt;</code> pattern to update the number live.</p>
+
+      <div class="code-wrap"><div class="code-tag">bash — terminal check</div><pre><code class="language-bash">python manage.py runserver</code></pre></div>
+      <p>Log in as your seeded second user, post something, follow yourself around — the feed, profile, and follow flow should all work. The like button will 404 until the next step.</p>
+    </section>
+
+    <section class="step django" id="step-16">
+      <div class="step-head"><span class="step-num">Step 16</span><span class="step-title">Open posts/views.py again — add liking, with a stubbed-out real-time call</span></div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">import requests
+from django.conf import settings
+from django.views.decorators.http import require_POST
+from .models import Post, Like
+
+@require_POST
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+    if not created:
+        like.delete()
+    likes_count = post.likes.count()
+
+    try:
+        requests.post(
+            f'{settings.REALTIME_SERVICE_URL}/notify',
+            json={'post_id': post.id, 'likes_count': likes_count},
+            timeout=1,
+        )
+    except requests.exceptions.RequestException:
+        pass   # the like itself must still succeed even if the realtime service is offline
+
+    return redirect('posts:feed')</code></pre></div>
+      <div class="callout warn"><strong>Why the try/except around requests.post, specifically:</strong> liking a post is the <em>core</em> feature; broadcasting that like to other open tabs is an <em>enhancement</em>. If the Rust service is down, restarting, or not built yet (exactly the situation we're in right now, mid-walkthrough), liking a post must still work. This mirrors the "don't let a non-essential dependency take down an essential feature" principle, applied here across a network boundary instead of within one process.</div>
+
+      <p><code>settings.REALTIME_SERVICE_URL</code> is referenced but not defined yet — add it now, in the same visit.</p>
+      <div class="step-path">social_project/settings.py — add near the bottom</div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">REALTIME_SERVICE_URL = 'http://127.0.0.1:8080'</code></pre></div>
+      <div class="step-path">posts/urls.py — add</div>
+      <div class="code-wrap"><div class="code-tag">python</div><pre><code class="language-python">    path('like/&lt;int:post_id&gt;/', views.like_post, name='like_post'),</code></pre></div>
+
+      <p>At this point, clicking the heart button on the feed will increment/decrement the count and reload the page correctly — Django-only functionality is fully working. The Rust service doesn't exist yet, so the <code>try/except</code> silently absorbs the failed connection every time. That's expected, and exactly why Part B comes next.</p>
+    </section>
+
+    <!-- PART B -->
+    <div class="part-divider"><span class="part-badge rust">Part B</span><div class="line"></div></div>
+    <div class="part-heading">
+      <h2>The Rust / Actix-web Real-Time Service</h2>
+      <p>Steps 17–21. A completely separate project — different language, different dependency manager, its own process.</p>
+    </div>
+
+    <section class="step rust" id="step-17">
+      <div class="step-head"><span class="step-num">Step 17</span><span class="step-title">Terminal: create the Rust project</span></div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">cd ..                     # back out to socialsnap/
+cargo new realtime_service --bin
+cd realtime_service</code></pre></div>
+      <p><strong>What now exists:</strong></p>
+      <div class="tree">realtime_service/
+    Cargo.toml
+    src/
+        main.rs</div>
+      <p>This is a completely separate project from <code>django_app/</code>. The only thing connecting them will be plain HTTP/WebSocket calls over <code>localhost</code>, which is the point: neither side needs to know the other is written in a different language.</p>
+    </section>
+
+    <section class="step rust" id="step-18">
+      <div class="step-head"><span class="step-num">Step 18</span><span class="step-title">Open Cargo.toml</span></div>
+      <p>Replace the <code>[dependencies]</code> section:</p>
+      <div class="code-wrap"><div class="code-tag">toml</div><pre><code class="language-ini">[dependencies]
+actix = "0.13"
+actix-web = "4"
+actix-web-actors = "4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"</code></pre></div>
+      <ul style="color:var(--text-dim);font-size:.9rem;">
+        <li><code>actix-web</code> — the HTTP server itself (routes, requests, responses).</li>
+        <li><code>actix</code> — the actor framework actix-web is built on; used directly to model "each connected browser is an actor" and "the broadcaster is an actor that knows about all of them."</li>
+        <li><code>actix-web-actors</code> — the glue that lets an actix actor speak the WebSocket protocol.</li>
+        <li><code>serde</code>/<code>serde_json</code> — parsing the JSON body Django's <code>requests.post(...)</code> sends, and building the JSON message broadcast out to browsers.</li>
+      </ul>
+    </section>
+
+    <section class="step rust" id="step-19">
+      <div class="step-head"><span class="step-num">Step 19</span><span class="step-title">Create src/broadcaster.rs (new file)</span></div>
+      <p>The "who's currently connected, and how do I tell all of them something" piece — built first because both the WebSocket handler (Step 20) and the HTTP <code>/notify</code> handler (Step 21) depend on it existing.</p>
+      <div class="code-wrap"><div class="code-tag">rust</div><pre><code class="language-rust">use actix::prelude::*;
+use std::collections::HashMap;
+
+/// A single text message pushed out to one connected browser.
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct BroadcastMessage(pub String);
+
+/// Sent by a new WebSocket session when it connects, to register itself.
+#[derive(Message)]
+#[rtype(result = "usize")]
+pub struct Connect {
+    pub addr: Recipient&lt;BroadcastMessage&gt;,
+}
+
+/// Sent when a WebSocket session closes, to clean up.
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct Disconnect {
+    pub id: usize,
+}
+
+/// Sent by the HTTP /notify handler — "tell everyone this post's like count changed."
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct PostUpdate(pub String);
+
+pub struct Broadcaster {
+    sessions: HashMap&lt;usize, Recipient&lt;BroadcastMessage&gt;&gt;,
+    next_id: usize,
+}
+
+impl Broadcaster {
+    pub fn new() -&gt; Self {
+        Broadcaster { sessions: HashMap::new(), next_id: 0 }
+    }
+}
+
+impl Actor for Broadcaster {
+    type Context = Context&lt;Self&gt;;
+}
+
+impl Handler&lt;Connect&gt; for Broadcaster {
+    type Result = usize;
+
+    fn handle(&amp;mut self, msg: Connect, _ctx: &amp;mut Context&lt;Self&gt;) -&gt; usize {
+        let id = self.next_id;
+        self.next_id += 1;
+        self.sessions.insert(id, msg.addr);
+        id
+    }
+}
+
+impl Handler&lt;Disconnect&gt; for Broadcaster {
+    type Result = ();
+
+    fn handle(&amp;mut self, msg: Disconnect, _ctx: &amp;mut Context&lt;Self&gt;) {
+        self.sessions.remove(&amp;msg.id);
+    }
+}
+
+impl Handler&lt;PostUpdate&gt; for Broadcaster {
+    type Result = ();
+
+    fn handle(&amp;mut self, msg: PostUpdate, _ctx: &amp;mut Context&lt;Self&gt;) {
+        for addr in self.sessions.values() {
+            addr.do_send(BroadcastMessage(msg.0.clone()));
+        }
+    }
+}</code></pre></div>
+      <div class="callout"><strong>Why a HashMap&lt;usize, Recipient&lt;...&gt;&gt; instead of just a Vec:</strong> each connected browser needs a stable ID so <code>Disconnect</code> can remove exactly that one session when a tab closes, without accidentally dropping a different, still-open connection.</div>
+      <div class="callout"><strong>Why this is an Actor at all, instead of a plain shared Mutex&lt;Vec&lt;...&gt;&gt;:</strong> actix actors process one message at a time by design, which means <code>Connect</code>/<code>Disconnect</code>/<code>PostUpdate</code> can never race against each other corrupting the <code>sessions</code> map — thread-safety comes from the actor model itself, without writing any manual locking code.</div>
+    </section>
+
+    <section class="step rust" id="step-20">
+      <div class="step-head"><span class="step-num">Step 20</span><span class="step-title">Create src/ws_session.rs (new file)</span></div>
+      <p>The other half: what happens inside one browser's WebSocket connection.</p>
+      <div class="code-wrap"><div class="code-tag">rust</div><pre><code class="language-rust">use actix::prelude::*;
+use actix_web_actors::ws;
+use crate::broadcaster::{Broadcaster, BroadcastMessage, Connect, Disconnect};
+
+pub struct WsSession {
+    pub id: usize,
+    pub broadcaster: Addr&lt;Broadcaster&gt;,
+}
+
+impl Actor for WsSession {
+    type Context = ws::WebsocketContext&lt;Self&gt;;
+
+    fn started(&amp;mut self, ctx: &amp;mut Self::Context) {
+        let addr = ctx.address();
+        self.broadcaster
+            .send(Connect { addr: addr.recipient() })
+            .into_actor(self)
+            .then(|res, act, _ctx| {
+                if let Ok(id) = res {
+                    act.id = id;
+                }
+                fut::ready(())
+            })
+            .wait(ctx);
+    }
+
+    fn stopped(&amp;mut self, _ctx: &amp;mut Self::Context) {
+        self.broadcaster.do_send(Disconnect { id: self.id });
+    }
+}
+
+/// Messages coming FROM the Broadcaster, pushed OUT to this one browser.
+impl Handler&lt;BroadcastMessage&gt; for WsSession {
+    type Result = ();
+
+    fn handle(&amp;mut self, msg: BroadcastMessage, ctx: &amp;mut Self::Context) {
+        ctx.text(msg.0);
+    }
+}
+
+/// Raw WebSocket protocol events coming FROM the browser.
+impl StreamHandler&lt;Result&lt;ws::Message, ws::ProtocolError&gt;&gt; for WsSession {
+    fn handle(&amp;mut self, msg: Result&lt;ws::Message, ws::ProtocolError&gt;, ctx: &amp;mut Self::Context) {
+        match msg {
+            Ok(ws::Message::Ping(bytes)) =&gt; ctx.pong(&amp;bytes),
+            Ok(ws::Message::Close(reason)) =&gt; {
+                ctx.close(reason);
+                ctx.stop();
+            }
+            // Browsers in this project only listen; they never send anything meaningful back.
+            _ =&gt; {}
+        }
+    }
+}</code></pre></div>
+      <div class="callout"><strong>Why started() registers with the broadcaster instead of the broadcaster discovering sessions on its own:</strong> actix has no built-in way to "list every open WebSocket" — each session has to actively announce itself when it starts and clean up after itself when it stops. This is the direct Rust-actor equivalent of a Python object registering a callback and unregistering it in a <code>finally</code> block.</div>
+      <div class="callout"><strong>Why the StreamHandler mostly does nothing (<code>_ =&gt; {}</code>):</strong> this project's browsers are read-only listeners — all the <em>writing</em> happens through Django's <code>/notify</code> HTTP call in Step 21, not through the WebSocket itself. A chat app would fill this in to broadcast whatever the user typed; a like-counter doesn't need to.</div>
+    </section>
+
+    <section class="step rust" id="step-21">
+      <div class="step-head"><span class="step-num">Step 21</span><span class="step-title">Open src/main.rs</span></div>
+      <p>Wire the two pieces above into an actual running server, and add the HTTP endpoint Django calls.</p>
+      <div class="code-wrap"><div class="code-tag">rust</div><pre><code class="language-rust">mod broadcaster;
+mod ws_session;
+
+use actix::prelude::*;
+use actix_web::{web, App, HttpServer, HttpRequest, HttpResponse, Error};
+use actix_web_actors::ws;
+use serde::Deserialize;
+
+use broadcaster::{Broadcaster, PostUpdate};
+use ws_session::WsSession;
+
+#[derive(Deserialize)]
+struct NotifyPayload {
+    post_id: i64,
+    likes_count: i64,
+}
+
+async fn ws_index(
+    req: HttpRequest,
+    stream: web::Payload,
+    broadcaster: web::Data&lt;Addr&lt;Broadcaster&gt;&gt;,
+) -&gt; Result&lt;HttpResponse, Error&gt; {
+    ws::start(
+        WsSession { id: 0, broadcaster: broadcaster.get_ref().clone() },
+        &amp;req,
+        stream,
+    )
+}
+
+async fn notify(
+    payload: web::Json&lt;NotifyPayload&gt;,
+    broadcaster: web::Data&lt;Addr&lt;Broadcaster&gt;&gt;,
+) -&gt; HttpResponse {
+    let message = serde_json::json!({
+        "post_id": payload.post_id,
+        "likes_count": payload.likes_count,
+    })
+    .to_string();
+
+    broadcaster.do_send(PostUpdate(message));
+    HttpResponse::Ok().finish()
+}
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+    let broadcaster_addr = Broadcaster::new().start();
+
+    println!("Realtime service running on http://127.0.0.1:8080");
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(broadcaster_addr.clone()))
+            .route("/ws/", web::get().to(ws_index))
+            .route("/notify", web::post().to(notify))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}</code></pre></div>
+
+      <p><strong>Tracing the two request paths through these three files:</strong></p>
+      <div class="trace-box">Browser opens ws://127.0.0.1:8080/ws/
+   → main.rs: ws_index()
+   → ws_session.rs: WsSession::started() → Broadcaster gets a Connect message → registered
+
+Django POSTs to http://127.0.0.1:8080/notify
+   → main.rs: notify() deserializes NotifyPayload
+   → broadcaster.rs: Broadcaster receives PostUpdate → loops every registered session
+   → ws_session.rs: each WsSession's Handler&lt;BroadcastMessage&gt; fires → ctx.text(msg) → browser receives it</div>
+
+      <p><strong>Terminal — build and run it:</strong></p>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">cargo run</code></pre></div>
+      <p>First build will take a minute (compiling all dependencies). You should see <code>Realtime service running on http://127.0.0.1:8080</code> in the terminal, with no errors. If <code>cargo run</code> reports missing imports or type errors, that's the Rust equivalent of a Python traceback — read the compiler's line number and message, it names the exact file and issue.</p>
+    </section>
+
+    <!-- PART C -->
+    <div class="part-divider"><span class="part-badge wire">Part C</span><div class="line"></div></div>
+    <div class="part-heading">
+      <h2>Wiring the Two Services Together</h2>
+      <p>Steps 22–23. Both services already work; now the browser talks to both.</p>
+    </div>
+
+    <section class="step wire" id="step-22">
+      <div class="step-head"><span class="step-num">Step 22</span><span class="step-title">Open templates/base.html once more — add the WebSocket client</span></div>
+      <p>Now that the Rust service is actually running and reachable, the browser side can connect to it. Recall the empty <code>{% block extra_js %}</code> left in Step 13 — this is what it was for.</p>
+      <div class="step-path">posts/templates/posts/feed.html — add at the bottom</div>
+      <div class="code-wrap"><div class="code-tag">html</div><pre><code class="language-django">{% block extra_js %}
+&lt;script&gt;
+    const socket = new WebSocket('ws://127.0.0.1:8080/ws/');
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const counter = document.getElementById(`like-count-${data.post_id}`);
+        if (counter) {
+            counter.textContent = data.likes_count;
+        }
+    };
+
+    socket.onclose = function () {
+        console.log('Realtime connection closed — like counts will update on refresh instead.');
+    };
+&lt;/script&gt;
+{% endblock %}</code></pre></div>
+      <p>This is only added to <code>feed.html</code>, not <code>base.html</code> directly — the feed page is the only place <code>like-count-&lt;id&gt;</code> elements exist, so it's the only page that needs a live socket open. Every other page (profile, create post) has no use for it.</p>
+      <div class="callout"><strong>Why id="like-count-${data.post_id}" in the JS matches id="like-count-{{ post.id }}" from Step 15 exactly:</strong> this is the one piece of "shared contract" between Django and Rust — neither service imports the other's code, so the only way they agree on anything is by both sides independently using the same naming convention. If you ever rename one side's ID pattern without the other, this is the first thing to check when live updates silently stop working.</div>
+    </section>
+
+    <section class="step wire" id="step-23">
+      <div class="step-head"><span class="step-num">Step 23</span><span class="step-title">Terminal: run both services and test the full flow</span></div>
+      <div class="step-path">Terminal 1</div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">cd socialsnap/django_app
+source venv/bin/activate
+python manage.py runserver</code></pre></div>
+      <div class="step-path">Terminal 2</div>
+      <div class="code-wrap"><div class="code-tag">bash</div><pre><code class="language-bash">cd socialsnap/realtime_service
+cargo run</code></pre></div>
+
+      <p><strong>Test it exactly like two real users, in two browser tabs:</strong></p>
+      <ol style="color:var(--text-dim);font-size:.95rem;">
+        <li>Log in as your seeded second user in Tab A, open the feed — the WebSocket connects silently in the background (check DevTools → Network → WS to confirm the connection is open).</li>
+        <li>Open the same feed in Tab B (or an incognito window, logged in as the superuser).</li>
+        <li>In Tab B, click the ♥ on a post.</li>
+        <li><strong>Watch Tab A</strong> — the like count updates immediately, with no page refresh, because Django's <code>like_post</code> view told the Rust service, and the Rust service pushed it out over the open socket.</li>
+        <li>Stop the Rust service (<code>Ctrl+C</code> in Terminal 2) and click the heart again in Tab B — liking still works (the count still updates on that tab's own refresh), because of the <code>try/except</code> from Step 16. Only the <em>live push to other tabs</em> is lost, not the core feature.</li>
+      </ol>
+      <div class="callout tip">That last check is the most important one in the whole system: it proves the architectural boundary from the top of this document actually holds — Django's job is never allowed to fail because Rust's job failed.</div>
+    </section>
+
+    <div class="part-divider" id="tree"><span class="part-badge wire">Reference</span><div class="line"></div></div>
+    <div class="part-heading">
+      <h2>Final project tree</h2>
+      <p>Where every piece from every step ends up.</p>
+    </div>
+    <section class="step wire" style="border-left-color:transparent;">
+      <div class="tree">socialsnap/
+├── <span class="f">django_app/</span>
+│   ├── manage.py
+│   ├── social_project/
+│   │   ├── settings.py           <span class="n">(Steps 3, 12, 16)</span>
+│   │   └── urls.py                 <span class="n">(Step 11)</span>
+│   ├── accounts/
+│   │   ├── models.py                 <span class="n">(Step 4)</span>
+│   │   ├── admin.py                    <span class="n">(Step 7)</span>
+│   │   ├── views.py                      <span class="n">(Step 14)</span>
+│   │   ├── urls.py                         <span class="n">(Step 14)</span>
+│   │   └── templates/accounts/
+│   │       ├── register.html                 <span class="n">(Step 14)</span>
+│   │       ├── login.html                       <span class="n">(Step 14)</span>
+│   │       └── profile.html                       <span class="n">(Step 14)</span>
+│   ├── posts/
+│   │   ├── models.py                 <span class="n">(Step 5)</span>
+│   │   ├── admin.py                    <span class="n">(Step 7)</span>
+│   │   ├── views.py                      <span class="n">(Steps 9, 16)</span>
+│   │   ├── urls.py                         <span class="n">(Steps 10, 16)</span>
+│   │   └── templates/posts/
+│   │       ├── create_post.html              <span class="n">(Step 15)</span>
+│   │       └── feed.html                       <span class="n">(Steps 15, 22)</span>
+│   ├── templates/base.html         <span class="n">(Step 13)</span>
+│   └── static/css/style.css          <span class="n">(same pattern as prior projects)</span>
+└── <span class="f">realtime_service/</span>
+    ├── Cargo.toml                    <span class="n">(Step 18)</span>
+    └── src/
+        ├── main.rs                     <span class="n">(Step 21)</span>
+        ├── broadcaster.rs                <span class="n">(Step 19)</span>
+        └── ws_session.rs                   <span class="n">(Step 20)</span></div>
+    </section>
+
+    <div class="pattern" id="pattern">
+      <div class="pattern-card">
+        <h2>The pattern worth remembering</h2>
+        <p>Inside Django, the loop is identical to both earlier projects: <strong>model → migrate → admin (seed data) → view → url → template</strong>, with every template link built ahead of its target and the target following immediately after.</p>
+        <p>The new idea this project adds is the <strong>boundary between two services</strong>. Django was written first and works completely on its own; Rust was added second, purely additive, and every place they touch — the <code>REALTIME_SERVICE_URL</code> setting, the <code>try/except</code> around the HTTP call, the matching <code>like-count-&lt;id&gt;</code> naming convention — was written <em>defensively</em>, assuming the other side might not be there.</p>
+        <p style="margin-bottom:0;">That's the actual skill in a polyglot system: not making two languages talk to each other, but making sure one half never breaks because the other half did.</p>
+      </div>
+    </div>
+
+    <footer>
+      Converted from <code>SocialSnap_Django_Actix_Build_Walkthrough.md</code> for onboarding juniors. 24 steps, two services, one boundary.
+    </footer>
+  </main>
+</div>
+
+<script>
+hljs.highlightAll();
+
+// copy buttons
+document.querySelectorAll('.code-wrap').forEach(wrap => {
+  const tag = wrap.querySelector('.code-tag');
+  if(!tag) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', () => {
+    const code = wrap.querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'Copied';
+      setTimeout(() => btn.textContent = 'Copy', 1200);
+    });
+  });
+  tag.appendChild(btn);
+});
+
+// progress bar
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progress.style.width = pct + '%';
+});
+
+// scrollspy
+const links = Array.from(document.querySelectorAll('.nav-link'));
+const sections = links.map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const id = '#' + entry.target.id;
+    const link = links.find(l => l.getAttribute('href') === id);
+    if(!link) return;
+    if(entry.isIntersecting){
+      links.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+sections.forEach(s => spy.observe(s));
+
+// mobile nav toggle
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+links.forEach(l => l.addEventListener('click', () => sidebar.classList.remove('open')));
+</script>
+</body>
+</html>
