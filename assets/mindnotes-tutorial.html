@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building MindNotes — Django + Rust/Actix Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+:root{
+  --paper:#F5EFDE;
+  --paper-2:#EFE7D2;
+  --rule:#DCD0AC;
+  --rule-soft:#E6DBBC;
+  --ink:#2A241C;
+  --ink-dim:#6E6552;
+  --ink-faint:#A69A7D;
+  --django:#33509E;
+  --django-soft:#DCE3F4;
+  --rust:#BE4A2E;
+  --rust-soft:#F5DED4;
+  --verify:#57795A;
+  --verify-soft:#DEE9DD;
+  --card-dark:#1D1B18;
+  --card-dark-2:#26221D;
+  --radius:9px;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+  --type:'Courier Prime', var(--mono);
+  --serif:'Source Serif 4', Georgia, serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  line-height:1.65;
+  font-size:16.5px;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    linear-gradient(var(--rule-soft) 1px, transparent 1px);
+  background-size:100% 34px;
+  background-attachment:local;
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+a{color:inherit;}
+::selection{background:var(--django-soft);color:var(--ink);}
+
+#progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--ink-faint),var(--django),var(--rust),var(--verify));
+  z-index:200;transition:width .1s linear;
+}
+
+#topbar{
+  display:none;
+  position:sticky;top:0;z-index:150;
+  background:rgba(245,239,222,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--rule);
+  padding:14px 18px;
+  align-items:center;justify-content:space-between;
+}
+#topbar .brand{font-family:var(--type);font-weight:700;font-size:14px;letter-spacing:.02em;}
+#topbar .brand span{color:var(--rust);}
+#navToggle{
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--ink);
+  border-radius:8px;padding:8px 12px;font-family:var(--type);font-size:12px;cursor:pointer;
+}
+
+#shell{display:grid;grid-template-columns:296px 1fr;min-height:100vh;}
+#sidebar{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  border-right:1px solid var(--rule);
+  background:var(--paper-2);
+  padding:26px 0 60px;
+  background-image:linear-gradient(var(--rule-soft) 1px, transparent 1px);
+  background-size:100% 34px;
+}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--ink-faint);border-radius:4px;}
+
+.brandblock{padding:0 22px 20px;border-bottom:2px solid var(--ink);margin-bottom:6px;}
+.brandblock .brand{font-family:var(--type);font-weight:700;font-size:19px;letter-spacing:.01em;}
+.brandblock .brand span{color:var(--rust);}
+.brandblock .sub{color:var(--ink-dim);font-size:12.5px;margin-top:6px;font-family:var(--mono);}
+
+.lane-legend{display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px 10px;}
+.lane-chip{
+  display:flex;align-items:center;gap:6px;font-family:var(--mono);
+  font-size:10px;letter-spacing:.04em;color:var(--ink-dim);
+  border:1px solid var(--rule);border-radius:3px;padding:3px 8px;background:var(--paper);
+}
+.lane-chip i{width:8px;height:8px;display:inline-block;border-radius:2px;}
+.lane-chip.setup i{background:var(--ink-faint);}
+.lane-chip.django i{background:var(--django);}
+.lane-chip.rust i{background:var(--rust);}
+.lane-chip.verify i{background:var(--verify);}
+
+nav#steps{padding:6px 0 0 0;}
+.partlabel{
+  font-family:var(--type);font-size:11px;font-weight:700;letter-spacing:.1em;
+  color:var(--ink-faint);text-transform:uppercase;padding:16px 22px 4px;
+}
+.navitem{
+  position:relative;display:flex;align-items:baseline;gap:10px;
+  padding:6px 22px 6px 18px;text-decoration:none;cursor:pointer;
+  border-left:3px solid transparent;
+}
+.navitem.setup{border-left-color:var(--ink-faint);}
+.navitem.django{border-left-color:var(--django);}
+.navitem.rust{border-left-color:var(--rust);}
+.navitem.verify{border-left-color:var(--verify);}
+.navitem .num{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);min-width:20px;}
+.navitem .label{font-size:13px;color:var(--ink-dim);transition:color .15s;}
+.navitem:hover .label{color:var(--ink);}
+.navitem.active{background:var(--paper);}
+.navitem.active .label{color:var(--ink);font-weight:600;}
+
+main{padding:0;min-width:0;}
+.hero{
+  padding:64px 56px 44px;
+  border-bottom:2px solid var(--ink);
+  position:relative;
+}
+.eyebrow{
+  font-family:var(--type);font-size:12px;letter-spacing:.1em;color:var(--ink-dim);
+  text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"§";color:var(--rust);font-weight:700;}
+h1.title{
+  font-family:var(--type);font-weight:700;font-size:clamp(26px,3.6vw,40px);
+  line-height:1.2;letter-spacing:-.005em;max-width:820px;
+}
+h1.title .accent-django{color:var(--django);}
+h1.title .accent-rust{color:var(--rust);}
+.hero-sub{color:var(--ink-dim);font-size:17px;margin-top:16px;max-width:660px;}
+.scope{
+  margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;max-width:920px;
+}
+.scope li{
+  list-style:none;background:var(--paper-2);border:1px solid var(--rule);
+  border-radius:6px;padding:11px 13px;font-size:13.5px;color:var(--ink-dim);
+  display:flex;gap:9px;align-items:flex-start;
+}
+.scope li::before{content:"✓";color:var(--verify);font-weight:700;flex:0 0 auto;}
+
+.diagram-wrap{margin-top:40px;background:var(--card-dark);border-radius:12px;padding:20px 22px 12px;box-shadow:0 10px 30px rgba(0,0,0,.15);}
+.diagram-cap{font-family:var(--mono);font-size:10.5px;color:#8A8271;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;text-align:center;}
+svg{display:block;width:100%;height:auto;}
+
+.content{padding:10px 56px 120px;max-width:900px;}
+.part-banner{
+  margin:52px 0 8px;padding:14px 20px;border-radius:8px;
+  font-family:var(--type);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.part-banner.django-b{background:var(--django-soft);color:var(--django);}
+.part-banner.rust-b{background:var(--rust-soft);color:var(--rust);}
+.part-banner.verify-b{background:var(--verify-soft);color:var(--verify);}
+.part-banner span.desc{font-family:var(--serif);font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-dim);font-size:13.5px;}
+
+.step{
+  padding:36px 0 8px;border-top:1px solid var(--rule);
+  scroll-margin-top:20px;
+}
+.step:first-of-type{border-top:none;}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.step-badge{
+  font-family:var(--mono);font-weight:700;font-size:11.5px;letter-spacing:.05em;
+  padding:3px 9px;border-radius:4px;border:1px solid;white-space:nowrap;
+}
+.step.setup .step-badge{color:var(--ink-dim);border-color:var(--ink-faint);background:var(--paper-2);}
+.step.django .step-badge{color:var(--django);border-color:var(--django);background:var(--django-soft);}
+.step.rust .step-badge{color:var(--rust);border-color:var(--rust);background:var(--rust-soft);}
+.step.verify .step-badge{color:var(--verify);border-color:var(--verify);background:var(--verify-soft);}
+.step h2{font-family:var(--type);font-size:20px;font-weight:700;letter-spacing:-.005em;}
+.step p{margin:13px 0;color:var(--ink);font-size:15.5px;}
+.step p strong{font-weight:700;}
+
+.codeblock{position:relative;margin:16px 0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--ink);}
+.codeblock .filebar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--card-dark-2);padding:8px 14px;font-family:var(--mono);
+  font-size:11.5px;color:#9C9483;border-bottom:1px solid #38332B;
+}
+.codeblock .filebar .fb-accent{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:8px;}
+.step.django .filebar .fb-accent{background:var(--django);}
+.step.rust .filebar .fb-accent{background:var(--rust);}
+.step.setup .filebar .fb-accent{background:var(--ink-faint);}
+.step.verify .filebar .fb-accent{background:var(--verify);}
+.codeblock .copybtn{
+  background:transparent;border:1px solid #4A4438;color:#9C9483;
+  font-family:var(--mono);font-size:10.5px;padding:3px 9px;border-radius:6px;cursor:pointer;
+}
+.codeblock .copybtn:hover{color:#EDE7D8;border-color:#9C9483;}
+.codeblock pre{margin:0;padding:16px;overflow-x:auto;background:var(--card-dark) !important;font-size:13px;}
+.codeblock code{font-family:var(--mono) !important;}
+
+.callout{
+  margin:18px 0;padding:15px 18px;border-radius:6px;
+  background:var(--paper-2);border:1px solid var(--rule);border-left:3px solid var(--ink);
+}
+.step.django .callout{border-left-color:var(--django);}
+.step.rust .callout{border-left-color:var(--rust);}
+.step.verify .callout{border-left-color:var(--verify);}
+.callout .why{
+  font-family:var(--type);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:7px;display:block;font-weight:700;color:var(--ink-dim);
+}
+.callout p{margin:0;font-size:14.5px;color:var(--ink);}
+.callout code, .step p code, .step li code{
+  font-family:var(--mono);background:var(--paper);border:1px solid var(--rule);
+  padding:1px 6px;border-radius:4px;font-size:.86em;color:#8A5A28;
+}
+
+.terminal-check{
+  margin:16px 0;padding:13px 16px;border-radius:6px;
+  background:var(--verify-soft);border:1px dashed var(--verify);font-size:14px;color:var(--ink-dim);
+}
+.terminal-check strong{color:var(--verify);}
+
+.trace{
+  background:var(--card-dark);border:1px solid var(--ink);border-radius:var(--radius);
+  padding:16px 18px;font-family:var(--mono);font-size:12.6px;color:#B7AF9C;
+  overflow-x:auto;margin:16px 0;white-space:pre;
+}
+.trace .django-t{color:#8FA8E8;}
+.trace .rust-t{color:#E88A6C;}
+.trace .arrow{color:#7A7364;}
+
+.step ol, .step ul.plain{margin:13px 0 13px 22px;color:var(--ink);font-size:15px;}
+.step ol li, .step ul.plain li{margin:6px 0;}
+
+.tree-block{
+  background:var(--card-dark);border:1px solid var(--ink);border-radius:var(--radius);
+  padding:20px 22px;font-family:var(--mono);font-size:12.6px;color:#B7AF9C;
+  overflow-x:auto;white-space:pre;line-height:1.75;
+}
+.tree-block .tag{color:#7A7364;font-style:italic;}
+
+.pattern-section{
+  margin-top:56px;padding:42px;border-radius:12px;
+  background:var(--paper-2);border:2px solid var(--ink);position:relative;overflow:hidden;
+}
+.pattern-section .eyebrow{color:var(--ink-dim);}
+.pattern-section .eyebrow::before{content:"§";}
+.pattern-section h2{font-family:var(--type);font-size:24px;margin-bottom:16px;}
+.pattern-section p{font-size:15.5px;color:var(--ink);max-width:760px;}
+.pattern-halves{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;}
+.pattern-half{
+  background:var(--paper);border-radius:8px;padding:18px 20px;
+  border:1px solid var(--rule);
+}
+.pattern-half.django-h{border-top:3px solid var(--django);}
+.pattern-half.rust-h{border-top:3px solid var(--rust);}
+.pattern-half h3{font-family:var(--type);font-size:13.5px;margin-bottom:8px;}
+.pattern-half.django-h h3{color:var(--django);}
+.pattern-half.rust-h h3{color:var(--rust);}
+.pattern-half p{font-size:13.8px;color:var(--ink-dim);margin:0;}
+@media (max-width:760px){.pattern-halves{grid-template-columns:1fr;}}
+
+footer{padding:40px 56px 80px;color:var(--ink-faint);font-size:13px;font-family:var(--mono);}
+
+@media (max-width:980px){
+  #shell{grid-template-columns:1fr;}
+  #topbar{display:flex;}
+  #sidebar{
+    position:fixed;left:0;top:57px;width:296px;max-width:82vw;
+    height:calc(100vh - 57px);transform:translateX(-100%);
+    transition:transform .22s ease;z-index:140;box-shadow:20px 0 40px rgba(0,0,0,.25);
+  }
+  #sidebar.open{transform:translateX(0);}
+  .hero{padding:40px 22px 30px;}
+  .content{padding:10px 22px 100px;}
+  footer{padding:30px 22px 60px;}
+  .pattern-section{padding:26px;}
+}
+/* final responsive pass */
+img,svg,video,canvas{max-width:100%;height:auto;}
+pre,.trace,.tree-block{max-width:100%;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){
+  body{font-size:15px;}
+  #topbar{padding:10px 14px;}
+  #topbar .brand{font-size:12px;}
+  #navToggle{min-height:42px;padding:9px 11px;}
+  .hero{padding:32px 16px 24px;}
+  h1.title{font-size:clamp(24px,8vw,34px);overflow-wrap:anywhere;}
+  .hero-sub{font-size:15px;}
+  .scope{grid-template-columns:1fr;margin-top:20px;}
+  .scope li{font-size:13px;padding:10px 12px;}
+  .content{padding:8px 16px 72px;}
+  .step{padding-top:36px;}
+  .step-head{align-items:flex-start;gap:9px;flex-wrap:wrap;}
+  .step-head .step-badge{font-size:10px;padding:4px 8px;}
+  .step h2{font-size:18px;line-height:1.3;overflow-wrap:anywhere;}
+  .step p,.step ol,.step ul.plain{font-size:14px;}
+  .codeblock .filebar{gap:10px;align-items:flex-start;flex-wrap:wrap;}
+  .codeblock .copybtn{min-height:36px;padding:7px 10px;}
+  .codeblock pre{padding:12px;font-size:12px;}
+  .callout,.terminal-check{padding:13px 14px;}
+  .pattern-section{padding:20px 16px;margin-top:40px;}
+  .pattern-section h2{font-size:21px;}
+  .pattern-half{padding:15px;}
+  footer{padding:24px 16px 48px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="topbar">
+  <div class="brand">Mind<span>Notes</span></div>
+  <button id="navToggle">☰ Steps</button>
+</div>
+
+<div id="shell">
+  <aside id="sidebar">
+    <div class="brandblock">
+      <div class="brand">Mind<span>Notes</span></div>
+      <div class="sub">Django + Rust/Actix walkthrough</div>
+    </div>
+    <div class="lane-legend">
+      <span class="lane-chip setup"><i></i>SETUP</span>
+      <span class="lane-chip django"><i></i>DJANGO</span>
+      <span class="lane-chip rust"><i></i>RUST</span>
+      <span class="lane-chip verify"><i></i>VERIFY</span>
+    </div>
+    <nav id="steps">
+      <div class="partlabel">Part A — Django</div>
+      <a class="navitem setup" href="#step-0"><span class="num">00</span><span class="label">Set up the workspace</span></a>
+      <a class="navitem setup" href="#step-1"><span class="num">01</span><span class="label">Create the project</span></a>
+      <a class="navitem setup" href="#step-2"><span class="num">02</span><span class="label">Create the notes app</span></a>
+      <a class="navitem setup" href="#step-3"><span class="num">03</span><span class="label">settings.py — INSTALLED_APPS</span></a>
+      <a class="navitem django" href="#step-4"><span class="num">04</span><span class="label">models.py</span></a>
+      <a class="navitem django" href="#step-5"><span class="num">05</span><span class="label">Migrate</span></a>
+      <a class="navitem django" href="#step-6"><span class="num">06</span><span class="label">admin.py</span></a>
+      <a class="navitem django" href="#step-7"><span class="num">07</span><span class="label">Superuser</span></a>
+      <a class="navitem django" href="#step-8"><span class="num">08</span><span class="label">views.py — list/detail</span></a>
+      <a class="navitem django" href="#step-9"><span class="num">09</span><span class="label">notes/urls.py</span></a>
+      <a class="navitem django" href="#step-10"><span class="num">10</span><span class="label">project urls.py</span></a>
+      <a class="navitem django" href="#step-11"><span class="num">11</span><span class="label">AI_SERVICE_URL config</span></a>
+      <a class="navitem django" href="#step-12"><span class="num">12</span><span class="label">base.html</span></a>
+      <a class="navitem django" href="#step-13"><span class="num">13</span><span class="label">notes templates</span></a>
+      <a class="navitem django" href="#step-14"><span class="num">14</span><span class="label">views.py — create/edit + AI call</span></a>
+      <a class="navitem django" href="#step-15"><span class="num">15</span><span class="label">views.py — search + related</span></a>
+
+      <div class="partlabel">Part B — Rust / Actix</div>
+      <a class="navitem rust" href="#step-16"><span class="num">16</span><span class="label">cargo new ai_service</span></a>
+      <a class="navitem rust" href="#step-17"><span class="num">17</span><span class="label">Cargo.toml</span></a>
+      <a class="navitem rust" href="#step-18"><span class="num">18</span><span class="label">vectorizer.rs</span></a>
+      <a class="navitem rust" href="#step-19"><span class="num">19</span><span class="label">similarity.rs</span></a>
+      <a class="navitem rust" href="#step-20"><span class="num">20</span><span class="label">main.rs</span></a>
+
+      <div class="partlabel">Part C — Wiring &amp; testing</div>
+      <a class="navitem verify" href="#step-21"><span class="num">21</span><span class="label">Run both services</span></a>
+      <a class="navitem verify" href="#step-22"><span class="num">22</span><span class="label">Test the full flow</span></a>
+      <a class="navitem verify" href="#tree"><span class="num">＋</span><span class="label">Final project tree</span></a>
+      <a class="navitem verify" href="#pattern"><span class="num">＋</span><span class="label">The pattern worth remembering</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Real build log · which file, what I type, why</div>
+      <h1 class="title">Building <span class="accent-rust">MindNotes</span> — notes that find each other, with <span class="accent-django">Django</span> + a tiny <span class="accent-rust">Rust</span> "AI"</h1>
+      <p class="hero-sub">"AI" here means something concrete: every note becomes a numeric vector describing what it's about, and vectors that sit close together represent notes that are about similar things. That's the whole engine behind semantic search and an automatic "Related Notes" list — no paid API, no internet access required.</p>
+
+      <ul class="scope">
+        <li>Users write and edit notes (title + content)</li>
+        <li>Every save asks Rust to vectorize the text — Django stores the vector</li>
+        <li>Search turns your query into a vector too, ranks notes by similarity</li>
+        <li>Every note page shows "Related Notes," computed the same way</li>
+      </ul>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono', monospace">
+          <defs>
+            <pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#38332B"/>
+            </pattern>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#B7AF9C"/>
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="900" height="320" fill="url(#grid)"/>
+
+          <text x="26" y="30" fill="#7A7364" font-size="10.5" letter-spacing="1">SEMANTIC SPACE — every dot is one saved note</text>
+
+          <!-- hiking cluster -->
+          <ellipse cx="235" cy="175" rx="110" ry="85" fill="#33509E" fill-opacity="0.07" stroke="#33509E" stroke-opacity="0.25" stroke-dasharray="4 4"/>
+          <text x="235" y="98" fill="#8FA8E8" font-size="10.5" text-anchor="middle">"hiking" cluster</text>
+
+          <circle cx="200" cy="150" r="7" fill="#57795A" stroke="#DEE9DD" stroke-width="1.5"/>
+          <text x="200" y="136" fill="#B7AF9C" font-size="10" text-anchor="middle">hiking trails</text>
+
+          <circle cx="268" cy="196" r="7" fill="#57795A" stroke="#DEE9DD" stroke-width="1.5"/>
+          <text x="268" y="222" fill="#B7AF9C" font-size="10" text-anchor="middle">hiking gear / boots</text>
+
+          <circle cx="188" cy="205" r="6" fill="#57795A" stroke="#DEE9DD" stroke-width="1.5" opacity="0.75"/>
+          <text x="150" y="230" fill="#7A7364" font-size="9.5" text-anchor="middle">mountain weather</text>
+
+          <!-- similarity link -->
+          <path d="M200,150 L268,196" stroke="#DEE9DD" stroke-width="1.4" stroke-dasharray="3 4" fill="none"/>
+          <text x="245" y="165" fill="#DEE9DD" font-size="10" text-anchor="middle" font-weight="700">0.87</text>
+
+          <!-- python cluster -->
+          <ellipse cx="670" cy="130" rx="95" ry="60" fill="#BE4A2E" fill-opacity="0.08" stroke="#BE4A2E" stroke-opacity="0.25" stroke-dasharray="4 4"/>
+          <text x="670" y="62" fill="#E88A6C" font-size="10.5" text-anchor="middle">"python" cluster</text>
+
+          <circle cx="645" cy="120" r="7" fill="#8A5A28" stroke="#F5DED4" stroke-width="1.5"/>
+          <text x="645" y="106" fill="#B7AF9C" font-size="10" text-anchor="middle">python debugging</text>
+
+          <circle cx="700" cy="150" r="6" fill="#8A5A28" stroke="#F5DED4" stroke-width="1.5" opacity="0.75"/>
+          <text x="712" y="172" fill="#7A7364" font-size="9.5" text-anchor="middle">script notes</text>
+
+          <!-- query vector -->
+          <rect x="392" y="240" width="9" height="9" fill="#EDE7D8" stroke="#B7AF9C" transform="rotate(45 396 244)"/>
+          <text x="396" y="270" fill="#EDE7D8" font-size="10.5" text-anchor="middle">search: "boots"</text>
+          <path d="M401,241 C 330,220 300,205 272,199" stroke="#B7AF9C" stroke-width="1.3" fill="none" marker-end="url(#arr)" stroke-dasharray="2 3"/>
+
+          <!-- far apart note, unrelated -->
+          <circle cx="500" cy="270" r="6" fill="#4A4438" stroke="#7A7364" stroke-width="1.2" opacity="0.6"/>
+          <text x="500" y="292" fill="#5C5645" font-size="9" text-anchor="middle">grocery list — far from both</text>
+
+          <text x="26" y="304" fill="#5C5645" font-size="9.5">note vector, e.g. [0.12, -0.04, 0.31, ... ] · 128 numbers, computed in Rust (Step 18)</text>
+        </svg>
+        <div class="diagram-cap">notes plotted by what they're about — closeness is computed, not tagged</div>
+      </div>
+    </section>
+
+    <div class="content" id="content">
+
+      <div class="part-banner django-b">Part A — The Django app <span class="desc">ordinary CRUD: notes, users, pages</span></div>
+
+      <section class="step setup" id="step-0">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 0 — Terminal: set up the workspace</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">mkdir mindnotes &amp;&amp; cd mindnotes
+mkdir django_app &amp;&amp; cd django_app
+python -m venv venv
+source venv/bin/activate
+pip install django requests</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-1">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 1 — Terminal: create the project</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">django-admin startproject notes_project .
+python manage.py runserver     # sanity check, then Ctrl+C</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-2">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 2 — Terminal: create the notes app</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py startapp notes</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-3">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 3 — Open notes_project/settings.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'notes',        # &lt;- added
+]</code></pre>
+        </div>
+      </section>
+
+      <section class="step django" id="step-4">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 4 — Open notes/models.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/models.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.db import models
+from django.contrib.auth.models import User
+
+class Note(models.Model):
+    author = models.ForeignKey(User, related_name='notes', on_delete=models.CASCADE)
+    title = models.CharField(max_length=150)
+    content = models.TextField()
+    embedding = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return self.title</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why embedding is a plain JSONField, not something more exotic</span>
+          <p>The vector is just a list of numbers (e.g. <code>[0.12, -0.04, 0.31, ...]</code>) — Postgres/SQLite can store that as JSON with zero extra setup. A production system with millions of notes would eventually want a real vector database (pgvector, Pinecone, etc.) for fast similarity search <em>inside</em> the database — but for a simple project, storing the vector and asking Rust to compare a handful of them on demand is more than fast enough, and far simpler to reason about.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why null=True, blank=True on embedding</span>
+          <p>A note can legitimately exist with <code>embedding=None</code> — if the Rust service happens to be down the moment someone saves a note (Step 14 handles this gracefully), the note must still save successfully; it just won't show up in similarity results until it's re-saved or a background job fills it in later.</p>
+        </div>
+      </section>
+
+      <section class="step django" id="step-5">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 5 — Terminal: turn the model into a table</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py makemigrations notes
+python manage.py migrate</code></pre>
+        </div>
+      </section>
+
+      <section class="step django" id="step-6">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 6 — Open notes/admin.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/admin.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.contrib import admin
+from .models import Note
+
+@admin.register(Note)
+class NoteAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'updated_at')
+    readonly_fields = ('embedding',)</code></pre>
+        </div>
+        <p><code>embedding</code> is marked <code>readonly_fields</code> here — it's a value <strong>computed</strong> by the Rust service, not something an admin should hand-type incorrectly and silently break similarity search for that note.</p>
+      </section>
+
+      <section class="step django" id="step-7">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 7 — Terminal: create an admin login</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py createsuperuser
+python manage.py runserver</code></pre>
+        </div>
+        <p>No extra seeding here beyond the superuser — unlike earlier projects, this app's whole point only becomes visible once <strong>several</strong> notes with real, varied content exist, and Step 14's create-note flow is what we're about to build. It makes more sense to seed data through the actual UI once it exists, rather than by hand in the admin.</p>
+      </section>
+
+      <section class="step django" id="step-8">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 8 — Open notes/views.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Note
+
+@login_required
+def note_list(request):
+    notes = Note.objects.filter(author=request.user)
+    return render(request, 'notes/note_list.html', {'notes': notes})
+
+@login_required
+def note_detail(request, pk):
+    note = get_object_or_404(Note, pk=pk, author=request.user)
+    return render(request, 'notes/note_detail.html', {'note': note})</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why get_object_or_404(Note, pk=pk, author=request.user)</span>
+          <p>Not just <code>pk=pk</code> — this is the same ownership-check habit as every earlier project's "can this user actually touch this row" guard. Without <code>author=request.user</code> in the lookup, any logged-in user could view any other user's private notes just by guessing IDs in the URL.</p>
+        </div>
+      </section>
+
+      <section class="step django" id="step-9">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 9 — Create notes/urls.py (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.urls import path
+from . import views
+
+app_name = 'notes'
+
+urlpatterns = [
+    path('', views.note_list, name='note_list'),
+    path('note/&lt;int:pk&gt;/', views.note_detail, name='note_detail'),
+]</code></pre>
+        </div>
+      </section>
+
+      <section class="step django" id="step-10">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 10 — Open notes_project/urls.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes_project/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.contrib import admin
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('notes.urls', namespace='notes')),
+    path('login/', auth_views.LoginView.as_view(template_name='notes/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='notes:note_list'), name='logout'),
+]</code></pre>
+        </div>
+        <p>Built-in <code>LoginView</code>/<code>LogoutView</code> again, same reasoning as the ChatSpace project — this app's actual feature is search/similarity, not reinventing auth for a fourth time in this series.</p>
+        <p><strong>Add to notes_project/settings.py:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'notes:note_list'</code></pre>
+        </div>
+      </section>
+
+      <section class="step django" id="step-11">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 11 — Open notes_project/settings.py again</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],     # &lt;- added
+        'APP_DIRS': True,
+        ...
+    },
+]</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+AI_SERVICE_URL = 'http://127.0.0.1:8080'</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why AI_SERVICE_URL is added now, before Rust exists</span>
+          <p>Same reasoning as <code>REALTIME_SERVICE_URL</code> in the SocialSnap project — it's config, not logic, so it's cheapest to settle in one visit to this file rather than a return trip later.</p>
+        </div>
+      </section>
+
+      <section class="step django" id="step-12">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 12 — Create templates/base.html</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">mkdir templates</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>templates/base.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;{% block title %}MindNotes{% endblock %}&lt;/title&gt;
+    {% load static %}
+    &lt;link rel="stylesheet" href="{% static 'css/style.css' %}"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;a href="{% url 'notes:note_list' %}"&gt;MindNotes&lt;/a&gt;
+        {% if user.is_authenticated %}
+            &lt;a href="{% url 'notes:note_create' %}"&gt;New Note&lt;/a&gt;
+            &lt;form action="{% url 'notes:search' %}" method="get" style="display:inline"&gt;
+                &lt;input type="text" name="q" placeholder="Search notes..."&gt;
+                &lt;button type="submit"&gt;Search&lt;/button&gt;
+            &lt;/form&gt;
+            &lt;form action="{% url 'logout' %}" method="post" style="display:inline"&gt;
+                {% csrf_token %}
+                &lt;button type="submit"&gt;Log out&lt;/button&gt;
+            &lt;/form&gt;
+        {% else %}
+            &lt;a href="{% url 'login' %}"&gt;Log in&lt;/a&gt;
+        {% endif %}
+    &lt;/header&gt;
+    &lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+        <p>The search box and "New Note" link already point at <code>notes:search</code> and <code>notes:note_create</code> — neither exists yet. Same "write the link first" habit as every earlier project.</p>
+      </section>
+
+      <section class="step django" id="step-13">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 13 — Create the remaining notes templates</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">mkdir -p notes/templates/notes</code></pre>
+        </div>
+
+        <p><strong>login.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/login.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+    &lt;h1&gt;Log In&lt;/h1&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        {{ form.as_p }}
+        &lt;button type="submit"&gt;Log In&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+        </div>
+
+        <p><strong>note_list.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/note_list.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}My Notes{% endblock %}
+{% block content %}
+    &lt;h1&gt;My Notes&lt;/h1&gt;
+    &lt;ul&gt;
+        {% for note in notes %}
+            &lt;li&gt;&lt;a href="{% url 'notes:note_detail' note.pk %}"&gt;{{ note.title }}&lt;/a&gt;&lt;/li&gt;
+        {% empty %}
+            &lt;li&gt;No notes yet. &lt;a href="{% url 'notes:note_create' %}"&gt;Write your first one.&lt;/a&gt;&lt;/li&gt;
+        {% endfor %}
+    &lt;/ul&gt;
+{% endblock %}</code></pre>
+        </div>
+
+        <p><strong>note_form.html</strong> (used for both create and edit):</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/note_form.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}{% if note %}Edit Note{% else %}New Note{% endif %}{% endblock %}
+{% block content %}
+    &lt;h1&gt;{% if note %}Edit Note{% else %}New Note{% endif %}&lt;/h1&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        &lt;input type="text" name="title" value="{{ note.title|default:'' }}" placeholder="Title" required&gt;
+        &lt;textarea name="content" rows="10" placeholder="Write your note..."&gt;{{ note.content|default:'' }}&lt;/textarea&gt;
+        &lt;button type="submit"&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+        </div>
+
+        <p><strong>note_detail.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/note_detail.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}{{ note.title }}{% endblock %}
+{% block content %}
+    &lt;h1&gt;{{ note.title }}&lt;/h1&gt;
+    &lt;p&gt;{{ note.content|linebreaks }}&lt;/p&gt;
+    &lt;a href="{% url 'notes:note_edit' note.pk %}"&gt;Edit&lt;/a&gt;
+
+    &lt;h2&gt;Related Notes&lt;/h2&gt;
+    &lt;ul&gt;
+        {% for related in related_notes %}
+            &lt;li&gt;
+                &lt;a href="{% url 'notes:note_detail' related.pk %}"&gt;{{ related.title }}&lt;/a&gt;
+                — {{ related.score|floatformat:2 }} similarity
+            &lt;/li&gt;
+        {% empty %}
+            &lt;li&gt;No related notes found yet.&lt;/li&gt;
+        {% endfor %}
+    &lt;/ul&gt;
+{% endblock %}</code></pre>
+        </div>
+
+        <p><strong>search_results.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/search_results.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}Search{% endblock %}
+{% block content %}
+    &lt;h1&gt;Results for "{{ query }}"&lt;/h1&gt;
+    &lt;ul&gt;
+        {% for result in results %}
+            &lt;li&gt;
+                &lt;a href="{% url 'notes:note_detail' result.pk %}"&gt;{{ result.title }}&lt;/a&gt;
+                — {{ result.score|floatformat:2 }} match
+            &lt;/li&gt;
+        {% empty %}
+            &lt;li&gt;No matching notes found.&lt;/li&gt;
+        {% endfor %}
+    &lt;/ul&gt;
+{% endblock %}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why related.score and result.score work with no score field on Note</span>
+          <p>Both are referenced here even though <code>Note</code> (Step 4) has no <code>score</code> field — that's intentional, and explained in Step 15: the <strong>view</strong> attaches a temporary <code>.score</code> attribute to each <code>Note</code> object at render time, computed fresh from the Rust service, never stored on the model itself.</p>
+        </div>
+      </section>
+
+      <section class="step django" id="step-14">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 14 — Open notes/views.py again — add create/edit, calling the AI service</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import requests
+from django.conf import settings
+
+def _get_embedding(text):
+    try:
+        response = requests.post(
+            f'{settings.AI_SERVICE_URL}/embed',
+            json={'text': text},
+            timeout=2,
+        )
+        response.raise_for_status()
+        return response.json()['vector']
+    except requests.exceptions.RequestException:
+        return None    # AI service down or unreachable — degrade gracefully
+
+@login_required
+def note_create(request):
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('content', '').strip()
+        if title and content:
+            note = Note.objects.create(author=request.user, title=title, content=content)
+            note.embedding = _get_embedding(f'{title} {content}')
+            note.save()
+            return redirect('notes:note_detail', pk=note.pk)
+    return render(request, 'notes/note_form.html')
+
+@login_required
+def note_edit(request, pk):
+    note = get_object_or_404(Note, pk=pk, author=request.user)
+    if request.method == 'POST':
+        note.title = request.POST.get('title', '').strip()
+        note.content = request.POST.get('content', '').strip()
+        note.embedding = _get_embedding(f'{note.title} {note.content}')
+        note.save()
+        return redirect('notes:note_detail', pk=note.pk)
+    return render(request, 'notes/note_form.html', {'note': note})</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why _get_embedding is its own small function</span>
+          <p>Both <code>note_create</code> and <code>note_edit</code> need the exact same "text in, vector out, fail safely" behavior — writing it once and calling it twice means a future change (a retry, a different timeout) only has to happen in one place.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why it returns None on failure, instead of raising</span>
+          <p>Same defensive boundary as SocialSnap's <code>like_post</code> — saving a note is the essential feature; computing its embedding is an enhancement. If the AI service is down, unreachable, or slow, the note must still save with <code>embedding=None</code> rather than the whole page failing with a 500 error. This is exactly why Step 4 made <code>embedding</code> nullable.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why the embedding is computed from title + content, not content alone</span>
+          <p>The title usually carries the strongest signal of what a note is <em>about</em> — including it in the text sent for vectorization makes the resulting vector a better summary of the note's topic.</p>
+        </div>
+      </section>
+
+      <section class="step django" id="step-15">
+        <div class="step-head"><span class="step-badge">DJANGO</span></div>
+        <h2>Step 15 — Open notes/views.py once more — add search and Related Notes</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>notes/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">def note_detail(request, pk):
+    note = get_object_or_404(Note, pk=pk, author=request.user)
+    related_notes = []
+    if note.embedding:
+        candidates = Note.objects.filter(author=request.user).exclude(pk=note.pk).exclude(embedding=None)
+        related_notes = _rank_by_similarity(note.embedding, candidates)[:3]
+    return render(request, 'notes/note_detail.html', {'note': note, 'related_notes': related_notes})
+
+@login_required
+def search(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+    if query:
+        query_vector = _get_embedding(query)
+        if query_vector:
+            candidates = Note.objects.filter(author=request.user).exclude(embedding=None)
+            results = _rank_by_similarity(query_vector, candidates)
+    return render(request, 'notes/search_results.html', {'query': query, 'results': results})
+
+def _rank_by_similarity(query_vector, candidates):
+    candidate_list = [{'id': n.id, 'vector': n.embedding} for n in candidates]
+    if not candidate_list:
+        return []
+    try:
+        response = requests.post(
+            f'{settings.AI_SERVICE_URL}/similar',
+            json={'query_vector': query_vector, 'candidates': candidate_list},
+            timeout=2,
+        )
+        response.raise_for_status()
+        ranked = response.json()['ranked']    # [{'id': 4, 'score': 0.87}, ...]
+    except requests.exceptions.RequestException:
+        return []
+
+    notes_by_id = {n.id: n for n in candidates}
+    scored_notes = []
+    for entry in ranked:
+        note = notes_by_id.get(entry['id'])
+        if note:
+            note.score = entry['score']    # attached at render time, not stored on the model
+            scored_notes.append(note)
+    return scored_notes</code></pre>
+        </div>
+        <p><em>(Replace the earlier plain <code>note_detail</code> from Step 8 with this version — same URL, same name, now doing more.)</em></p>
+        <div class="callout">
+          <span class="why">Why the similarity math is sent to Rust, not computed in a Python loop</span>
+          <p>This is the entire reason Rust exists in this project. A Python <code>for</code> loop computing similarity across hundreds or thousands of vectors is exactly the kind of numeric work Python is slow at and Rust is built for — sending the query vector and candidate vectors over HTTP and letting Rust do the comparison is the whole point of the split described at the top of this walkthrough.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why note.score is a plain attribute, not a model field</span>
+          <p>The score only means something <em>relative to one specific search or one specific note's related-notes lookup</em> — it's not a property of the note itself the way <code>title</code> is. Attaching it just for this one render, on an object about to be handed straight to a template and then discarded, is the correct scope for a value this temporary.</p>
+        </div>
+      </section>
+
+      <div class="part-banner rust-b">Part B — The Rust / Actix "AI" service <span class="desc">one job: turn text into numbers, fast</span></div>
+
+      <section class="step rust" id="step-16">
+        <div class="step-head"><span class="step-badge">RUST</span></div>
+        <h2>Step 16 — Terminal: create the Rust project</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">cd ..                    # back out to mindnotes/
+cargo new ai_service --bin
+cd ai_service</code></pre>
+        </div>
+      </section>
+
+      <section class="step rust" id="step-17">
+        <div class="step-head"><span class="step-badge">RUST</span></div>
+        <h2>Step 17 — Open Cargo.toml</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>Cargo.toml</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-toml">[dependencies]
+actix-web = "4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"</code></pre>
+        </div>
+        <p>No actor framework needed this time — unlike SocialSnap's realtime service, there's no persistent connection to manage here, just two plain request-in/response-out HTTP endpoints. Plain <code>actix-web</code> is all that's required.</p>
+      </section>
+
+      <section class="step rust" id="step-18">
+        <div class="step-head"><span class="step-badge">RUST</span></div>
+        <h2>Step 18 — Create src/vectorizer.rs (new file)</h2>
+        <p>This is the "AI" in the smallest honest sense: turning text into a fixed-length numeric vector using <strong>feature hashing</strong> — a real, established technique (used in production systems like Vowpal Wabbit) that needs no pretrained model, no downloaded weights, and no internet access, while still producing vectors where similar text produces similar vectors.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>src/vectorizer.rs</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-rust">const VECTOR_SIZE: usize = 128;
+
+/// Turns arbitrary text into a fixed-length vector by hashing each word into
+/// one of VECTOR_SIZE buckets and counting occurrences, then normalizing.
+pub fn embed_text(text: &amp;str) -&gt; Vec&lt;f32&gt; {
+    let mut vector = vec![0f32; VECTOR_SIZE];
+
+    for word in text.to_lowercase().split_whitespace() {
+        let bucket = simple_hash(word) % VECTOR_SIZE;
+        vector[bucket] += 1.0;
+    }
+
+    normalize(&amp;mut vector);
+    vector
+}
+
+fn simple_hash(word: &amp;str) -&gt; usize {
+    let mut hash: usize = 5381;
+    for byte in word.bytes() {
+        hash = hash.wrapping_mul(33).wrapping_add(byte as usize);
+    }
+    hash
+}
+
+fn normalize(vector: &amp;mut [f32]) {
+    let magnitude: f32 = vector.iter().map(|v| v * v).sum::&lt;f32&gt;().sqrt();
+    if magnitude &gt; 0.0 {
+        for v in vector.iter_mut() {
+            *v /= magnitude;
+        }
+    }
+}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why every word hashes into a bucket instead of a full vocabulary dictionary</span>
+          <p>A real vocabulary-based approach needs to remember every word it's ever seen, which grows without bound and needs to be kept in sync between training and use. Hashing every word into one of a <strong>fixed</strong> 128 buckets means the vector size never changes no matter how much text flows through the system — the tradeoff (rare "collisions" where two different words share a bucket) is a well-known, acceptable one at this scale.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why normalize() matters for the similarity step that comes next</span>
+          <p>Without normalizing, a long note would produce a vector with a bigger magnitude than a short note purely from having more words, which would make it look "similar to everything" regardless of actual topic. Normalizing every vector to length 1 means Step 19's cosine similarity is comparing <em>direction</em> (what the text is about) rather than <em>length</em> (how much text there was).</p>
+        </div>
+      </section>
+
+      <section class="step rust" id="step-19">
+        <div class="step-head"><span class="step-badge">RUST</span></div>
+        <h2>Step 19 — Create src/similarity.rs (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>src/similarity.rs</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-rust">pub fn cosine_similarity(a: &amp;[f32], b: &amp;[f32]) -&gt; f32 {
+    let dot: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
+    dot    // both vectors are already normalized (Step 18), so dot product IS cosine similarity
+}
+
+pub struct ScoredId {
+    pub id: i64,
+    pub score: f32,
+}
+
+pub fn rank_by_similarity(query: &amp;[f32], candidates: &amp;[(i64, Vec&lt;f32&gt;)]) -&gt; Vec&lt;ScoredId&gt; {
+    let mut scored: Vec&lt;ScoredId&gt; = candidates
+        .iter()
+        .map(|(id, vector)| ScoredId {
+            id: *id,
+            score: cosine_similarity(query, vector),
+        })
+        .collect();
+
+    scored.sort_by(|a, b| b.score.partial_cmp(&amp;a.score).unwrap());
+    scored
+}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why dot product alone equals cosine similarity here</span>
+          <p>The textbook formula for cosine similarity divides the dot product by both vectors' magnitudes — but since <code>embed_text</code> (Step 18) already normalized every vector to length 1, that division would just be dividing by 1 twice. Skipping the redundant division isn't a shortcut that sacrifices correctness; it's a direct consequence of a decision already made one file earlier. Worth noticing as a pattern: doing normalization once, early, made every later computation on that data simpler.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why .partial_cmp(...).unwrap() instead of the more familiar .cmp()</span>
+          <p>Floating-point numbers in Rust don't implement a total ordering (because of <code>NaN</code>), so <code>Vec&lt;f32&gt;</code> can't use the simple <code>.sort()</code> a <code>Vec&lt;i64&gt;</code> could. <code>partial_cmp</code> handles the general case and <code>.unwrap()</code> is safe here specifically because normalized similarity scores can never actually be <code>NaN</code>.</p>
+        </div>
+      </section>
+
+      <section class="step rust" id="step-20">
+        <div class="step-head"><span class="step-badge">RUST</span></div>
+        <h2>Step 20 — Open src/main.rs</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>src/main.rs</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-rust">mod vectorizer;
+mod similarity;
+
+use actix_web::{web, App, HttpServer, HttpResponse};
+use serde::{Deserialize, Serialize};
+use vectorizer::embed_text;
+use similarity::rank_by_similarity;
+
+#[derive(Deserialize)]
+struct EmbedRequest {
+    text: String,
+}
+
+#[derive(Serialize)]
+struct EmbedResponse {
+    vector: Vec&lt;f32&gt;,
+}
+
+async fn embed(payload: web::Json&lt;EmbedRequest&gt;) -&gt; HttpResponse {
+    let vector = embed_text(&amp;payload.text);
+    HttpResponse::Ok().json(EmbedResponse { vector })
+}
+
+#[derive(Deserialize)]
+struct Candidate {
+    id: i64,
+    vector: Vec&lt;f32&gt;,
+}
+
+#[derive(Deserialize)]
+struct SimilarRequest {
+    query_vector: Vec&lt;f32&gt;,
+    candidates: Vec&lt;Candidate&gt;,
+}
+
+#[derive(Serialize)]
+struct RankedResult {
+    id: i64,
+    score: f32,
+}
+
+#[derive(Serialize)]
+struct SimilarResponse {
+    ranked: Vec&lt;RankedResult&gt;,
+}
+
+async fn similar(payload: web::Json&lt;SimilarRequest&gt;) -&gt; HttpResponse {
+    let candidates: Vec&lt;(i64, Vec&lt;f32&gt;)&gt; = payload
+        .candidates
+        .iter()
+        .map(|c| (c.id, c.vector.clone()))
+        .collect();
+
+    let ranked = rank_by_similarity(&amp;payload.query_vector, &amp;candidates)
+        .into_iter()
+        .map(|r| RankedResult { id: r.id, score: r.score })
+        .collect();
+
+    HttpResponse::Ok().json(SimilarResponse { ranked })
+}
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+    println!("AI service running on http://127.0.0.1:8080");
+
+    HttpServer::new(|| {
+        App::new()
+            .route("/embed", web::post().to(embed))
+            .route("/similar", web::post().to(similar))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}</code></pre>
+        </div>
+
+        <p><strong>Tracing both request paths through these three files:</strong></p>
+        <div class="trace">Django POSTs { "text": "..." } to /embed
+   → main.rs: embed() deserializes EmbedRequest
+   → vectorizer.rs: embed_text() hashes words into buckets, normalizes
+   → main.rs: returns { "vector": [...] } as JSON
+
+Django POSTs { "query_vector": [...], "candidates": [...] } to /similar
+   → main.rs: similar() deserializes SimilarRequest
+   → similarity.rs: rank_by_similarity() computes cosine similarity per candidate, sorts
+   → main.rs: returns { "ranked": [{"id": 4, "score": 0.87}, ...] } as JSON</div>
+
+        <p><strong>Terminal — build and run it:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">cargo run</code></pre>
+        </div>
+        <p>You should see <code>AI service running on http://127.0.0.1:8080</code> with no compile errors. If the compiler flags a missing import or a type mismatch, read the line number it reports the same way you'd read a Python traceback — it names the exact file and issue.</p>
+      </section>
+
+      <div class="part-banner verify-b">Part C — Wiring and testing the full system <span class="desc">two processes, one product</span></div>
+
+      <section class="step verify" id="step-21">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 21 — Terminal: run both services together</h2>
+        <p><strong>Terminal 1:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal 1</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">cd mindnotes/django_app
+source venv/bin/activate
+python manage.py runserver</code></pre>
+        </div>
+        <p><strong>Terminal 2:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal 2</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">cd mindnotes/ai_service
+cargo run</code></pre>
+        </div>
+      </section>
+
+      <section class="step verify" id="step-22">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 22 — Test the full flow</h2>
+        <ol>
+          <li>Log in, create three or four notes with genuinely different topics — e.g. one about "hiking trails and mountain weather," one about "python programming and debugging," one about "hiking gear and boots."</li>
+          <li>Open the "hiking trails" note's detail page — the <strong>Related Notes</strong> section should rank the "hiking gear" note above the "python programming" one, purely from shared vocabulary hashed into overlapping buckets — no manual tagging or categorization involved.</li>
+          <li>Use the search box for a word that appears in a note but wasn't the note's title — e.g. search "boots" and confirm the hiking gear note is returned with a real similarity score, not just a raw text match.</li>
+          <li>Stop the Rust service (<code>Ctrl+C</code> in Terminal 2), then create a new note. It should still save successfully — check <code>/admin/</code> and confirm the new note exists with <code>embedding: null</code>. This confirms the same defensive boundary as SocialSnap: the core feature (saving a note) never depends on the AI service being up.</li>
+        </ol>
+      </section>
+
+      <section class="step verify" id="step-22-visual">
+        <div class="step-head"><span class="step-badge">FINAL PASS</span></div>
+        <h2>Step 23 — Product polish: turn the working system into a finished MindNotes experience</h2>
+        <p>After Step 22, the Django and Rust services already work together. This final replacement pass keeps that architecture intact while turning the starter screens into a calm, responsive private knowledge library: designed notes, focused writing, semantic search, and related thoughts.</p>
+        <div class="callout"><span class="why">No logic is being replaced</span><p>Keep the models, views, routes, and Rust service from the earlier steps. Replace only these Django templates and the stylesheet. The temporary <code>result.score</code> and <code>related.score</code> attributes continue to come from the existing similarity view.</p></div>
+        <p><strong>templates/base.html</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>templates/base.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% load static %}&lt;!doctype html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;{% block title %}MindNotes{% endblock %} · MindNotes&lt;/title&gt;&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;&lt;link href=&quot;https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;{% static &#x27;css/style.css&#x27; %}&quot;&gt;&lt;/head&gt;&lt;body&gt;&lt;header&gt;&lt;a class=&quot;brand&quot; href=&quot;{% url &#x27;notes:note_list&#x27; %}&quot;&gt;&lt;span&gt;✦&lt;/span&gt; mindnotes&lt;/a&gt;{% if user.is_authenticated %}&lt;nav&gt;&lt;form class=&quot;search&quot; action=&quot;{% url &#x27;notes:search&#x27; %}&quot; method=&quot;get&quot;&gt;&lt;input name=&quot;q&quot; value=&quot;{{ request.GET.q }}&quot; placeholder=&quot;Search your thoughts…&quot;&gt;&lt;button&gt;⌕&lt;/button&gt;&lt;/form&gt;&lt;a href=&quot;{% url &#x27;notes:note_create&#x27; %}&quot;&gt;New note&lt;/a&gt;&lt;form action=&quot;{% url &#x27;logout&#x27; %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button&gt;Log out&lt;/button&gt;&lt;/form&gt;&lt;/nav&gt;{% endif %}&lt;/header&gt;&lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;</code></pre></div>
+        <p><strong>notes/templates/notes/login.html</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/login.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}{% block content %}&lt;section class=&quot;auth&quot;&gt;&lt;div&gt;&lt;span&gt;✦&lt;/span&gt;&lt;p&gt;MindNotes&lt;/p&gt;&lt;h1&gt;A quieter place for your ideas.&lt;/h1&gt;&lt;/div&gt;&lt;form method=&quot;post&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Welcome back&lt;/p&gt;&lt;h1&gt;Log in&lt;/h1&gt;&lt;p&gt;Keep your thinking together, then let connections surface naturally.&lt;/p&gt;{% csrf_token %}{{ form.as_p }}&lt;button class=&quot;button&quot;&gt;Continue →&lt;/button&gt;&lt;/form&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>notes/templates/notes/note_list.html</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/note_list.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}{% block title %}My notes{% endblock %}{% block content %}&lt;section class=&quot;library&quot;&gt;&lt;div class=&quot;library-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;eyebrow&quot;&gt;Your private library&lt;/p&gt;&lt;h1&gt;Notes for&lt;br&gt;&lt;em&gt;thinking aloud.&lt;/em&gt;&lt;/h1&gt;&lt;/div&gt;&lt;a class=&quot;button&quot; href=&quot;{% url &#x27;notes:note_create&#x27; %}&quot;&gt;New note →&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;note-grid&quot;&gt;{% for note in notes %}&lt;a class=&quot;note-card&quot; href=&quot;{% url &#x27;notes:note_detail&#x27; note.pk %}&quot;&gt;&lt;p&gt;{{ note.created_at|date:&quot;M j, Y&quot; }}&lt;/p&gt;&lt;h2&gt;{{ note.title }}&lt;/h2&gt;&lt;span&gt;{{ note.content|truncatechars:120 }}&lt;/span&gt;&lt;small&gt;{% if note.embedding %}✦ Connected to your library{% else %}○ Saved locally{% endif %}&lt;/small&gt;&lt;/a&gt;{% empty %}&lt;div class=&quot;empty&quot;&gt;&lt;span&gt;✦&lt;/span&gt;&lt;h2&gt;Your first thought belongs here.&lt;/h2&gt;&lt;p&gt;Write a note and let your library begin.&lt;/p&gt;&lt;a class=&quot;button&quot; href=&quot;{% url &#x27;notes:note_create&#x27; %}&quot;&gt;Write a note →&lt;/a&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>notes/templates/notes/note_form.html</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/note_form.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}{% block title %}{% if note %}Edit note{% else %}New note{% endif %}{% endblock %}{% block content %}&lt;section class=&quot;editor&quot;&gt;&lt;a href=&quot;{% url &#x27;notes:note_list&#x27; %}&quot;&gt;← Back to library&lt;/a&gt;&lt;form method=&quot;post&quot;&gt;{% csrf_token %}&lt;p class=&quot;eyebrow&quot;&gt;{% if note %}Refine a thought{% else %}A blank page{% endif %}&lt;/p&gt;&lt;input name=&quot;title&quot; value=&quot;{{ note.title|default:&#x27;&#x27; }}&quot; placeholder=&quot;Give this thought a title&quot; required autofocus&gt;&lt;textarea name=&quot;content&quot; placeholder=&quot;Start where you are…&quot;&gt;{{ note.content|default:&#x27;&#x27; }}&lt;/textarea&gt;&lt;div&gt;&lt;small&gt;Semantic connections are refreshed when you save.&lt;/small&gt;&lt;button class=&quot;button&quot;&gt;Save note →&lt;/button&gt;&lt;/div&gt;&lt;/form&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>notes/templates/notes/note_detail.html</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/note_detail.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}{% block title %}{{ note.title }}{% endblock %}{% block content %}&lt;section class=&quot;note-detail&quot;&gt;&lt;a href=&quot;{% url &#x27;notes:note_list&#x27; %}&quot;&gt;← All notes&lt;/a&gt;&lt;article&gt;&lt;p class=&quot;eyebrow&quot;&gt;{{ note.created_at|date:&quot;F j, Y&quot; }}&lt;/p&gt;&lt;h1&gt;{{ note.title }}&lt;/h1&gt;&lt;div class=&quot;note-content&quot;&gt;{{ note.content|linebreaks }}&lt;/div&gt;&lt;a class=&quot;edit&quot; href=&quot;{% url &#x27;notes:note_edit&#x27; note.pk %}&quot;&gt;Edit note →&lt;/a&gt;&lt;/article&gt;&lt;aside&gt;&lt;p class=&quot;eyebrow&quot;&gt;Related thoughts&lt;/p&gt;&lt;h2&gt;Your ideas, in conversation.&lt;/h2&gt;{% for related in related_notes %}&lt;a href=&quot;{% url &#x27;notes:note_detail&#x27; related.pk %}&quot;&gt;&lt;span&gt;✦&lt;/span&gt;&lt;div&gt;&lt;strong&gt;{{ related.title }}&lt;/strong&gt;&lt;small&gt;{{ related.score|floatformat:0 }}% semantic match&lt;/small&gt;&lt;/div&gt;&lt;/a&gt;{% empty %}&lt;p class=&quot;muted&quot;&gt;As your library grows, related ideas will appear here.&lt;/p&gt;{% endfor %}&lt;/aside&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>notes/templates/notes/search_results.html</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>notes/templates/notes/search_results.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}{% block title %}Search{% endblock %}{% block content %}&lt;section class=&quot;library results&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Semantic search&lt;/p&gt;&lt;h1&gt;Results for “{{ query }}”&lt;/h1&gt;&lt;p class=&quot;sub&quot;&gt;Matches are ranked by meaning, not only by exact words.&lt;/p&gt;&lt;div class=&quot;note-grid&quot;&gt;{% for result in results %}&lt;a class=&quot;note-card&quot; href=&quot;{% url &#x27;notes:note_detail&#x27; result.pk %}&quot;&gt;&lt;p&gt;{{ result.score|floatformat:0 }}% semantic match&lt;/p&gt;&lt;h2&gt;{{ result.title }}&lt;/h2&gt;&lt;span&gt;{{ result.content|truncatechars:135 }}&lt;/span&gt;&lt;/a&gt;{% empty %}&lt;div class=&quot;empty&quot;&gt;&lt;h2&gt;No connected thoughts yet.&lt;/h2&gt;&lt;p&gt;Try a different phrase, or add a few notes first.&lt;/p&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>static/css/style.css</strong></p><div class="codeblock"><div class="filebar"><span><i class="fb-accent"></i>static/css/style.css — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-css">:root{--ink:#2d2935;--paper:#fffdf8;--bg:#f4f0e9;--muted:#817b82;--line:#dfd8d1;--rose:#dfa6b5;--lilac:#dfd8ec;--sage:#c8ddd2}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 &quot;DM Sans&quot;,sans-serif}header{height:76px;max-width:1160px;margin:auto;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font:700 22px Fraunces;text-decoration:none}.brand span{color:#aa7080}nav{display:flex;gap:15px;align-items:center;font-size:13px;font-weight:700}nav&gt;a{text-decoration:none}nav form{margin:0}nav form:last-child button{border:0;background:none;font:inherit;color:var(--ink);cursor:pointer}.search{display:flex;border:1px solid var(--line);background:var(--paper);border-radius:99px;padding:3px 7px}.search input{border:0;outline:0;background:transparent;width:175px;font-size:12px}.search button{border:0;background:none;color:var(--muted);font-size:19px;cursor:pointer}.button{background:var(--ink);color:white;border:0;border-radius:99px;padding:12px 17px;text-decoration:none;font:700 13px &quot;DM Sans&quot;;cursor:pointer}.library{max-width:1160px;margin:auto;padding:62px 0 90px}.library-head{display:flex;justify-content:space-between;align-items:end;gap:20px}.eyebrow{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:#a06c7b;margin:0 0 12px}.library h1,.note-detail h1,.auth h1{font:700 clamp(43px,5.5vw,70px)/.98 Fraunces;margin:0;letter-spacing:-3px}.library h1 em{color:#aa7282;font-weight:600}.note-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}.note-card{min-height:230px;padding:21px;background:var(--paper);border:1px solid var(--line);border-radius:14px;text-decoration:none;display:flex;flex-direction:column;transition:.2s}.note-card:hover{transform:translateY(-4px);border-color:#c99ca7}.note-card p{margin:0;color:#a37482;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px}.note-card h2{font:700 27px/1.1 Fraunces;margin:11px 0}.note-card&gt;span{color:var(--muted);font:13px/1.55 Fraunces}.note-card small{margin-top:auto;padding-top:15px;color:#769486;font-size:10px;font-weight:700}.empty{grid-column:1/-1;text-align:center;border:1px dashed #cbbcc1;border-radius:14px;padding:58px}.empty span{font-size:32px;color:#b77d8d}.empty h2{font:700 28px Fraunces;margin:7px}.empty p,.sub,.muted{color:var(--muted)}.editor{max-width:820px;margin:auto;padding:30px 0 85px}.editor&gt;a,.note-detail&gt;a{font-size:13px;font-weight:700;color:var(--ink)}.editor form{margin-top:35px}.editor input{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;padding:0 0 14px;font:700 45px Fraunces;outline-color:#bd8392}.editor textarea{width:100%;height:330px;resize:vertical;border:0;background:transparent;padding:20px 0;font:20px/1.75 Fraunces;outline-color:#bd8392}.editor form&gt;div{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px}.editor small{color:var(--muted);font-size:11px}.note-detail{max-width:1050px;margin:auto;padding:30px 0 90px;display:grid;grid-template-columns:1.35fr .65fr;gap:75px}.note-detail article{margin-top:40px}.note-detail article h1{font-size:58px;max-width:11ch}.note-content{margin-top:29px;font:20px/1.8 Fraunces}.note-content p{margin:0 0 20px}.edit{display:inline-block;margin-top:20px;font-size:13px;font-weight:700}.note-detail aside{margin-top:100px;background:#ece9f0;padding:22px;border-radius:13px;height:max-content}.note-detail aside h2{font:700 25px/1.1 Fraunces;margin:0 0 20px}.note-detail aside a{display:flex;gap:9px;padding:12px 0;border-top:1px solid #d7d0df;text-decoration:none}.note-detail aside a&gt;span{color:#af7284}.note-detail aside strong,.note-detail aside small{display:block;font-size:12px}.note-detail aside small{color:var(--muted);margin-top:2px}.results h1{font-size:49px}.auth{max-width:920px;margin:55px auto;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}.auth&gt;div{background:var(--rose);padding:45px;min-height:480px;display:flex;flex-direction:column;justify-content:end}.auth&gt;div span{font-size:40px}.auth&gt;div p{font:700 31px/1 Fraunces;text-transform:uppercase}.auth form{padding:48px}.auth form&gt;p:not(.eyebrow){color:var(--muted)}.auth form p label{display:block;font-size:12px;font-weight:700;margin:16px 0 5px}.auth input{width:100%;padding:11px;border:1px solid var(--line);border-radius:7px}.auth .button{margin-top:10px}@media(max-width:800px){header,.library,.editor,.note-detail{margin-left:20px;margin-right:20px}.library{padding-top:43px}.note-grid{grid-template-columns:1fr 1fr}.note-detail{grid-template-columns:1fr;gap:0}.note-detail aside{margin-top:38px}.auth{margin:35px 20px;grid-template-columns:1fr}.auth&gt;div{min-height:180px}.auth form{padding:30px}}@media(max-width:500px){nav&gt;a{display:none}.search input{width:120px}.library-head{align-items:start;flex-direction:column}.note-grid{grid-template-columns:1fr}.editor input{font-size:37px}.editor form&gt;div{align-items:start;gap:12px;flex-direction:column}.auth&gt;div{display:none}}</code></pre></div>        <div class="terminal-check"><strong>Final check:</strong> run both services, create several notes, then search and open a note. The library should remain useful when Rust is offline (saving still works), and show semantic matches whenever the AI service is available.</div>
+      </section>
+
+      <section class="step verify" id="tree">
+        <div class="step-head"><span class="step-badge">REFERENCE</span></div>
+        <h2>Final project tree</h2>
+        <div class="tree-block">mindnotes/
+├── django_app/
+│   ├── manage.py
+│   ├── notes_project/
+│   │   ├── settings.py         <span class="tag">(Steps 3, 10, 11)</span>
+│   │   └── urls.py                <span class="tag">(Step 10)</span>
+│   ├── notes/
+│   │   ├── models.py                 <span class="tag">(Step 4)</span>
+│   │   ├── admin.py                    <span class="tag">(Step 6)</span>
+│   │   ├── views.py                      <span class="tag">(Steps 8, 14, 15)</span>
+│   │   ├── urls.py                          <span class="tag">(Step 9, updated for note_create/edit/search)</span>
+│   │   └── templates/notes/
+│   │       ├── login.html                     <span class="tag">(Step 13)</span>
+│   │       ├── note_list.html                    <span class="tag">(Step 13)</span>
+│   │       ├── note_form.html                       <span class="tag">(Step 13)</span>
+│   │       ├── note_detail.html                        <span class="tag">(Step 13)</span>
+│   │       └── search_results.html                        <span class="tag">(Step 13)</span>
+│   ├── templates/base.html          <span class="tag">(Step 12)</span>
+│   └── static/css/style.css           <span class="tag">(same pattern as every prior project)</span>
+└── ai_service/
+    ├── Cargo.toml                       <span class="tag">(Step 17)</span>
+    └── src/
+        ├── main.rs                         <span class="tag">(Step 20)</span>
+        ├── vectorizer.rs                      <span class="tag">(Step 18)</span>
+        └── similarity.rs                         <span class="tag">(Step 19)</span></div>
+        <div class="callout">
+          <span class="why">Loose end to close</span>
+          <p><code>notes/urls.py</code> from Step 9 needs <code>note_create</code>, <code>note_edit</code>, and <code>search</code> paths added once those views exist — add them following the exact same pattern as every earlier project's urls.py, <code>path('note/new/', views.note_create, name='note_create')</code> and so on, right after writing each corresponding view.</p>
+        </div>
+      </section>
+
+      <section class="pattern-section" id="pattern">
+        <div class="eyebrow">Closing thesis</div>
+        <h2>The pattern worth remembering</h2>
+        <p>The Rust side of this project earns its place for a genuinely different reason than SocialSnap's real-time service did. Both are legitimate reasons to reach for a second language — but they're not the same reason, and knowing which one applies is what tells you whether "add a Rust service" is solving a real problem, or just adding complexity for its own sake.</p>
+        <div class="pattern-halves">
+          <div class="pattern-half django-h">
+            <h3>SocialSnap needed Rust because Python can't</h3>
+            <p>Django can't efficiently keep thousands of WebSocket connections open and push to them concurrently without a much heavier setup (Channels + Redis). That's a concurrency limit, not a speed limit.</p>
+          </div>
+          <div class="pattern-half rust-h">
+            <h3>MindNotes needed Rust because Python is slow</h3>
+            <p>Python can do vector math and text hashing just fine, functionally. It would just be slower doing it in a plain loop at any real scale — a throughput problem, not a capability problem.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer>MindNotes walkthrough · 23 steps plus a final product pass · Part A (Django), Part B (Rust), then Part C wires them together.</footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/toml.min.js"></script>
+<script>
+hljs.highlightAll();
+
+document.querySelectorAll('.codeblock').forEach(block=>{
+  const btn = block.querySelector('.copybtn');
+  const code = block.querySelector('code');
+  if(!btn || !code) return;
+  btn.addEventListener('click', ()=>{
+    navigator.clipboard.writeText(code.innerText).then(()=>{
+      const orig = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(()=>{ btn.textContent = orig; }, 1400);
+    });
+  });
+});
+
+const progress = document.getElementById('progress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = h.scrollTop;
+  const max = h.scrollHeight - h.clientHeight;
+  progress.style.width = (max > 0 ? (scrolled/max)*100 : 0) + '%';
+}
+document.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+const sidebar = document.getElementById('sidebar');
+const navToggle = document.getElementById('navToggle');
+if(navToggle){
+  navToggle.addEventListener('click', ()=> sidebar.classList.toggle('open'));
+}
+document.querySelectorAll('.navitem').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    if(window.innerWidth <= 980) sidebar.classList.remove('open');
+  });
+});
+
+const navItems = Array.from(document.querySelectorAll('.navitem'));
+const sections = navItems.map(item=> document.querySelector(item.getAttribute('href'))).filter(Boolean);
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const idx = sections.indexOf(entry.target);
+    if(idx === -1) return;
+    if(entry.isIntersecting){
+      navItems.forEach(n=>n.classList.remove('active'));
+      navItems[idx].classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+sections.forEach(sec=> io.observe(sec));
+</script>
+</body>
+</html>

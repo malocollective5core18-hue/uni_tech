@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building EduManage — A Django School Management Build Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12130F;
+  --bg-alt:#151610;
+  --surface:#1B1C15;
+  --surface-2:#212317;
+  --border:#33352A;
+  --text:#EDECE3;
+  --text-dim:#A2A38F;
+  --text-faint:#67685A;
+
+  --model:#C9A24B;
+  --migrate:#B98A3E;
+  --admin:#6FA8DC;
+  --view:#8CB369;
+  --url:#B08BD9;
+  --template:#D97A61;
+  --meta:#847F6C;
+
+  --code-str:#D9B96C;
+  --code-com:#67685A;
+  --code-kw:#8CB369;
+
+  --radius:10px;
+  --maxw:1180px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(237,236,227,0.035) 1px, transparent 0);
+  background-size: 26px 26px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit;}
+h1,h2,h3,h4{font-family:'Space Grotesk',system-ui,sans-serif; font-weight:600; margin:0;}
+code, pre, .mono{font-family:'JetBrains Mono', monospace;}
+::selection{background:var(--model); color:#161708;}
+
+/* ---------- progress bar ---------- */
+#progress{
+  position:fixed; top:0; left:0; height:3px; width:0%;
+  background:linear-gradient(90deg, var(--model), var(--url));
+  z-index:100; transition:width .08s linear;
+}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative; z-index:1;
+  max-width:var(--maxw); margin:0 auto;
+  padding:5rem 2rem 3.5rem;
+  border-bottom:1px solid var(--border);
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-family:'JetBrains Mono',monospace; font-size:.78rem; letter-spacing:.08em;
+  color:var(--model); text-transform:uppercase;
+  padding:.35rem .7rem; border:1px solid var(--border); border-radius:100px;
+  background:rgba(201,162,75,0.07);
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--model); box-shadow:0 0 8px var(--model);}
+.hero h1{
+  font-size:clamp(2.2rem, 5vw, 3.4rem);
+  line-height:1.08; margin-top:1.1rem; letter-spacing:-0.01em;
+  max-width:17ch;
+}
+.hero h1 .accent{color:var(--model);}
+.hero p.lede{
+  color:var(--text-dim); font-size:1.08rem; max-width:58ch; margin-top:1.1rem;
+}
+.hero p.lede b{color:var(--text); font-weight:600;}
+.scope{
+  margin-top:2.2rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
+}
+.scope div{background:var(--surface); padding:1.1rem 1.3rem;}
+.scope .k{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em;}
+.scope .v{margin-top:.35rem; font-size:.92rem; color:var(--text);}
+
+/* ---------- layout ---------- */
+.layout{
+  position:relative; z-index:1;
+  max-width:var(--maxw); margin:0 auto;
+  display:grid; grid-template-columns:250px 1fr; gap:3rem;
+  padding:3rem 2rem 6rem;
+  align-items:start;
+}
+
+/* ---------- sidebar / loop tracker ---------- */
+.sidebar{position:sticky; top:1.5rem; align-self:start;}
+.tracker{
+  border:1px solid var(--border); border-radius:var(--radius); background:var(--surface);
+  padding:1.2rem;
+}
+.tracker h4{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-weight:500;}
+.tracker .sub{font-size:.78rem; color:var(--text-dim); margin-top:.4rem; line-height:1.45;}
+.loop{margin-top:1.1rem; display:flex; flex-direction:column; gap:0;}
+.loop-node{
+  display:flex; align-items:center; gap:.6rem;
+  padding:.4rem 0; position:relative;
+  font-size:.82rem; color:var(--text-faint); font-weight:500;
+  transition:color .25s ease;
+}
+.loop-node::before{
+  content:""; width:9px; height:9px; border-radius:50%;
+  background:var(--border); flex-shrink:0; transition:all .25s ease;
+}
+.loop-node:not(:last-child)::after{
+  content:""; position:absolute; left:4px; top:20px; width:1px; height:14px; background:var(--border);
+}
+.loop-node.active{color:var(--text); }
+.loop-node.active::before{background:var(--c); box-shadow:0 0 10px var(--c);}
+
+.stepnav{margin-top:1.2rem; max-height:46vh; overflow-y:auto; padding-right:.3rem;}
+.stepnav a{
+  display:flex; align-items:center; gap:.55rem;
+  font-size:.8rem; color:var(--text-faint); text-decoration:none;
+  padding:.4rem .5rem; border-radius:6px; transition:all .15s ease;
+  border-left:2px solid transparent;
+}
+.stepnav a .n{font-family:'JetBrains Mono',monospace; font-size:.72rem; opacity:.7; width:1.6em; flex-shrink:0;}
+.stepnav a:hover{color:var(--text); background:var(--surface-2);}
+.stepnav a.active{color:var(--text); border-left-color:var(--c); background:var(--surface-2);}
+.stepnav::-webkit-scrollbar{width:5px;}
+.stepnav::-webkit-scrollbar-thumb{background:var(--border); border-radius:10px;}
+
+/* ---------- main / steps ---------- */
+main{min-width:0;}
+.step{
+  scroll-margin-top:1.5rem;
+  border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--surface);
+  margin-bottom:1.4rem; overflow:hidden;
+  border-left:3px solid var(--c, var(--border));
+}
+.step-head{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  padding:1.3rem 1.5rem; border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+}
+.step-head-left{display:flex; align-items:baseline; gap:.9rem;}
+.step-num{font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--text-faint);}
+.step-head h2{font-size:1.13rem; letter-spacing:-0.005em;}
+.tag{
+  font-family:'JetBrains Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.07em;
+  padding:.28rem .6rem; border-radius:100px; color:var(--c); background:color-mix(in srgb, var(--c) 14%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 35%, transparent);
+  white-space:nowrap;
+}
+.step-body{padding:1.4rem 1.5rem 1.6rem;}
+.step-body p{margin:0 0 1rem; color:var(--text-dim); font-size:.95rem;}
+.step-body p:last-child{margin-bottom:0;}
+.step-body strong{color:var(--text); font-weight:600;}
+
+.filebar{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--text-faint);
+  margin:1.1rem 0 .4rem;
+}
+.filebar .path{color:var(--text-dim);}
+.filebar .badge{
+  font-size:.65rem; padding:.15rem .5rem; border-radius:5px; text-transform:uppercase; letter-spacing:.05em;
+  border:1px solid var(--border); color:var(--text-faint);
+}
+
+pre.code{
+  margin:.4rem 0 1.1rem; padding:1rem 1.1rem; border-radius:8px;
+  background:#0E0F0A; border:1px solid var(--border);
+  overflow-x:auto; font-size:.83rem; line-height:1.65;
+  position:relative;
+}
+pre.code::-webkit-scrollbar{height:6px;}
+pre.code::-webkit-scrollbar-thumb{background:var(--border); border-radius:10px;}
+pre.code code{white-space:pre; color:#CFCCB9;}
+.comment-line{color:var(--code-com); font-style:italic;}
+
+.why{
+  margin:1.1rem 0 0; padding:.95rem 1.1rem; border-radius:8px;
+  background:rgba(201,162,75,0.05); border:1px solid rgba(201,162,75,0.24);
+  font-size:.88rem; color:var(--text-dim);
+}
+.why b{color:var(--model); font-family:'JetBrains Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:.4rem;}
+
+.security{
+  margin:1.1rem 0 0; padding:.95rem 1.1rem; border-radius:8px;
+  background:rgba(217,122,97,0.06); border:1px solid rgba(217,122,97,0.3);
+  font-size:.88rem; color:var(--text-dim);
+}
+.security b{color:var(--template); font-family:'JetBrains Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:.4rem;}
+
+.tree{
+  font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.75; color:var(--text-dim);
+  background:#0E0F0A; border:1px solid var(--border); border-radius:8px; padding:1.1rem 1.3rem;
+  overflow-x:auto; white-space:pre;
+}
+.tree .hi{color:var(--model);}
+.tree .cm{color:var(--text-faint);}
+
+.checklist{list-style:none; margin:1rem 0 0; padding:0; display:flex; flex-direction:column; gap:.5rem;}
+.checklist li{display:flex; gap:.6rem; font-size:.9rem; color:var(--text-dim); align-items:flex-start;}
+.checklist li::before{content:"→"; color:var(--c, var(--model)); flex-shrink:0; font-family:'JetBrains Mono',monospace;}
+
+.persona{
+  margin-top:1rem; border:1px solid var(--border); border-radius:8px; overflow:hidden;
+}
+.persona-head{
+  font-family:'JetBrains Mono',monospace; font-size:.74rem; text-transform:uppercase; letter-spacing:.06em;
+  padding:.6rem 1rem; background:var(--surface-2); color:var(--text-dim); border-bottom:1px solid var(--border);
+}
+.persona ol{margin:0; padding:.9rem 1rem .9rem 2.1rem; font-size:.88rem; color:var(--text-dim); display:flex; flex-direction:column; gap:.4rem;}
+
+/* ---------- pattern / footer ---------- */
+.pattern{
+  margin-top:2.5rem; border-radius:14px; border:1px solid rgba(201,162,75,0.32);
+  background:linear-gradient(160deg, rgba(201,162,75,0.09), rgba(201,162,75,0.02));
+  padding:2.4rem;
+}
+.pattern .eyebrow{margin-bottom:1rem;}
+.pattern h3{font-size:1.5rem; margin-bottom:.9rem;}
+.pattern p{color:var(--text-dim); font-size:.98rem; max-width:70ch;}
+.loopstrip{
+  display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:1.4rem 0 1.6rem;
+  font-family:'JetBrains Mono',monospace; font-size:.85rem;
+}
+.loopstrip span.node{
+  padding:.5rem .9rem; border-radius:100px; border:1px solid var(--c);
+  color:var(--c); background:color-mix(in srgb, var(--c) 12%, transparent);
+}
+.loopstrip span.arrow{color:var(--text-faint);}
+
+footer{
+  max-width:var(--maxw); margin:0 auto; padding:2.5rem 2rem 4rem;
+  color:var(--text-faint); font-size:.85rem; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+}
+footer .mono{font-family:'JetBrains Mono',monospace;}
+
+/* ---------- mobile ---------- */
+.sidebar-toggle{display:none;}
+@media (max-width: 920px){
+  .layout{grid-template-columns:1fr; padding:2rem 1.2rem 4rem;}
+  .hero{padding:3.5rem 1.2rem 2.5rem;}
+  .sidebar{position:static; margin-bottom:0;}
+  .tracker{display:none;}
+  .sidebar-toggle{
+    display:flex; width:100%; justify-content:space-between; align-items:center;
+    padding:.9rem 1.1rem; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--surface); font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--text);
+    margin-bottom:.8rem; cursor:pointer;
+  }
+  .stepnav{display:none; max-height:none; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); padding:.6rem; margin-top:0;}
+  .stepnav.open{display:block;}
+  #progress{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{transition:none !important;}
+}
+/* final responsive pass */
+img,svg,video,canvas{max-width:100%;height:auto;}
+pre.code,.tree{max-width:100%;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){
+  body{font-size:15px;}
+  .hero{padding:2.5rem 1rem 2rem;}
+  .hero h1{font-size:clamp(1.9rem,8vw,2.6rem);overflow-wrap:anywhere;}
+  .hero p.lede{font-size:.98rem;}
+  .scope{grid-template-columns:1fr;margin-top:1.5rem;}
+  .scope div{padding:.9rem 1rem;}
+  .layout{padding:1rem .75rem 3.5rem;gap:0;}
+  .sidebar-toggle{min-height:44px;padding:.8rem .9rem;}
+  .stepnav a{min-height:42px;align-items:center;}
+  .step-head{padding:1rem;align-items:flex-start;}
+  .step-head-left{gap:.55rem;align-items:flex-start;flex-wrap:wrap;}
+  .step-head h2{font-size:1rem;line-height:1.3;overflow-wrap:anywhere;}
+  .step-body{padding:1rem 1rem 1.15rem;}
+  .step-body p{font-size:.9rem;}
+  .filebar{gap:.5rem;align-items:flex-start;flex-wrap:wrap;}
+  pre.code{padding:.8rem;font-size:.74rem;}
+  .why,.security{padding:.8rem .9rem;font-size:.83rem;}
+  .pattern{padding:1.2rem;margin-top:1.5rem;}
+  .pattern h3{font-size:1.25rem;}
+  .loopstrip{font-size:.75rem;}
+  .loopstrip span.node{padding:.42rem .65rem;}
+  footer{padding:2rem 1rem 3rem;font-size:.76rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <span class="eyebrow"><span class="dot"></span>Build log · Django</span>
+  <h1>Building <span class="accent">EduManage</span> — a school system with two kinds of users</h1>
+  <p class="lede">
+    Same format as the QuickCart e-commerce build: no theory dump, just the actual build order —
+    the exact file opened or created at each step, what goes inside it, and why it couldn't have
+    come earlier or later. This one adds a wrinkle QuickCart didn't have: <b>two different logged-in
+    roles</b> — students and teachers — sharing one login flow but seeing different dashboards.
+  </p>
+  <div class="scope">
+    <div><div class="k">Catalog</div><div class="v">Courses, each with a teacher</div></div>
+    <div><div class="k">Accounts</div><div class="v">Student self-registration and login</div></div>
+    <div><div class="k">Enrollment</div><div class="v">Students enroll/drop themselves</div></div>
+    <div><div class="k">Attendance</div><div class="v">Teachers mark it for their own course only</div></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-toggle" id="navToggle">
+      <span>Jump to step</span>
+      <span>▾</span>
+    </div>
+    <div class="tracker">
+      <h4>The repeating loop</h4>
+      <div class="sub">Same six-stage order as every Django feature: model comes first, template comes last. Highlights as you scroll.</div>
+      <div class="loop" id="loopTracker">
+        <div class="loop-node" data-stage="model" style="--c:var(--model)">Model</div>
+        <div class="loop-node" data-stage="migrate" style="--c:var(--migrate)">Migrate</div>
+        <div class="loop-node" data-stage="admin" style="--c:var(--admin)">Admin · seed data</div>
+        <div class="loop-node" data-stage="view" style="--c:var(--view)">View</div>
+        <div class="loop-node" data-stage="url" style="--c:var(--url)">URL</div>
+        <div class="loop-node" data-stage="template" style="--c:var(--template)">Template</div>
+      </div>
+    </div>
+    <nav class="stepnav" id="stepnav">
+      <!-- filled by JS -->
+    </nav>
+  </aside>
+
+  <main id="steps">
+
+    <section class="step" id="step-0" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 0</span><h2>Terminal — set up the workspace</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">terminal</span><span class="badge">bash</span></div>
+        <pre class="code" data-lang="bash"><code>mkdir edumanage &amp;&amp; cd edumanage
+python -m venv venv
+source venv/bin/activate          # venv\Scripts\Activate.ps1 on Windows
+pip install django</code></pre>
+        <p>Nothing to build yet — this just gives us an isolated place to install Django without touching any other project on the machine.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-1" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 1</span><h2>Terminal — create the project</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>django-admin startproject edu_project .</code></pre>
+        <div class="filebar"><span class="path">what now exists</span><span class="badge">tree</span></div>
+        <div class="tree">edumanage/
+    manage.py
+    edu_project/
+        settings.py
+        urls.py</div>
+        <p style="margin-top:1rem">Quick sanity check:</p>
+        <pre class="code" data-lang="bash"><code>python manage.py runserver</code></pre>
+        <p>Confirm the default Django page loads, then stop the server — we haven't written any of our own code yet.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-2" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 2</span><h2>Terminal — create the <code>academics</code> app</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py startapp academics</code></pre>
+        <div class="why"><b>Why this name and not "school"</b>"academics" specifically signals "this app owns teachers, students, and courses" — we'll add a second app (<code>enrollment</code>) later for the relationship between students and courses, so a more specific name avoids the whole system collapsing into one giant app.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-3" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 3</span><h2>Open <code>edu_project/settings.py</code></h2></div>
+        <span class="tag">config</span>
+      </div>
+      <div class="step-body">
+        <p><strong>Find <code>INSTALLED_APPS</code> and add one line:</strong></p>
+        <pre class="code" data-lang="python"><code>INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'academics',                    # ← added
+]</code></pre>
+        <p>Same reason as always: an app not listed here is invisible to migrations, admin, and template lookup.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-4" data-stage="model" style="--c:var(--model)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 4</span><h2>Open <code>academics/models.py</code></h2></div>
+        <span class="tag">model</span>
+      </div>
+      <div class="step-body">
+        <p>This is the first real code — the shape of Teacher/Student/Course has to exist before views, admin, or enrollment logic can reference any of it.</p>
+        <div class="filebar"><span class="path">academics/models.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.db import models
+from django.contrib.auth.models import User
+
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
+
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    admission_number = models.CharField(max_length=20, unique=True)
+    grade_level = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
+
+class Course(models.Model):
+    title = models.CharField(max_length=150)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    teacher = models.ForeignKey(Teacher, related_name='courses', on_delete=models.SET_NULL, null=True)
+    capacity = models.PositiveIntegerField(default=30)
+
+    def __str__(self):
+        return self.title
+
+    def seats_taken(self):
+        return self.enrollments.count()</code></pre>
+        <div class="why"><b>Why OneToOneField(User, ...) on both Teacher and Student</b>Rather than reinventing login/password/email, we attach a small "profile" of extra fields to Django's already-battle-tested <code>User</code> model — the same pattern applied twice here for two different roles.</div>
+        <div class="why" style="margin-top:.7rem"><b>Why on_delete=SET_NULL on Course.teacher, not CASCADE</b>Deleting a teacher's account shouldn't delete every course they ever taught — the course should survive with an unset teacher, ready to be reassigned. (Requires <code>null=True</code>, added above.)</div>
+        <div class="why" style="margin-top:.7rem"><b>Why seats_taken() calls self.enrollments.count() before Enrollment even exists</b>Writing the method against the <code>related_name</code> already planned for Step 15's <code>Enrollment</code> model — same "write against the interface I know I need" habit as the cart project. It simply won't work until that model exists; that's fine, we're not calling it yet.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-5" data-stage="migrate" style="--c:var(--migrate)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 5</span><h2>Terminal — turn the models into database tables</h2></div>
+        <span class="tag">migrate</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py makemigrations academics
+python manage.py migrate</code></pre>
+        <p>Nothing works past this point without real tables — <code>models.py</code> only describes the shape in Python until these two commands run.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-6" data-stage="admin" style="--c:var(--admin)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 6</span><h2>Open <code>academics/admin.py</code></h2></div>
+        <span class="tag">admin</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">academics/admin.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib import admin
+from .models import Teacher, Student, Course
+
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    list_display = ('user', 'department')
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'admission_number', 'grade_level')
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'teacher', 'capacity')
+    prepopulated_fields = {'slug': ('title',)}</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-7" data-stage="admin" style="--c:var(--admin)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 7</span><h2>Terminal — create an admin login and seed real data</h2></div>
+        <span class="tag">admin · seed</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py createsuperuser
+python manage.py runserver</code></pre>
+        <p>Visit <code>127.0.0.1:8000/admin/</code> and manually create:</p>
+        <ul class="checklist">
+          <li>1 <code>User</code> (staff) + a linked <code>Teacher</code> row — e.g. "Ms. Alvarez", department "Mathematics"</li>
+          <li>2–3 <code>Course</code> rows assigned to that teacher</li>
+        </ul>
+        <div class="why" style="margin-top:1.1rem"><b>Why seed data now, before writing any views</b>Without real rows, every view built next would render an empty page, and you couldn't tell "the view is broken" apart from "there's simply no data yet." Seeding first makes every following step visually checkable.</div>
+        <p style="margin-top:1rem">We're intentionally <em>not</em> creating Student rows through the admin yet — Step 13 builds a self-registration form, and testing that flow is more realistic if a student creates their own account through the actual site rather than the admin panel.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-8" data-stage="view" style="--c:var(--view)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 8</span><h2>Open <code>academics/views.py</code></h2></div>
+        <span class="tag">view</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">academics/views.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.shortcuts import render, get_object_or_404
+from .models import Course
+
+def course_list(request):
+    courses = Course.objects.all()
+    return render(request, 'academics/course_list.html', {'courses': courses})
+
+def course_detail(request, slug):
+    course = get_object_or_404(Course, slug=slug)
+    return render(request, 'academics/course_detail.html', {'course': course})</code></pre>
+        <p><code>get_object_or_404</code> again, for the same reason as the e-commerce project: a stale or mistyped course URL should show a clean 404, not an unhandled crash.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-9" data-stage="url" style="--c:var(--url)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 9</span><h2>Create <code>academics/urls.py</code></h2></div>
+        <span class="tag">url · new file</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">academics/urls.py</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+
+app_name = 'academics'
+
+urlpatterns = [
+    path('', views.course_list, name='course_list'),
+    path('course/&lt;slug:slug&gt;/', views.course_detail, name='course_detail'),
+]</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-10" data-stage="url" style="--c:var(--url)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 10</span><h2>Open <code>edu_project/urls.py</code></h2></div>
+        <span class="tag">url</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">edu_project/urls.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('academics.urls', namespace='academics')),
+    path('accounts/', include('enrollment.urls', namespace='enrollment')),   # built in Step 13+
+]</code></pre>
+        <p>Same note as the e-commerce walkthrough: the <code>enrollment</code> line is written now so it isn't forgotten, but it won't resolve until that app actually exists a few steps from now.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-11" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 11</span><h2>Open <code>edu_project/settings.py</code> again</h2></div>
+        <span class="tag">config</span>
+      </div>
+      <div class="step-body">
+        <p><strong>Update <code>TEMPLATES</code> → <code>DIRS</code>:</strong></p>
+        <pre class="code" data-lang="python"><code>TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],     # ← added
+        'APP_DIRS': True,
+        ...
+    },
+]</code></pre>
+        <p><strong>Add near the bottom of the file:</strong></p>
+        <pre class="code" data-lang="python"><code>STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+LOGIN_URL = 'enrollment:login'
+LOGIN_REDIRECT_URL = 'enrollment:my_dashboard'</code></pre>
+        <div class="why"><b>Why these two lines exist before the enrollment app does</b><code>LOGIN_URL</code>/<code>LOGIN_REDIRECT_URL</code> are added here — even before the <code>enrollment</code> app exists — because Step 15's <code>@login_required</code> decorators need them set, and it's simpler to configure both auth-related settings in the same visit to this file rather than a third trip back to it later.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-12" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 12</span><h2>Create <code>templates/base.html</code></h2></div>
+        <span class="tag">template · new file</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir templates</code></pre>
+        <div class="filebar"><span class="path">templates/base.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;{% block title %}EduManage{% endblock %}&lt;/title&gt;
+    {% load static %}
+    &lt;link rel="stylesheet" href="{% static 'css/style.css' %}"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;a href="{% url 'academics:course_list' %}"&gt;Courses&lt;/a&gt;
+        {% if user.is_authenticated %}
+            &lt;a href="{% url 'enrollment:my_dashboard' %}"&gt;My Dashboard&lt;/a&gt;
+            &lt;form action="{% url 'enrollment:logout' %}" method="post" style="display:inline"&gt;
+                {% csrf_token %}
+                &lt;button type="submit"&gt;Log out&lt;/button&gt;
+            &lt;/form&gt;
+        {% else %}
+            &lt;a href="{% url 'enrollment:login' %}"&gt;Log in&lt;/a&gt;
+            &lt;a href="{% url 'enrollment:register' %}"&gt;Register&lt;/a&gt;
+        {% endif %}
+    &lt;/header&gt;
+    &lt;main&gt;
+        {% block content %}{% endblock %}
+    &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        <p>Project-level (<code>templates/</code>, not <code>academics/templates/academics/</code>) because the header/login state is shared across every app — same reasoning as the e-commerce <code>base.html</code>.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-13" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 13</span><h2>Create the <code>academics</code> catalog templates</h2></div>
+        <span class="tag">template · new files</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir -p academics/templates/academics</code></pre>
+        <div class="filebar"><span class="path">academics/templates/academics/course_list.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+    &lt;h1&gt;Course Catalog&lt;/h1&gt;
+    &lt;div class="grid"&gt;
+        {% for course in courses %}
+            &lt;div class="card"&gt;
+                &lt;h3&gt;&lt;a href="{% url 'academics:course_detail' course.slug %}"&gt;{{ course.title }}&lt;/a&gt;&lt;/h3&gt;
+                &lt;p&gt;Taught by {{ course.teacher }}&lt;/p&gt;
+                &lt;p&gt;{{ course.seats_taken }} / {{ course.capacity }} seats filled&lt;/p&gt;
+            &lt;/div&gt;
+        {% empty %}
+            &lt;p&gt;No courses yet.&lt;/p&gt;
+        {% endfor %}
+    &lt;/div&gt;
+{% endblock %}</code></pre>
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">academics/templates/academics/course_detail.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}{{ course.title }}{% endblock %}
+{% block content %}
+    &lt;h1&gt;{{ course.title }}&lt;/h1&gt;
+    &lt;p&gt;Teacher: {{ course.teacher }}&lt;/p&gt;
+    &lt;p&gt;{{ course.description }}&lt;/p&gt;
+    &lt;p&gt;{{ course.seats_taken }} / {{ course.capacity }} seats filled&lt;/p&gt;
+
+    {% if user.is_authenticated %}
+        &lt;form action="{% url 'enrollment:enroll' course.id %}" method="post"&gt;
+            {% csrf_token %}
+            &lt;button type="submit"&gt;Enroll&lt;/button&gt;
+        &lt;/form&gt;
+    {% else %}
+        &lt;p&gt;&lt;a href="{% url 'enrollment:login' %}"&gt;Log in&lt;/a&gt; to enroll.&lt;/p&gt;
+    {% endif %}
+{% endblock %}</code></pre>
+        <p>That "Enroll" form already points at <code>enrollment:enroll</code> — same habit as the e-commerce project's "Add to Cart" button: write the link against the piece you know comes next, then go build it immediately.</p>
+        <p style="margin-top:1rem"><strong>Terminal check:</strong></p>
+        <pre class="code" data-lang="bash"><code>python manage.py runserver</code></pre>
+        <p>Visit <code>127.0.0.1:8000/</code> — the course catalog and detail pages should render correctly. "Enroll" will 404 until the next step — expected at this point.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-14" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 14</span><h2>Terminal — build the <code>enrollment</code> app</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py startapp enrollment</code></pre>
+        <p>Add it to <code>INSTALLED_APPS</code> in <code>edu_project/settings.py</code> (same pattern as Step 3):</p>
+        <pre class="code" data-lang="python"><code>INSTALLED_APPS = [
+    ...
+    'academics',
+    'enrollment',      # ← added
+]</code></pre>
+        <div class="why"><b>Why a separate app instead of adding this to academics</b>Enrollment is a <em>relationship</em> between students and courses, plus the auth flow (register/login/logout) that makes "a student" a meaningful concept on the site — bundling that into <code>academics</code> would blur "the data" (courses/teachers) with "who's allowed to touch it" (accounts, sessions).</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-15" data-stage="model" style="--c:var(--model)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 15</span><h2>Open <code>enrollment/models.py</code></h2></div>
+        <span class="tag">model · migrate</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">enrollment/models.py</span><span class="badge">new</span></div>
+        <pre class="code" data-lang="python"><code>from django.db import models
+from academics.models import Student, Course
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(Student, related_name='enrollments', on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name='enrollments', on_delete=models.CASCADE)
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    attended = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('student', 'course')
+
+    def __str__(self):
+        return f"{self.student} in {self.course}"</code></pre>
+        <p><code>related_name='enrollments'</code> here is exactly the name <code>Course.seats_taken()</code> (Step 4) was already written against — this is the moment that method starts actually working.</p>
+        <p><code>unique_together = ('student', 'course')</code> prevents a student from enrolling in the same course twice — a database-level constraint, not just something we hope the view remembers to check.</p>
+        <div class="filebar" style="margin-top:1.1rem"><span class="path">terminal</span><span class="badge">bash</span></div>
+        <pre class="code" data-lang="bash"><code>python manage.py makemigrations enrollment
+python manage.py migrate</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-16" data-stage="view" style="--c:var(--view)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 16</span><h2>Open <code>enrollment/views.py</code></h2></div>
+        <span class="tag">view</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">enrollment/views.py</span><span class="badge">new</span></div>
+        <pre class="code" data-lang="python"><code>from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.views.decorators.http import require_POST
+from academics.models import Student, Course
+from .models import Enrollment
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            Student.objects.create(
+                user=user,
+                admission_number=f"STU{user.id:05d}",
+                grade_level='Unassigned',
+            )
+            login(request, user)
+            return redirect('enrollment:my_dashboard')
+    else:
+        form = UserCreationForm()
+    return render(request, 'enrollment/register.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('enrollment:my_dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'enrollment/login.html', {'form': form})
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect('academics:course_list')
+
+@login_required
+def enroll(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    student = get_object_or_404(Student, user=request.user)
+    Enrollment.objects.get_or_create(student=student, course=course)
+    return redirect('academics:course_detail', slug=course.slug)
+
+@login_required
+def drop(request, course_id):
+    student = get_object_or_404(Student, user=request.user)
+    Enrollment.objects.filter(student=student, course_id=course_id).delete()
+    return redirect('enrollment:my_dashboard')
+
+@login_required
+def my_dashboard(request):
+    student = Student.objects.filter(user=request.user).first()
+    if student:
+        enrollments = Enrollment.objects.filter(student=student)
+        return render(request, 'enrollment/student_dashboard.html', {'enrollments': enrollments})
+    # Not a student — check if they're a teacher instead
+    from academics.models import Teacher
+    teacher = get_object_or_404(Teacher, user=request.user)
+    courses = Course.objects.filter(teacher=teacher)
+    return render(request, 'enrollment/teacher_dashboard.html', {'courses': courses})</code></pre>
+        <div class="why"><b>Why get_or_create in enroll, not plain create</b>Matches the <code>unique_together</code> constraint from Step 15 — trying to <code>create()</code> a duplicate enrollment would raise <code>IntegrityError</code>; <code>get_or_create</code> handles "already enrolled" gracefully instead of crashing.</div>
+        <div class="why" style="margin-top:.7rem"><b>Why my_dashboard branches on Student-vs-Teacher</b>This app's registration flow only creates Students — but the earlier admin-seeded Ms. Alvarez (Step 7) is a Teacher, not a Student. One dashboard URL routing to two different templates keeps the URL structure simple (<code>LOGIN_REDIRECT_URL</code> from Step 11 only needs to point at one place) while still serving each role correctly.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-17" data-stage="url" style="--c:var(--url)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 17</span><h2>Create <code>enrollment/urls.py</code></h2></div>
+        <span class="tag">url · new file</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">enrollment/urls.py</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+
+app_name = 'enrollment'
+
+urlpatterns = [
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('enroll/&lt;int:course_id&gt;/', views.enroll, name='enroll'),
+    path('drop/&lt;int:course_id&gt;/', views.drop, name='drop'),
+    path('dashboard/', views.my_dashboard, name='my_dashboard'),
+]</code></pre>
+        <p>Go back and confirm the <code>enrollment</code> include line from Step 10 is active in <code>edu_project/urls.py</code> — it will finally resolve correctly now.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-18" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 18</span><h2>Create the <code>enrollment</code> templates</h2></div>
+        <span class="tag">template · new files</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir -p enrollment/templates/enrollment</code></pre>
+        <p><strong>register.html</strong> and <strong>login.html</strong> (nearly identical — same shape as the core Django manual's auth templates):</p>
+        <div class="filebar"><span class="path">enrollment/templates/enrollment/register.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+    &lt;h1&gt;Create a Student Account&lt;/h1&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        {{ form.as_p }}
+        &lt;button type="submit"&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+        <div class="filebar" style="margin-top:1.1rem"><span class="path">enrollment/templates/enrollment/login.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+    &lt;h1&gt;Log In&lt;/h1&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        {{ form.as_p }}
+        &lt;button type="submit"&gt;Log In&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">enrollment/templates/enrollment/student_dashboard.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}My Courses{% endblock %}
+{% block content %}
+    &lt;h1&gt;My Courses&lt;/h1&gt;
+    &lt;ul&gt;
+        {% for e in enrollments %}
+            &lt;li&gt;
+                {{ e.course.title }} — {% if e.attended %}Present today{% else %}Not marked yet{% endif %}
+                &lt;form action="{% url 'enrollment:drop' e.course.id %}" method="post" style="display:inline"&gt;
+                    {% csrf_token %}
+                    &lt;button type="submit"&gt;Drop&lt;/button&gt;
+                &lt;/form&gt;
+            &lt;/li&gt;
+        {% empty %}
+            &lt;li&gt;You're not enrolled in anything yet — browse the &lt;a href="{% url 'academics:course_list' %}"&gt;catalog&lt;/a&gt;.&lt;/li&gt;
+        {% endfor %}
+    &lt;/ul&gt;
+{% endblock %}</code></pre>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">enrollment/templates/enrollment/teacher_dashboard.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}My Classes{% endblock %}
+{% block content %}
+    &lt;h1&gt;My Classes&lt;/h1&gt;
+    {% for course in courses %}
+        &lt;h3&gt;{{ course.title }}&lt;/h3&gt;
+        &lt;ul&gt;
+            {% for e in course.enrollments.all %}
+                &lt;li&gt;
+                    {{ e.student }} —
+                    &lt;form action="{% url 'enrollment:mark_attendance' e.id %}" method="post" style="display:inline"&gt;
+                        {% csrf_token %}
+                        &lt;button type="submit"&gt;{% if e.attended %}Present ✓{% else %}Mark Present{% endif %}&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/li&gt;
+            {% endfor %}
+        &lt;/ul&gt;
+    {% endfor %}
+{% endblock %}</code></pre>
+        <p>That last button links to <code>enrollment:mark_attendance</code> — not built yet. One more small piece to add.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-19" data-stage="view" style="--c:var(--view)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 19</span><h2>Add attendance marking</h2></div>
+        <span class="tag">view · url</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">enrollment/views.py</span><span class="badge">append</span></div>
+        <pre class="code" data-lang="python"><code>@require_POST
+@login_required
+def mark_attendance(request, enrollment_id):
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id, course__teacher__user=request.user)
+    enrollment.attended = True
+    enrollment.save()
+    return redirect('enrollment:my_dashboard')</code></pre>
+        <div class="security"><b>This lookup is doing real security work</b><code>course__teacher__user=request.user</code> guarantees a teacher can only mark attendance for <em>their own</em> course's enrollments — a teacher can't hit this URL with an arbitrary <code>enrollment_id</code> and mark a student in someone else's class.</div>
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">enrollment/urls.py</span><span class="badge">append to urlpatterns</span></div>
+        <pre class="code" data-lang="python"><code>    path('attendance/&lt;int:enrollment_id&gt;/', views.mark_attendance, name='mark_attendance'),</code></pre>
+        <p>This is the same "template references it → build it immediately after" loop that ran through the whole project: <code>course_detail.html</code> → <code>enrollment:enroll</code>, <code>student_dashboard.html</code> → <code>enrollment:drop</code>, <code>teacher_dashboard.html</code> → <code>enrollment:mark_attendance</code>.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-20" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 20</span><h2>Create <code>static/css/style.css</code></h2></div>
+        <span class="tag">style</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir -p static/css</code></pre>
+        <div class="filebar"><span class="path">static/css/style.css</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="css"><code>body { font-family: system-ui, sans-serif; margin: 0; }
+header { display: flex; gap: 1.5rem; align-items: center; padding: 1rem 2rem; background: #101828; }
+header a, header button { color: #fff; text-decoration: none; background: none; border: none; cursor: pointer; }
+main { padding: 2rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+.card { border: 1px solid #e2e2e2; border-radius: 8px; padding: 1rem; }</code></pre>
+        <p>Last file, as always — styling has nothing left to fix or break in the logic; it just makes the already-working flow presentable.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-20-visual" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 20.5</span><h2>Final product pass — build the polished EduManage experience</h2></div>
+        <span class="tag">full UI · functional polish</span>
+      </div>
+      <div class="step-body">
+        <p>The prior steps teach the minimum working feature set. This replacement pass upgrades that same project into the final responsive EduManage experience: a designed course catalogue, role-aware dashboards, a student account flow, course enrollment, and secure teacher attendance controls.</p>
+        <div class="why"><b>Use this as one coherent pass</b>Replace each file in full rather than mixing snippets. The visual system, template class names, and enrollment endpoints are designed to work together.</div>
+        <p style="margin-top:1.2rem"><strong>Final project files:</strong></p>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">edu_project/settings.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>&quot;&quot;&quot;
+Django settings for edu_project project.
+
+Generated by &#x27;django-admin startproject&#x27; using Django 6.1.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/6.1/topics/settings/
+
+For the full list of settings and their values, see
+https://docs.djangoproject.com/en/6.1/ref/settings/
+&quot;&quot;&quot;
+
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / &#x27;subdir&#x27;.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = &#x27;django-insecure-*l2l_pu9akb1^_=orr6lsivnlsnnj_0a7hcdh5pa5%xe3=hk3c&#x27;
+
+# SECURITY WARNING: don&#x27;t run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
+
+# Application definition
+
+INSTALLED_APPS = [
+    &#x27;django.contrib.admin&#x27;,
+    &#x27;django.contrib.auth&#x27;,
+    &#x27;django.contrib.contenttypes&#x27;,
+    &#x27;django.contrib.sessions&#x27;,
+    &#x27;django.contrib.messages&#x27;,
+    &#x27;django.contrib.staticfiles&#x27;,
+    &#x27;academics&#x27;,
+    &#x27;enrollment&#x27;,
+]
+
+MIDDLEWARE = [
+    &#x27;django.middleware.security.SecurityMiddleware&#x27;,
+    &#x27;django.contrib.sessions.middleware.SessionMiddleware&#x27;,
+    &#x27;django.middleware.common.CommonMiddleware&#x27;,
+    &#x27;django.middleware.csrf.CsrfViewMiddleware&#x27;,
+    &#x27;django.contrib.auth.middleware.AuthenticationMiddleware&#x27;,
+    &#x27;django.contrib.messages.middleware.MessageMiddleware&#x27;,
+    &#x27;django.middleware.clickjacking.XFrameOptionsMiddleware&#x27;,
+]
+
+ROOT_URLCONF = &#x27;edu_project.urls&#x27;
+
+TEMPLATES = [
+    {
+        &#x27;BACKEND&#x27;: &#x27;django.template.backends.django.DjangoTemplates&#x27;,
+        &#x27;DIRS&#x27;: [BASE_DIR / &#x27;templates&#x27;],
+        &#x27;APP_DIRS&#x27;: True,
+        &#x27;OPTIONS&#x27;: {
+            &#x27;context_processors&#x27;: [
+                &#x27;django.template.context_processors.request&#x27;,
+                &#x27;django.contrib.auth.context_processors.auth&#x27;,
+                &#x27;django.contrib.messages.context_processors.messages&#x27;,
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = &#x27;edu_project.wsgi.application&#x27;
+
+
+# Database
+# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+
+DATABASES = {
+    &#x27;default&#x27;: {
+        &#x27;ENGINE&#x27;: &#x27;django.db.backends.sqlite3&#x27;,
+        &#x27;NAME&#x27;: BASE_DIR / &#x27;db.sqlite3&#x27;,
+    }
+}
+
+
+# Password validation
+# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        &#x27;NAME&#x27;: &#x27;django.contrib.auth.password_validation.UserAttributeSimilarityValidator&#x27;,
+    },
+    {
+        &#x27;NAME&#x27;: &#x27;django.contrib.auth.password_validation.MinimumLengthValidator&#x27;,
+    },
+    {
+        &#x27;NAME&#x27;: &#x27;django.contrib.auth.password_validation.CommonPasswordValidator&#x27;,
+    },
+    {
+        &#x27;NAME&#x27;: &#x27;django.contrib.auth.password_validation.NumericPasswordValidator&#x27;,
+    },
+]
+
+
+# Internationalization
+# https://docs.djangoproject.com/en/6.1/topics/i18n/
+
+LANGUAGE_CODE = &#x27;en-us&#x27;
+
+TIME_ZONE = &#x27;UTC&#x27;
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/6.1/howto/static-files/
+
+STATIC_URL = &#x27;static/&#x27;
+STATICFILES_DIRS = [BASE_DIR / &#x27;static&#x27;]
+LOGIN_URL = &#x27;enrollment:login&#x27;
+LOGIN_REDIRECT_URL = &#x27;enrollment:dashboard&#x27;
+
+
+# Email
+# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+
+MAILERS = {
+    &#x27;default&#x27;: {
+        &#x27;BACKEND&#x27;: &#x27;django.core.mail.backends.console.EmailBackend&#x27;,
+    },
+}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">edu_project/urls.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>&quot;&quot;&quot;
+URL configuration for edu_project project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/6.1/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path(&#x27;&#x27;, views.home, name=&#x27;home&#x27;)
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path(&#x27;&#x27;, Home.as_view(), name=&#x27;home&#x27;)
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path(&#x27;blog/&#x27;, include(&#x27;blog.urls&#x27;))
+&quot;&quot;&quot;
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path(&#x27;admin/&#x27;, admin.site.urls),
+    path(&#x27;accounts/&#x27;, include(&#x27;enrollment.urls&#x27;, namespace=&#x27;enrollment&#x27;)),
+    path(&#x27;&#x27;, include(&#x27;academics.urls&#x27;, namespace=&#x27;academics&#x27;)),
+]
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">academics/models.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib.auth.models import User
+from django.db import models
+
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.CharField(max_length=100)
+    def __str__(self): return self.user.get_full_name() or self.user.username
+
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    admission_number = models.CharField(max_length=20, unique=True)
+    grade_level = models.CharField(max_length=20, default=&#x27;Year 1&#x27;)
+    def __str__(self): return self.user.get_full_name() or self.user.username
+
+class Course(models.Model):
+    title = models.CharField(max_length=150)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    teacher = models.ForeignKey(Teacher, related_name=&#x27;courses&#x27;, on_delete=models.SET_NULL, null=True)
+    capacity = models.PositiveIntegerField(default=30)
+    accent = models.CharField(max_length=7, default=&#x27;#b9d7b0&#x27;)
+    def __str__(self): return self.title
+    def seats_taken(self): return self.enrollments.count()
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">academics/views.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.shortcuts import get_object_or_404, render
+from .models import Course
+def course_list(request): return render(request, &#x27;academics/course_list.html&#x27;, {&#x27;courses&#x27;: Course.objects.select_related(&#x27;teacher&#x27;)})
+def course_detail(request, slug): return render(request, &#x27;academics/course_detail.html&#x27;, {&#x27;course&#x27;: get_object_or_404(Course.objects.select_related(&#x27;teacher&#x27;), slug=slug)})
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">academics/urls.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+app_name = &#x27;academics&#x27;
+urlpatterns = [path(&#x27;&#x27;, views.course_list, name=&#x27;course_list&#x27;), path(&#x27;course/&lt;slug:slug&gt;/&#x27;, views.course_detail, name=&#x27;course_detail&#x27;)]
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">academics/admin.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib import admin
+from .models import Course, Student, Teacher
+admin.site.register(Teacher)
+admin.site.register(Student)
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = (&#x27;title&#x27;, &#x27;teacher&#x27;, &#x27;capacity&#x27;)
+    prepopulated_fields = {&#x27;slug&#x27;: (&#x27;title&#x27;,)}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">enrollment/models.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.db import models
+from academics.models import Course, Student
+class Enrollment(models.Model):
+    student = models.ForeignKey(Student, related_name=&#x27;enrollments&#x27;, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name=&#x27;enrollments&#x27;, on_delete=models.CASCADE)
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    attended = models.BooleanField(default=False)
+    class Meta: unique_together = (&#x27;student&#x27;, &#x27;course&#x27;)
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">enrollment/views.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+from academics.models import Course, Student, Teacher
+from .models import Enrollment
+
+def register(request):
+    form = UserCreationForm(request.POST or None)
+    if request.method == &#x27;POST&#x27; and form.is_valid():
+        user = form.save(); Student.objects.create(user=user, admission_number=f&#x27;STU{user.id:05d}&#x27;)
+        login(request, user); return redirect(&#x27;enrollment:dashboard&#x27;)
+    return render(request, &#x27;enrollment/auth.html&#x27;, {&#x27;form&#x27;: form, &#x27;mode&#x27;: &#x27;Create your student account&#x27;})
+
+def login_view(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == &#x27;POST&#x27; and form.is_valid(): login(request, form.get_user()); return redirect(&#x27;enrollment:dashboard&#x27;)
+    return render(request, &#x27;enrollment/auth.html&#x27;, {&#x27;form&#x27;: form, &#x27;mode&#x27;: &#x27;Welcome back&#x27;})
+
+@require_POST
+def logout_view(request): logout(request); return redirect(&#x27;academics:course_list&#x27;)
+
+@login_required
+@require_POST
+def enroll(request, course_id):
+    student = get_object_or_404(Student, user=request.user); course = get_object_or_404(Course, id=course_id)
+    if course.seats_taken() &lt; course.capacity: Enrollment.objects.get_or_create(student=student, course=course)
+    return redirect(&#x27;enrollment:dashboard&#x27;)
+
+@login_required
+@require_POST
+def drop(request, course_id):
+    Enrollment.objects.filter(student__user=request.user, course_id=course_id).delete(); return redirect(&#x27;enrollment:dashboard&#x27;)
+
+@login_required
+def dashboard(request):
+    student = Student.objects.filter(user=request.user).first()
+    if student: return render(request, &#x27;enrollment/student_dashboard.html&#x27;, {&#x27;enrollments&#x27;: student.enrollments.select_related(&#x27;course&#x27;, &#x27;course__teacher&#x27;)})
+    teacher = get_object_or_404(Teacher, user=request.user)
+    return render(request, &#x27;enrollment/teacher_dashboard.html&#x27;, {&#x27;courses&#x27;: teacher.courses.prefetch_related(&#x27;enrollments__student__user&#x27;)})
+
+@login_required
+@require_POST
+def mark_attendance(request, enrollment_id):
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id, course__teacher__user=request.user)
+    enrollment.attended = not enrollment.attended; enrollment.save(); return redirect(&#x27;enrollment:dashboard&#x27;)
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">enrollment/urls.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+app_name = &#x27;enrollment&#x27;
+urlpatterns = [path(&#x27;register/&#x27;, views.register, name=&#x27;register&#x27;), path(&#x27;login/&#x27;, views.login_view, name=&#x27;login&#x27;), path(&#x27;logout/&#x27;, views.logout_view, name=&#x27;logout&#x27;), path(&#x27;dashboard/&#x27;, views.dashboard, name=&#x27;dashboard&#x27;), path(&#x27;enroll/&lt;int:course_id&gt;/&#x27;, views.enroll, name=&#x27;enroll&#x27;), path(&#x27;drop/&lt;int:course_id&gt;/&#x27;, views.drop, name=&#x27;drop&#x27;), path(&#x27;attendance/&lt;int:enrollment_id&gt;/&#x27;, views.mark_attendance, name=&#x27;mark_attendance&#x27;)]
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/base.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% load static %}&lt;!doctype html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;{% block title %}EduManage{% endblock %} · EduManage&lt;/title&gt;&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;&lt;link href=&quot;https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;{% static &#x27;css/style.css&#x27; %}&quot;&gt;&lt;/head&gt;&lt;body&gt;&lt;header&gt;&lt;a class=&quot;brand&quot; href=&quot;{% url &#x27;academics:course_list&#x27; %}&quot;&gt;&lt;b&gt;e&lt;/b&gt; edu&lt;span&gt;manage&lt;/span&gt;&lt;/a&gt;&lt;nav&gt;&lt;a href=&quot;{% url &#x27;academics:course_list&#x27; %}&quot;&gt;Explore&lt;/a&gt;{% if user.is_authenticated %}&lt;a href=&quot;{% url &#x27;enrollment:dashboard&#x27; %}&quot;&gt;My space&lt;/a&gt;&lt;form action=&quot;{% url &#x27;enrollment:logout&#x27; %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button&gt;Log out&lt;/button&gt;&lt;/form&gt;{% else %}&lt;a href=&quot;{% url &#x27;enrollment:login&#x27; %}&quot;&gt;Log in&lt;/a&gt;&lt;a class=&quot;nav-button&quot; href=&quot;{% url &#x27;enrollment:register&#x27; %}&quot;&gt;Join EduManage&lt;/a&gt;{% endif %}&lt;/nav&gt;&lt;/header&gt;&lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;&lt;footer&gt;&lt;span&gt;EduManage&lt;/span&gt;&lt;span&gt;Learning, made clear.&lt;/span&gt;&lt;/footer&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/academics/course_list.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &#x27;base.html&#x27; %}{% block title %}Explore courses{% endblock %}{% block content %}&lt;section class=&quot;hero&quot;&gt;&lt;div&gt;&lt;p class=&quot;eyebrow&quot;&gt;A calmer way to learn&lt;/p&gt;&lt;h1&gt;Find your next &lt;em&gt;great class.&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;Build a learning path that feels personal, supported, and full of momentum.&lt;/p&gt;&lt;a class=&quot;button&quot; href=&quot;#courses&quot;&gt;Browse courses →&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;hero-art&quot;&gt;&lt;span&gt;✦&lt;/span&gt;&lt;strong&gt;learn&lt;br&gt;with&lt;br&gt;purpose&lt;/strong&gt;&lt;i&gt;&lt;/i&gt;&lt;/div&gt;&lt;/section&gt;&lt;section id=&quot;courses&quot; class=&quot;catalog&quot;&gt;&lt;div class=&quot;section-title&quot;&gt;&lt;div&gt;&lt;p class=&quot;eyebrow&quot;&gt;Course catalog&lt;/p&gt;&lt;h2&gt;Explore the term&lt;/h2&gt;&lt;/div&gt;&lt;p&gt;{{ courses|length }} thoughtfully designed courses&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;course-grid&quot;&gt;{% for course in courses %}&lt;article class=&quot;course-card&quot;&gt;&lt;div class=&quot;course-color&quot; style=&quot;background:{{ course.accent }}&quot;&gt;&lt;span&gt;{{ course.title|slice:&#x27;:1&#x27; }}&lt;/span&gt;&lt;small&gt;{{ course.teacher.department }}&lt;/small&gt;&lt;/div&gt;&lt;div class=&quot;course-body&quot;&gt;&lt;p&gt;With {{ course.teacher }}&lt;/p&gt;&lt;h3&gt;&lt;a href=&quot;{% url &#x27;academics:course_detail&#x27; course.slug %}&quot;&gt;{{ course.title }}&lt;/a&gt;&lt;/h3&gt;&lt;div&gt;&lt;span&gt;{{ course.seats_taken }} / {{ course.capacity }} enrolled&lt;/span&gt;&lt;a href=&quot;{% url &#x27;academics:course_detail&#x27; course.slug %}&quot;&gt;View →&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/article&gt;{% empty %}&lt;div class=&quot;empty&quot;&gt;&lt;h2&gt;Courses will appear here soon.&lt;/h2&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;/section&gt;{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/academics/course_detail.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &#x27;base.html&#x27; %}{% block title %}{{ course.title }}{% endblock %}{% block content %}&lt;div class=&quot;crumb&quot;&gt;&lt;a href=&quot;{% url &#x27;academics:course_list&#x27; %}&quot;&gt;Courses&lt;/a&gt; / {{ course.title }}&lt;/div&gt;&lt;section class=&quot;course-detail&quot;&gt;&lt;div class=&quot;course-cover&quot; style=&quot;background:{{ course.accent }}&quot;&gt;&lt;span&gt;{{ course.title|slice:&#x27;:1&#x27; }}&lt;/span&gt;&lt;p&gt;{{ course.teacher.department }}&lt;/p&gt;&lt;/div&gt;&lt;div&gt;&lt;p class=&quot;eyebrow&quot;&gt;{{ course.teacher.department }}&lt;/p&gt;&lt;h1&gt;{{ course.title }}&lt;/h1&gt;&lt;p class=&quot;teacher&quot;&gt;Led by {{ course.teacher }}&lt;/p&gt;&lt;p class=&quot;description&quot;&gt;{{ course.description }}&lt;/p&gt;&lt;div class=&quot;stats&quot;&gt;&lt;span&gt;&lt;b&gt;{{ course.seats_taken }}&lt;/b&gt; enrolled&lt;/span&gt;&lt;span&gt;&lt;b&gt;{{ course.capacity }}&lt;/b&gt; seats available&lt;/span&gt;&lt;/div&gt;{% if user.is_authenticated %}&lt;form action=&quot;{% url &#x27;enrollment:enroll&#x27; course.id %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button class=&quot;button&quot; {% if course.seats_taken &gt;= course.capacity %}disabled{% endif %}&gt;{% if course.seats_taken &gt;= course.capacity %}Class full{% else %}Enroll in this course →{% endif %}&lt;/button&gt;&lt;/form&gt;{% else %}&lt;a class=&quot;button&quot; href=&quot;{% url &#x27;enrollment:login&#x27; %}&quot;&gt;Log in to enroll →&lt;/a&gt;{% endif %}&lt;/div&gt;&lt;/section&gt;{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/enrollment/auth.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &#x27;base.html&#x27; %}{% block title %}{{ mode }}{% endblock %}{% block content %}&lt;section class=&quot;auth&quot;&gt;&lt;div class=&quot;auth-art&quot;&gt;&lt;p&gt;education&lt;br&gt;with&lt;br&gt;intention&lt;/p&gt;&lt;/div&gt;&lt;form method=&quot;post&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Your learning space&lt;/p&gt;&lt;h1&gt;{{ mode }}&lt;/h1&gt;&lt;p&gt;{% if &#x27;Create&#x27; in mode %}Start building a course collection that is all your own.{% else %}Pick up exactly where your learning left off.{% endif %}&lt;/p&gt;{% csrf_token %}{{ form.as_p }}&lt;button class=&quot;button&quot; type=&quot;submit&quot;&gt;{% if &#x27;Create&#x27; in mode %}Create account{% else %}Log in{% endif %} →&lt;/button&gt;&lt;small&gt;{% if &#x27;Create&#x27; in mode %}Already learning? &lt;a href=&quot;{% url &#x27;enrollment:login&#x27; %}&quot;&gt;Log in&lt;/a&gt;{% else %}New here? &lt;a href=&quot;{% url &#x27;enrollment:register&#x27; %}&quot;&gt;Create an account&lt;/a&gt;{% endif %}&lt;/small&gt;&lt;/form&gt;&lt;/section&gt;{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/enrollment/student_dashboard.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &#x27;base.html&#x27; %}{% block title %}My learning{% endblock %}{% block content %}&lt;section class=&quot;dashboard&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Your learning space&lt;/p&gt;&lt;h1&gt;Good to see you, {{ user.username }}.&lt;/h1&gt;&lt;p class=&quot;intro&quot;&gt;Here’s the shape of your term so far.&lt;/p&gt;&lt;div class=&quot;dashboard-head&quot;&gt;&lt;h2&gt;My courses&lt;/h2&gt;&lt;a href=&quot;{% url &#x27;academics:course_list&#x27; %}&quot;&gt;Explore more →&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;learning-list&quot;&gt;{% for e in enrollments %}&lt;article&gt;&lt;div class=&quot;tiny-course&quot; style=&quot;background:{{ e.course.accent }}&quot;&gt;{{ e.course.title|slice:&#x27;:1&#x27; }}&lt;/div&gt;&lt;div&gt;&lt;p&gt;{{ e.course.teacher }}&lt;/p&gt;&lt;h2&gt;{{ e.course.title }}&lt;/h2&gt;&lt;span class=&quot;status {% if e.attended %}complete{% endif %}&quot;&gt;{% if e.attended %}Present today{% else %}Attendance pending{% endif %}&lt;/span&gt;&lt;/div&gt;&lt;form action=&quot;{% url &#x27;enrollment:drop&#x27; e.course.id %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button&gt;Drop course&lt;/button&gt;&lt;/form&gt;&lt;/article&gt;{% empty %}&lt;div class=&quot;empty&quot;&gt;&lt;h2&gt;Your schedule is ready for something new.&lt;/h2&gt;&lt;a class=&quot;button&quot; href=&quot;{% url &#x27;academics:course_list&#x27; %}&quot;&gt;Explore courses →&lt;/a&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;/section&gt;{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/enrollment/teacher_dashboard.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &#x27;base.html&#x27; %}{% block title %}Teaching dashboard{% endblock %}{% block content %}&lt;section class=&quot;dashboard&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Teaching dashboard&lt;/p&gt;&lt;h1&gt;Hello, {{ user.get_full_name|default:user.username }}.&lt;/h1&gt;&lt;p class=&quot;intro&quot;&gt;Your classes and student attendance, all in one focused place.&lt;/p&gt;&lt;div class=&quot;teacher-courses&quot;&gt;{% for course in courses %}&lt;article&gt;&lt;div class=&quot;teacher-title&quot;&gt;&lt;span style=&quot;background:{{ course.accent }}&quot;&gt;{{ course.title|slice:&#x27;:1&#x27; }}&lt;/span&gt;&lt;div&gt;&lt;p&gt;{{ course.seats_taken }} students enrolled&lt;/p&gt;&lt;h2&gt;{{ course.title }}&lt;/h2&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;roster&quot;&gt;{% for e in course.enrollments.all %}&lt;div&gt;&lt;span&gt;{{ e.student }}&lt;/span&gt;&lt;form action=&quot;{% url &#x27;enrollment:mark_attendance&#x27; e.id %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button class=&quot;attendance {% if e.attended %}done{% endif %}&quot;&gt;{% if e.attended %}Present ✓{% else %}Mark present{% endif %}&lt;/button&gt;&lt;/form&gt;&lt;/div&gt;{% empty %}&lt;p&gt;No learners enrolled yet.&lt;/p&gt;{% endfor %}&lt;/div&gt;&lt;/article&gt;{% empty %}&lt;div class=&quot;empty&quot;&gt;&lt;h2&gt;No classes assigned yet.&lt;/h2&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;/section&gt;{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">static/css/style.css</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="css"><code>:root{--ink:#183b50;--navy:#123246;--cream:#f9f6ef;--paper:#fffefa;--muted:#74828b;--line:#dfe2dc;--mint:#c7dfcb;--sky:#dcecf0;--sun:#f4c87c}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.5 &#x27;DM Sans&#x27;,sans-serif}a{color:inherit}header{height:78px;display:flex;align-items:center;justify-content:space-between;max-width:1180px;margin:auto;border-bottom:1px solid var(--line)}.brand{text-decoration:none;font-size:21px;font-weight:700;letter-spacing:-1px}.brand b{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--ink);color:white;font:700 18px Georgia}.brand span{color:#759b77}nav{display:flex;align-items:center;gap:22px;font-size:14px;font-weight:600}nav a{text-decoration:none}nav form{margin:0}nav button{border:0;background:none;color:var(--ink);font:inherit;cursor:pointer}.nav-button,.button{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:100px;background:var(--ink);color:white;text-decoration:none;border:0;font:700 14px &#x27;DM Sans&#x27;;cursor:pointer}.hero{max-width:1180px;margin:auto;padding:64px 0 75px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10%}.eyebrow{color:#668875;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 14px}.hero h1,.course-detail h1,.auth h1,.dashboard&gt;h1{font:700 clamp(45px,5.5vw,73px)/.98 Fraunces,Georgia,serif;letter-spacing:-3px;margin:0;max-width:9ch}.hero h1 em{font-weight:600;color:#779e7b}.hero&gt;div&gt;p:not(.eyebrow){color:var(--muted);font-size:17px;max-width:400px;margin:23px 0 27px}.hero-art{height:350px;border-radius:180px 180px 16px 16px;background:var(--mint);position:relative;overflow:hidden}.hero-art:before{content:&#x27;&#x27;;position:absolute;width:250px;height:250px;background:#f5e5a5;border-radius:50%;top:52px;left:calc(50% - 125px)}.hero-art span{position:absolute;top:70px;right:70px;font-size:45px;color:#4a7460}.hero-art strong{position:absolute;bottom:30px;left:38px;text-transform:uppercase;font-size:13px;letter-spacing:2px;line-height:1.1}.hero-art i{position:absolute;bottom:-80px;right:55px;width:190px;height:270px;border:2px solid #527b61;border-radius:100% 100% 0 0}.catalog,.dashboard{background:var(--paper);padding:64px max(25px,calc((100vw - 1180px)/2)) 90px}.section-title,.dashboard-head{display:flex;justify-content:space-between;align-items:end;gap:20px}.section-title h2,.dashboard-head h2{font:700 34px Fraunces;margin:0;letter-spacing:-1px}.section-title&gt;p,.intro{color:var(--muted);font-size:13px}.course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:33px}.course-card{border:1px solid var(--line);border-radius:14px;overflow:hidden}.course-color{height:155px;padding:18px;display:flex;justify-content:space-between;align-items:end}.course-color span,.course-cover span{font:700 78px Fraunces;color:#315f56aa}.course-color small{font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:1px}.course-body{padding:18px}.course-body&gt;p,.teacher-title p,.learning-list article p{margin:0;color:var(--muted);font-size:12px}.course-body h3{font:700 22px Fraunces;margin:4px 0 15px}.course-body h3 a{text-decoration:none}.course-body&gt;div{display:flex;justify-content:space-between;font-size:12px}.course-body&gt;div a{font-weight:700}.crumb{max-width:1180px;margin:0 auto;padding:22px 0;font-size:13px;color:var(--muted)}.crumb a{color:var(--ink)}.course-detail{max-width:1180px;margin:4px auto 76px;display:grid;grid-template-columns:1fr 1fr;gap:9%;align-items:center}.course-cover{height:460px;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center}.course-cover span{font-size:180px}.course-cover p{font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700}.course-detail h1{font-size:58px;max-width:10ch}.teacher{font-weight:700;margin:14px 0}.description{color:var(--muted);line-height:1.75}.stats{display:flex;gap:27px;padding:22px 0;margin:24px 0;border-block:1px solid var(--line);font-size:13px;color:var(--muted)}.stats b{color:var(--ink);font-size:18px;display:block}.auth{max-width:980px;margin:55px auto 90px;background:var(--paper);display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:16px;overflow:hidden}.auth-art{background:var(--sky);min-height:500px;display:flex;align-items:end;padding:40px;position:relative}.auth-art:before{content:&#x27;✦&#x27;;position:absolute;top:90px;left:45%;font-size:60px;color:#6c9a8c}.auth-art p{font:700 36px/1 Fraunces;text-transform:uppercase;letter-spacing:-1px}.auth form{padding:55px}.auth h1{font-size:42px;letter-spacing:-2px}.auth form&gt;p:not(.eyebrow){color:var(--muted)}.auth form p label{display:block;font-size:12px;font-weight:700;margin:17px 0 6px}.auth input{width:100%;padding:12px;border:1px solid var(--line);border-radius:7px}.auth small{display:block;margin-top:17px;color:var(--muted)}.dashboard{min-height:66vh}.dashboard&gt;h1{font-size:52px;max-width:13ch}.dashboard-head{margin:42px 0 19px}.dashboard-head a{font-size:13px;font-weight:700}.learning-list,.teacher-courses{max-width:850px}.learning-list article{display:grid;grid-template-columns:65px 1fr auto;align-items:center;gap:18px;padding:15px 0;border-top:1px solid var(--line)}.tiny-course,.teacher-title&gt;span{height:65px;width:65px;border-radius:10px;display:grid;place-items:center;font:700 33px Fraunces;color:#315f56}.learning-list h2,.teacher-title h2{font:700 21px Fraunces;margin:1px 0 5px}.learning-list form button{border:0;background:none;color:#788584;text-decoration:underline;cursor:pointer;font-size:12px}.status{font-size:11px;color:#8b754f}.status.complete{color:#5d926a}.teacher-courses&gt;article{background:#f5f7ef;padding:22px;border-radius:12px;margin-bottom:16px}.teacher-title{display:flex;gap:15px;align-items:center}.roster{margin-top:18px;border-top:1px solid #dce2d5}.roster&gt;div{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #dce2d5;font-size:13px}.attendance{border:1px solid #9ab391;background:white;border-radius:100px;padding:7px 11px;color:#456d50;font-size:11px;font-weight:700;cursor:pointer}.attendance.done{background:#b8dcbd}.empty{padding:55px;text-align:center;border:1px dashed #bdcdbd;border-radius:12px}.empty h2{font:700 25px Fraunces}footer{max-width:1180px;margin:auto;padding:26px 0;display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}footer span:first-child{font-weight:700;color:var(--ink)}@media(max-width:800px){header{margin:0 20px;height:68px}nav{gap:12px}.nav-button{padding:9px 11px}.hero,.course-detail{grid-template-columns:1fr;margin:0 20px;padding:42px 0;gap:35px}.hero-art{height:270px}.catalog,.dashboard{padding:45px 20px 65px}.course-grid{grid-template-columns:1fr 1fr}.crumb{margin:0 20px}.course-cover{height:320px}.auth{margin:35px 20px;grid-template-columns:1fr}.auth-art{min-height:180px}.auth form{padding:35px}.site-footer,footer{margin:0 20px}}@media(max-width:520px){nav a:not(.nav-button){display:none}.course-grid{grid-template-columns:1fr}.course-detail h1,.dashboard&gt;h1{font-size:42px}.learning-list article{grid-template-columns:52px 1fr}.learning-list form{grid-column:2}.tiny-course{width:52px;height:52px}.auth-art{display:none}.section-title&gt;p{display:none}}
+</code></pre>
+        <div class="security"><b>Security carried into the final app</b>The attendance view filters by <code>course__teacher__user=request.user</code>; a logged-in teacher can only modify attendance for their own course. Keep that ownership check any time an ID in a URL changes data.</div>
+        <p style="margin-top:1.1rem"><strong>Seed the finished catalogue:</strong> use Django Admin to add a teacher and a few courses, or create them in the shell. The project uses graceful designed fallback course cards, so images are never required.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-21" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 21</span><h2>Terminal — run the full flow end to end</h2></div>
+        <span class="tag">verify</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py runserver</code></pre>
+        <p>Walk it exactly like two different real users:</p>
+
+        <div class="persona">
+          <div class="persona-head">As a new student</div>
+          <ol>
+            <li><code>/</code> → browse the course catalog</li>
+            <li>"Register" → create an account → auto-logged in → redirected to an empty "My Courses" dashboard</li>
+            <li>Click a course → "Enroll" → back on My Courses, the course now appears</li>
+            <li>"Drop" → course disappears from the list again</li>
+          </ol>
+        </div>
+
+        <div class="persona" style="margin-top:1rem">
+          <div class="persona-head">As the seeded teacher (Ms. Alvarez, from Step 7)</div>
+          <ol>
+            <li>Log out, log in as her</li>
+            <li>Redirected to "My Classes" instead of "My Courses" — the branch in <code>my_dashboard</code> (Step 16) picks the right template</li>
+            <li>See the student who just enrolled, click "Mark Present" → button updates to "Present ✓"</li>
+          </ol>
+        </div>
+
+        <div class="why" style="margin-top:1.1rem"><b>If anything 404s or 500s</b>Same debugging discipline as always: read the traceback, find the first frame inside <code>academics/</code> or <code>enrollment/</code> (never Django's own internals), and compare that file against this walkthrough.</div>
+      </div>
+    </section>
+
+    <div class="pattern">
+      <span class="eyebrow"><span class="dot"></span>The pattern worth remembering</span>
+      <h3>Same loop as the e-commerce build.</h3>
+      <div class="loopstrip">
+        <span class="node" style="--c:var(--model)">Model</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--migrate)">Migrate</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--admin)">Admin (seed data)</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--view)">View</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--url)">URL</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--template)">Template</span>
+      </div>
+      <p>Every time a template linked to something that didn't exist yet (<code>enrollment:enroll</code>, <code>enrollment:drop</code>, <code>enrollment:mark_attendance</code>), that link became the very next thing built. The only genuinely new idea in this project — the security check inside <code>mark_attendance</code> (<code>course__teacher__user=request.user</code>) — is worth internalizing beyond this one app: any time a logged-in user can act on a database row by ID, ask "what stops them from passing <em>someone else's</em> ID?" before calling the view finished.</p>
+
+      <div class="filebar" style="margin-top:1.6rem"><span class="path">final project tree</span><span class="badge">build order</span></div>
+      <div class="tree">edumanage/
+├── manage.py
+├── <span class="hi">edu_project/</span>
+│   ├── settings.py         <span class="cm">(Steps 3, 11)</span>
+│   └── urls.py               <span class="cm">(Steps 10, 17)</span>
+├── <span class="hi">academics/</span>
+│   ├── models.py               <span class="cm">(Step 4)</span>
+│   ├── admin.py                  <span class="cm">(Step 6)</span>
+│   ├── views.py                    <span class="cm">(Step 8)</span>
+│   ├── urls.py                       <span class="cm">(Step 9)</span>
+│   └── templates/academics/
+│       ├── course_list.html            <span class="cm">(Step 13)</span>
+│       └── course_detail.html            <span class="cm">(Step 13)</span>
+├── <span class="hi">enrollment/</span>
+│   ├── models.py                   <span class="cm">(Step 15)</span>
+│   ├── views.py                       <span class="cm">(Steps 16, 19)</span>
+│   ├── urls.py                          <span class="cm">(Steps 17, 19)</span>
+│   └── templates/enrollment/
+│       ├── register.html                  <span class="cm">(Step 18)</span>
+│       ├── login.html                        <span class="cm">(Step 18)</span>
+│       ├── student_dashboard.html              <span class="cm">(Step 18)</span>
+│       └── teacher_dashboard.html                <span class="cm">(Step 18)</span>
+├── <span class="hi">templates/</span>
+│   └── base.html                    <span class="cm">(Step 12)</span>
+└── <span class="hi">static/css/</span>
+    └── style.css                      <span class="cm">(Step 20)</span></div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <span class="mono">edumanage / build-log.md</span>
+  <span>22 steps + a final product pass · 2 apps · 2 user roles · 1 repeating loop</span>
+</footer>
+
+<script>
+// ---- syntax dimming: comments, per line, safe runtime-only ----
+document.querySelectorAll('pre.code code').forEach(block=>{
+  const lang = block.parentElement.getAttribute('data-lang');
+  const lines = block.textContent.split('\n');
+  const commentPrefix = (lang === 'python' || lang === 'bash') ? '#' : null;
+  block.innerHTML = lines.map(raw=>{
+    let line = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const trimmed = raw.trim();
+    if (commentPrefix && trimmed.startsWith(commentPrefix)) {
+      return '<span class="comment-line">'+line+'</span>';
+    }
+    if (lang === 'python' || lang === 'bash') {
+      const idx = raw.indexOf(' # ');
+      if (idx !== -1) {
+        const before = line.substring(0, idx);
+        const after = line.substring(idx);
+        return before + '<span class="comment-line">'+after+'</span>';
+      }
+    }
+    return line;
+  }).join('\n');
+});
+
+// ---- populate step nav ----
+const steps = Array.from(document.querySelectorAll('.step'));
+const stepnav = document.getElementById('stepnav');
+steps.forEach(s=>{
+  const num = s.querySelector('.step-num').textContent.replace('STEP ','');
+  const title = s.querySelector('h2').textContent;
+  const a = document.createElement('a');
+  a.href = '#'+s.id;
+  a.dataset.target = s.id;
+  a.style.setProperty('--c', s.style.getPropertyValue('--c'));
+  a.innerHTML = '<span class="n">'+num.padStart(2,'0')+'</span><span>'+title+'</span>';
+  stepnav.appendChild(a);
+});
+
+// ---- scrollspy: highlight active step in nav + loop tracker ----
+const navLinks = Array.from(stepnav.querySelectorAll('a'));
+const loopNodes = Array.from(document.querySelectorAll('.loop-node'));
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      navLinks.forEach(a=>a.classList.toggle('active', a.dataset.target===id));
+      const stage = entry.target.getAttribute('data-stage');
+      loopNodes.forEach(n=>n.classList.toggle('active', n.dataset.stage===stage));
+      const activeLink = stepnav.querySelector('a.active');
+      if(activeLink) activeLink.scrollIntoView({block:'nearest'});
+    }
+  });
+}, {rootMargin:'-15% 0px -70% 0px', threshold:0});
+steps.forEach(s=>observer.observe(s));
+
+// ---- progress bar ----
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progress.style.width = scrolled + '%';
+}, {passive:true});
+
+// ---- mobile nav toggle ----
+const navToggle = document.getElementById('navToggle');
+navToggle.addEventListener('click', ()=>{
+  stepnav.classList.toggle('open');
+  navToggle.querySelector('span:last-child').textContent = stepnav.classList.contains('open') ? '▴' : '▾';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building QuickCart — A Django E-Commerce Build Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1712;
+  --bg-alt:#111A15;
+  --surface:#182019;
+  --surface-2:#1D2620;
+  --border:#2A362E;
+  --text:#E8EDE9;
+  --text-dim:#8FA396;
+  --text-faint:#5C6E63;
+
+  --model:#4FBE93;
+  --migrate:#2E9E8F;
+  --admin:#E8A33D;
+  --view:#5B9BD9;
+  --url:#9583EA;
+  --template:#E36F91;
+  --meta:#7C8B80;
+
+  --code-str:#E8C07D;
+  --code-com:#5C6E63;
+  --code-kw:#6FB8A8;
+
+  --radius:10px;
+  --maxw:1180px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(232,237,233,0.035) 1px, transparent 0);
+  background-size: 26px 26px;
+  pointer-events:none;
+  z-index:0;
+}
+a{color:inherit;}
+h1,h2,h3,h4{font-family:'Space Grotesk',system-ui,sans-serif; font-weight:600; margin:0;}
+code, pre, .mono{font-family:'JetBrains Mono', monospace;}
+::selection{background:var(--model); color:#0B120D;}
+
+/* ---------- progress bar ---------- */
+#progress{
+  position:fixed; top:0; left:0; height:3px; width:0%;
+  background:linear-gradient(90deg, var(--model), var(--url));
+  z-index:100; transition:width .08s linear;
+}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative; z-index:1;
+  max-width:var(--maxw); margin:0 auto;
+  padding:5rem 2rem 3.5rem;
+  border-bottom:1px solid var(--border);
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-family:'JetBrains Mono',monospace; font-size:.78rem; letter-spacing:.08em;
+  color:var(--model); text-transform:uppercase;
+  padding:.35rem .7rem; border:1px solid var(--border); border-radius:100px;
+  background:rgba(79,190,147,0.06);
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--model); box-shadow:0 0 8px var(--model);}
+.hero h1{
+  font-size:clamp(2.2rem, 5vw, 3.4rem);
+  line-height:1.08; margin-top:1.1rem; letter-spacing:-0.01em;
+  max-width:16ch;
+}
+.hero h1 .accent{color:var(--model);}
+.hero p.lede{
+  color:var(--text-dim); font-size:1.08rem; max-width:58ch; margin-top:1.1rem;
+}
+.hero p.lede b{color:var(--text); font-weight:600;}
+.scope{
+  margin-top:2.2rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
+}
+.scope div{background:var(--surface); padding:1.1rem 1.3rem;}
+.scope .k{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em;}
+.scope .v{margin-top:.35rem; font-size:.94rem; color:var(--text);}
+
+/* ---------- layout ---------- */
+.layout{
+  position:relative; z-index:1;
+  max-width:var(--maxw); margin:0 auto;
+  display:grid; grid-template-columns:250px 1fr; gap:3rem;
+  padding:3rem 2rem 6rem;
+  align-items:start;
+}
+
+/* ---------- sidebar / loop tracker ---------- */
+.sidebar{position:sticky; top:1.5rem; align-self:start;}
+.tracker{
+  border:1px solid var(--border); border-radius:var(--radius); background:var(--surface);
+  padding:1.2rem;
+}
+.tracker h4{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-weight:500;}
+.tracker .sub{font-size:.78rem; color:var(--text-dim); margin-top:.4rem; line-height:1.45;}
+.loop{margin-top:1.1rem; display:flex; flex-direction:column; gap:0;}
+.loop-node{
+  display:flex; align-items:center; gap:.6rem;
+  padding:.4rem 0; position:relative;
+  font-size:.82rem; color:var(--text-faint); font-weight:500;
+  transition:color .25s ease;
+}
+.loop-node::before{
+  content:""; width:9px; height:9px; border-radius:50%;
+  background:var(--border); flex-shrink:0; transition:all .25s ease;
+}
+.loop-node:not(:last-child)::after{
+  content:""; position:absolute; left:4px; top:20px; width:1px; height:14px; background:var(--border);
+}
+.loop-node.active{color:var(--text); }
+.loop-node.active::before{background:var(--c); box-shadow:0 0 10px var(--c);}
+.loop-arrow{font-size:.68rem; color:var(--text-faint); text-align:center; margin:.6rem 0 .2rem; font-family:'JetBrains Mono',monospace;}
+
+.stepnav{margin-top:1.2rem; max-height:46vh; overflow-y:auto; padding-right:.3rem;}
+.stepnav a{
+  display:flex; align-items:center; gap:.55rem;
+  font-size:.8rem; color:var(--text-faint); text-decoration:none;
+  padding:.4rem .5rem; border-radius:6px; transition:all .15s ease;
+  border-left:2px solid transparent;
+}
+.stepnav a .n{font-family:'JetBrains Mono',monospace; font-size:.72rem; opacity:.7; width:1.6em; flex-shrink:0;}
+.stepnav a:hover{color:var(--text); background:var(--surface-2);}
+.stepnav a.active{color:var(--text); border-left-color:var(--c); background:var(--surface-2);}
+.stepnav::-webkit-scrollbar{width:5px;}
+.stepnav::-webkit-scrollbar-thumb{background:var(--border); border-radius:10px;}
+
+/* ---------- main / steps ---------- */
+main{min-width:0;}
+.step{
+  scroll-margin-top:1.5rem;
+  border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--surface);
+  margin-bottom:1.4rem; overflow:hidden;
+  border-left:3px solid var(--c, var(--border));
+}
+.step-head{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  padding:1.3rem 1.5rem; border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+}
+.step-head-left{display:flex; align-items:baseline; gap:.9rem;}
+.step-num{font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--text-faint);}
+.step-head h2{font-size:1.15rem; letter-spacing:-0.005em;}
+.tag{
+  font-family:'JetBrains Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.07em;
+  padding:.28rem .6rem; border-radius:100px; color:var(--c); background:color-mix(in srgb, var(--c) 14%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 35%, transparent);
+  white-space:nowrap;
+}
+.step-body{padding:1.4rem 1.5rem 1.6rem;}
+.step-body p{margin:0 0 1rem; color:var(--text-dim); font-size:.95rem;}
+.step-body p:last-child{margin-bottom:0;}
+.step-body strong{color:var(--text); font-weight:600;}
+
+.filebar{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--text-faint);
+  margin:1.1rem 0 .4rem;
+}
+.filebar .path{color:var(--text-dim);}
+.filebar .badge{
+  font-size:.65rem; padding:.15rem .5rem; border-radius:5px; text-transform:uppercase; letter-spacing:.05em;
+  border:1px solid var(--border); color:var(--text-faint);
+}
+
+pre.code{
+  margin:.4rem 0 1.1rem; padding:1rem 1.1rem; border-radius:8px;
+  background:#0C120D; border:1px solid var(--border);
+  overflow-x:auto; font-size:.83rem; line-height:1.65;
+  position:relative;
+}
+pre.code::-webkit-scrollbar{height:6px;}
+pre.code::-webkit-scrollbar-thumb{background:var(--border); border-radius:10px;}
+pre.code code{white-space:pre; color:#C7D3CB;}
+.comment-line{color:var(--code-com); font-style:italic;}
+.str-tok{color:var(--code-str);}
+.kw-tok{color:var(--code-kw); font-weight:500;}
+
+.why{
+  margin:1.1rem 0 0; padding:.95rem 1.1rem; border-radius:8px;
+  background:rgba(79,190,147,0.045); border:1px solid rgba(79,190,147,0.22);
+  font-size:.88rem; color:var(--text-dim);
+}
+.why b{color:var(--model); font-family:'JetBrains Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:.4rem;}
+
+.tree{
+  font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.75; color:var(--text-dim);
+  background:#0C120D; border:1px solid var(--border); border-radius:8px; padding:1.1rem 1.3rem;
+  overflow-x:auto; white-space:pre;
+}
+.tree .hi{color:var(--model);}
+.tree .cm{color:var(--text-faint);}
+
+.checklist{list-style:none; margin:1rem 0 0; padding:0; display:flex; flex-direction:column; gap:.5rem;}
+.checklist li{display:flex; gap:.6rem; font-size:.9rem; color:var(--text-dim); align-items:flex-start;}
+.checklist li::before{content:"→"; color:var(--c, var(--model)); flex-shrink:0; font-family:'JetBrains Mono',monospace;}
+
+/* ---------- pattern / footer ---------- */
+.pattern{
+  margin-top:2.5rem; border-radius:14px; border:1px solid rgba(79,190,147,0.3);
+  background:linear-gradient(160deg, rgba(79,190,147,0.09), rgba(79,190,147,0.02));
+  padding:2.4rem;
+}
+.pattern .eyebrow{margin-bottom:1rem;}
+.pattern h3{font-size:1.5rem; margin-bottom:.9rem;}
+.pattern p{color:var(--text-dim); font-size:.98rem; max-width:70ch;}
+.loopstrip{
+  display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:1.4rem 0 1.6rem;
+  font-family:'JetBrains Mono',monospace; font-size:.85rem;
+}
+.loopstrip span.node{
+  padding:.5rem .9rem; border-radius:100px; border:1px solid var(--c);
+  color:var(--c); background:color-mix(in srgb, var(--c) 12%, transparent);
+}
+.loopstrip span.arrow{color:var(--text-faint);}
+
+footer{
+  max-width:var(--maxw); margin:0 auto; padding:2.5rem 2rem 4rem;
+  color:var(--text-faint); font-size:.85rem; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+}
+footer .mono{font-family:'JetBrains Mono',monospace;}
+
+/* ---------- mobile ---------- */
+.sidebar-toggle{display:none;}
+@media (max-width: 920px){
+  .layout{grid-template-columns:1fr; padding:2rem 1.2rem 4rem;}
+  .hero{padding:3.5rem 1.2rem 2.5rem;}
+  .sidebar{position:static; margin-bottom:0;}
+  .tracker{display:none;}
+  .sidebar-toggle{
+    display:flex; width:100%; justify-content:space-between; align-items:center;
+    padding:.9rem 1.1rem; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--surface); font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--text);
+    margin-bottom:.8rem; cursor:pointer;
+  }
+  .stepnav{display:none; max-height:none; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); padding:.6rem; margin-top:0;}
+  .stepnav.open{display:block;}
+  #progress{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{transition:none !important;}
+}
+/* final responsive pass */
+img,svg,video,canvas{max-width:100%;height:auto;}
+pre.code,.tree{max-width:100%;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){
+  body{font-size:15px;}
+  .hero{padding:2.5rem 1rem 2rem;}
+  .hero h1{font-size:clamp(1.9rem,8vw,2.6rem);overflow-wrap:anywhere;}
+  .hero p.lede{font-size:.98rem;}
+  .scope{grid-template-columns:1fr;margin-top:1.5rem;}
+  .scope div{padding:.9rem 1rem;}
+  .layout{padding:1rem .75rem 3.5rem;gap:0;}
+  .sidebar-toggle{min-height:44px;padding:.8rem .9rem;}
+  .stepnav a{min-height:42px;align-items:center;}
+  .step-head{padding:1rem;align-items:flex-start;}
+  .step-head-left{gap:.55rem;align-items:flex-start;flex-wrap:wrap;}
+  .step-head h2{font-size:1rem;line-height:1.3;overflow-wrap:anywhere;}
+  .step-body{padding:1rem 1rem 1.15rem;}
+  .step-body p{font-size:.9rem;}
+  .filebar{gap:.5rem;align-items:flex-start;flex-wrap:wrap;}
+  pre.code{padding:.8rem;font-size:.74rem;}
+  .why{padding:.8rem .9rem;font-size:.83rem;}
+  .pattern{padding:1.2rem;margin-top:1.5rem;}
+  .pattern h3{font-size:1.25rem;}
+  .loopstrip{font-size:.75rem;}
+  .loopstrip span.node{padding:.42rem .65rem;}
+  footer{padding:2rem 1rem 3rem;font-size:.76rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <span class="eyebrow"><span class="dot"></span>Build log · Django</span>
+  <h1>Building <span class="accent">QuickCart</span> — a simple e-commerce app, one file at a time</h1>
+  <p class="lede">
+    Not a reference manual — a walkthrough of the <b>actual build order</b>. Every step shows exactly
+    which file gets opened, what goes inside it, and why that piece has to exist before the next one.
+    Follow it top to bottom and you'll have a working store: product list → product detail → add to cart →
+    view cart → checkout stub.
+  </p>
+  <div class="scope">
+    <div><div class="k">Catalog</div><div class="v">Product list + detail pages</div></div>
+    <div><div class="k">Cart</div><div class="v">Session-based — add, remove, update qty</div></div>
+    <div><div class="k">Checkout</div><div class="v">Collects shipping info, stubbed payment</div></div>
+    <div><div class="k">Admin</div><div class="v">Django Admin manages products</div></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-toggle" id="navToggle">
+      <span>Jump to step</span>
+      <span>▾</span>
+    </div>
+    <div class="tracker">
+      <h4>The repeating loop</h4>
+      <div class="sub">Every feature in this project follows the same six-stage build order. Watch it highlight as you scroll.</div>
+      <div class="loop" id="loopTracker">
+        <div class="loop-node" data-stage="model" style="--c:var(--model)">Model</div>
+        <div class="loop-node" data-stage="migrate" style="--c:var(--migrate)">Migrate</div>
+        <div class="loop-node" data-stage="admin" style="--c:var(--admin)">Admin · seed data</div>
+        <div class="loop-node" data-stage="view" style="--c:var(--view)">View</div>
+        <div class="loop-node" data-stage="url" style="--c:var(--url)">URL</div>
+        <div class="loop-node" data-stage="template" style="--c:var(--template)">Template</div>
+      </div>
+    </div>
+    <nav class="stepnav" id="stepnav">
+      <!-- filled by JS -->
+    </nav>
+  </aside>
+
+  <main id="steps">
+
+    <section class="step" id="step-0" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 0</span><h2>Terminal — set up the workspace</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">terminal</span><span class="badge">bash</span></div>
+        <pre class="code" data-lang="bash"><code>mkdir quickcart &amp;&amp; cd quickcart
+python -m venv venv
+source venv/bin/activate          # venv\Scripts\Activate.ps1 on Windows
+pip install django</code></pre>
+        <div class="why"><b>Why first</b>Nothing else can happen until Django is installed inside an isolated environment. No file exists yet — this step just prepares the ground.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-1" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 1</span><h2>Terminal — create the project</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">terminal</span><span class="badge">bash</span></div>
+        <pre class="code" data-lang="bash"><code>django-admin startproject ecommerce_project .</code></pre>
+        <p>The trailing <code>.</code> puts <code>manage.py</code> directly in <code>quickcart/</code> instead of nesting an extra folder — keeps the tree flat and simple.</p>
+        <div class="filebar"><span class="path">what now exists</span><span class="badge">tree</span></div>
+        <div class="tree">quickcart/
+    manage.py
+    ecommerce_project/
+        settings.py
+        urls.py
+        wsgi.py</div>
+        <p style="margin-top:1rem">Run it once just to confirm it's alive:</p>
+        <pre class="code" data-lang="bash"><code>python manage.py runserver</code></pre>
+        <p>You should see Django's default "it worked" page at <code>127.0.0.1:8000</code>. Stop the server (<code>Ctrl+C</code>) and move on — we haven't built anything yet, we just confirmed the foundation is solid.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-2" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 2</span><h2>Terminal — create the <code>store</code> app</h2></div>
+        <span class="tag">setup</span>
+      </div>
+      <div class="step-body">
+        <div class="filebar"><span class="path">terminal</span><span class="badge">bash</span></div>
+        <pre class="code" data-lang="bash"><code>python manage.py startapp store</code></pre>
+        <div class="why"><b>Why</b>The project (<code>ecommerce_project</code>) is just config. All the actual store logic — products, cart, checkout — belongs in its own app.</div>
+        <div class="filebar" style="margin-top:1rem"><span class="path">what now exists</span><span class="badge">tree</span></div>
+        <div class="tree">store/
+    admin.py
+    apps.py
+    models.py
+    views.py
+    tests.py
+    migrations/</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-3" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 3</span><h2>Open <code>ecommerce_project/settings.py</code></h2></div>
+        <span class="tag">config</span>
+      </div>
+      <div class="step-body">
+        <p><strong>Find this block:</strong></p>
+        <pre class="code" data-lang="python"><code>INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]</code></pre>
+        <p><strong>Add one line</strong> so Django knows the app exists:</p>
+        <pre class="code" data-lang="python"><code>INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'store',                        # ← added
+]</code></pre>
+        <div class="why"><b>Why this file, right now</b>An app with code in it but not listed here is invisible to Django — its models won't migrate, its templates won't be found, its admin registrations won't load. This has to happen before we write a single model.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-4" data-stage="model" style="--c:var(--model)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 4</span><h2>Open <code>store/models.py</code></h2></div>
+        <span class="tag">model</span>
+      </div>
+      <div class="step-body">
+        <p>This is the first <em>real</em> code of the project — the shape of a "Product" has to exist before anything else (views, cart, admin) can reference it.</p>
+        <div class="filebar"><span class="path">store/models.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.db import models
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+
+    class Meta:
+        verbose_name_plural = 'categories'
+
+    def __str__(self):
+        return self.name
+
+
+class Product(models.Model):
+    category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    stock = models.PositiveIntegerField(default=0)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name</code></pre>
+        <div class="why"><b>Why DecimalField, not FloatField, for price</b>Floating-point numbers introduce rounding errors that are unacceptable for money — <code>DecimalField</code> stores exact values, which matters the moment you start summing a cart.</div>
+        <div class="why" style="margin-top:.7rem"><b>Why slug on both models</b>We'll use slugs (not numeric IDs) in product URLs later (<code>/products/blue-t-shirt/</code>) — cleaner and more SEO-friendly than <code>/products/17/</code>.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-5" data-stage="migrate" style="--c:var(--migrate)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 5</span><h2>Terminal — turn the model into database tables</h2></div>
+        <span class="tag">migrate</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py makemigrations store
+python manage.py migrate</code></pre>
+        <div class="why"><b>Why immediately after Step 4, not later</b><code>models.py</code> describes the shape in Python — it does nothing to the actual database until these two commands run. Skipping this and moving to views would mean querying tables that don't exist yet.</div>
+        <p style="margin-top:1rem">For image uploads to work, also install Pillow now (needed by <code>ImageField</code>):</p>
+        <pre class="code" data-lang="bash"><code>pip install Pillow</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-6" data-stage="admin" style="--c:var(--admin)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 6</span><h2>Open <code>store/admin.py</code></h2></div>
+        <span class="tag">admin</span>
+      </div>
+      <div class="step-body">
+        <p>Now that tables exist, we need a way to actually <em>put data</em> into them without writing raw SQL. Django Admin is the fastest path.</p>
+        <div class="filebar"><span class="path">store/admin.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib import admin
+from .models import Category, Product
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'price', 'stock', 'available')
+    list_filter = ('available', 'category')
+    prepopulated_fields = {'slug': ('name',)}</code></pre>
+        <p><code>prepopulated_fields</code> auto-fills the slug from the name as you type in the admin form — one less thing to type by hand for every product.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-7" data-stage="admin" style="--c:var(--admin)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 7</span><h2>Terminal — create an admin login and add real data</h2></div>
+        <span class="tag">admin · seed</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py createsuperuser
+python manage.py runserver</code></pre>
+        <p>Visit <code>127.0.0.1:8000/admin/</code>, log in, and manually add:</p>
+        <ul class="checklist">
+          <li>1–2 Categories ("T-Shirts", "Mugs")</li>
+          <li>3–4 Products under them, with prices and stock</li>
+        </ul>
+        <div class="why" style="margin-top:1.1rem"><b>Why do this before writing views</b>Views display data — without rows in the database, every view we write next would render an empty page and you couldn't tell "no data" apart from "broken view." Seeding real data first makes every following step visually verifiable.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-8" data-stage="view" style="--c:var(--view)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 8</span><h2>Open <code>store/views.py</code></h2></div>
+        <span class="tag">view</span>
+      </div>
+      <div class="step-body">
+        <p>Now that real products exist, build the pages that show them.</p>
+        <div class="filebar"><span class="path">store/views.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.shortcuts import render, get_object_or_404
+from .models import Category, Product
+
+def product_list(request, category_slug=None):
+    category = None
+    categories = Category.objects.all()
+    products = Product.objects.filter(available=True)
+    if category_slug:
+        category = get_object_or_404(Category, slug=category_slug)
+        products = products.filter(category=category)
+    return render(request, 'store/product_list.html', {
+        'category': category,
+        'categories': categories,
+        'products': products,
+    })
+
+def product_detail(request, slug):
+    product = get_object_or_404(Product, slug=slug, available=True)
+    return render(request, 'store/product_detail.html', {'product': product})</code></pre>
+        <div class="why"><b>Why get_object_or_404 here specifically</b>A mistyped or old product URL should show a clean 404, not crash the whole page with an unhandled <code>DoesNotExist</code> traceback in front of a real customer.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-9" data-stage="url" style="--c:var(--url)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 9</span><h2>Create <code>store/urls.py</code></h2></div>
+        <span class="tag">url · new file</span>
+      </div>
+      <div class="step-body">
+        <p>Views exist but nothing points to them yet.</p>
+        <div class="filebar"><span class="path">store/urls.py</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+
+app_name = 'store'
+
+urlpatterns = [
+    path('', views.product_list, name='product_list'),
+    path('&lt;slug:category_slug&gt;/', views.product_list, name='product_list_by_category'),
+    path('product/&lt;slug:slug&gt;/', views.product_detail, name='product_detail'),
+]</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-10" data-stage="url" style="--c:var(--url)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 10</span><h2>Open <code>ecommerce_project/urls.py</code></h2></div>
+        <span class="tag">url</span>
+      </div>
+      <div class="step-body">
+        <p>The project's root router doesn't know <code>store/urls.py</code> exists yet — wire it in.</p>
+        <div class="filebar"><span class="path">ecommerce_project/urls.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('store.urls', namespace='store')),
+    path('cart/', include('cart.urls', namespace='cart')),   # added in Step 15
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)</code></pre>
+        <p>(The <code>cart</code> line will error until Step 15 exists — that's expected; we're writing it now so we don't forget to come back. In practice, add that line only once Step 15 is done — shown here for the full picture.)</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-11" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 11</span><h2>Open <code>ecommerce_project/settings.py</code> again</h2></div>
+        <span class="tag">config</span>
+      </div>
+      <div class="step-body">
+        <p>Two more things this stage needs: a templates folder and media file config (for product images).</p>
+        <p><strong>Find <code>TEMPLATES</code> and update <code>DIRS</code>:</strong></p>
+        <pre class="code" data-lang="python"><code>TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],     # ← added
+        'APP_DIRS': True,
+        ...
+    },
+]</code></pre>
+        <p><strong>Add near the bottom of the file:</strong></p>
+        <pre class="code" data-lang="python"><code>STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'</code></pre>
+        <div class="why"><b>Why touch this file again instead of putting it all in Step 3</b>Each addition here is only needed once the thing it configures (templates, images) actually exists in the project — adding it earlier would just be unused config sitting in the file with nothing to explain it.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-12" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 12</span><h2>Create <code>templates/base.html</code></h2></div>
+        <span class="tag">template · new file</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir templates</code></pre>
+        <div class="filebar"><span class="path">templates/base.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;{% block title %}QuickCart{% endblock %}&lt;/title&gt;
+    {% load static %}
+    &lt;link rel="stylesheet" href="{% static 'css/style.css' %}"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;a href="{% url 'store:product_list' %}"&gt;QuickCart&lt;/a&gt;
+        &lt;a href="{% url 'cart:cart_detail' %}"&gt;Cart&lt;/a&gt;
+    &lt;/header&gt;
+    &lt;main&gt;
+        {% block content %}{% endblock %}
+    &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        <p>This is a <em>project-level</em> template (in <code>templates/</code>, not <code>store/templates/store/</code>) because the header/cart link is shared across every app we'll add later, not just <code>store</code>.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-13" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 13</span><h2>Create <code>store/templates/store/product_list.html</code></h2></div>
+        <span class="tag">template · new file</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir -p store/templates/store</code></pre>
+        <div class="filebar"><span class="path">store/templates/store/product_list.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+    &lt;h1&gt;{% if category %}{{ category.name }}{% else %}All Products{% endif %}&lt;/h1&gt;
+
+    &lt;nav&gt;
+        &lt;a href="{% url 'store:product_list' %}"&gt;All&lt;/a&gt;
+        {% for c in categories %}
+            &lt;a href="{% url 'store:product_list_by_category' c.slug %}"&gt;{{ c.name }}&lt;/a&gt;
+        {% endfor %}
+    &lt;/nav&gt;
+
+    &lt;div class="grid"&gt;
+        {% for product in products %}
+            &lt;div class="card"&gt;
+                {% if product.image %}&lt;img src="{{ product.image.url }}" alt="{{ product.name }}"&gt;{% endif %}
+                &lt;h3&gt;&lt;a href="{% url 'store:product_detail' product.slug %}"&gt;{{ product.name }}&lt;/a&gt;&lt;/h3&gt;
+                &lt;p&gt;${{ product.price }}&lt;/p&gt;
+            &lt;/div&gt;
+        {% empty %}
+            &lt;p&gt;No products yet.&lt;/p&gt;
+        {% endfor %}
+    &lt;/div&gt;
+{% endblock %}</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-14" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 14</span><h2>Create <code>store/templates/store/product_detail.html</code></h2></div>
+        <span class="tag">template · new file</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+    &lt;h1&gt;{{ product.name }}&lt;/h1&gt;
+    {% if product.image %}&lt;img src="{{ product.image.url }}" alt="{{ product.name }}"&gt;{% endif %}
+    &lt;p&gt;{{ product.description }}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;${{ product.price }}&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;form action="{% url 'cart:cart_add' product.id %}" method="post"&gt;
+        {% csrf_token %}
+        &lt;input type="number" name="quantity" value="1" min="1"&gt;
+        &lt;button type="submit"&gt;Add to Cart&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+        <p>Notice this form already points at <code>cart:cart_add</code> — a URL that doesn't exist yet. That's intentional: write the template against the interface you <em>know</em> you need next, then build that piece immediately in the following step, rather than guessing at it blind later.</p>
+        <p style="margin-top:1rem"><strong>Terminal check right now:</strong></p>
+        <pre class="code" data-lang="bash"><code>python manage.py runserver</code></pre>
+        <p>Visit <code>127.0.0.1:8000/</code> — the product grid and detail pages should render (Add to Cart will 500/404 until Step 15 — expected at this point).</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-15" data-stage="view" style="--c:var(--view)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 15</span><h2>Terminal + files — build the cart app</h2></div>
+        <span class="tag">model · view · url · template</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py startapp cart</code></pre>
+        <p>Add it to <code>INSTALLED_APPS</code> in <code>ecommerce_project/settings.py</code> (same pattern as Step 3):</p>
+        <pre class="code" data-lang="python"><code>INSTALLED_APPS = [
+    ...
+    'store',
+    'cart',        # ← added
+]</code></pre>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/cart.py</span><span class="badge">new file — session engine</span></div>
+        <pre class="code" data-lang="python"><code>from decimal import Decimal
+from django.conf import settings
+from store.models import Product
+
+class Cart:
+    def __init__(self, request):
+        self.session = request.session
+        cart = self.session.get('cart')
+        if not cart:
+            cart = self.session['cart'] = {}
+        self.cart = cart
+
+    def add(self, product, quantity=1):
+        product_id = str(product.id)
+        if product_id not in self.cart:
+            self.cart[product_id] = {'quantity': 0, 'price': str(product.price)}
+        self.cart[product_id]['quantity'] += quantity
+        self.save()
+
+    def save(self):
+        self.session.modified = True
+
+    def remove(self, product):
+        product_id = str(product.id)
+        if product_id in self.cart:
+            del self.cart[product_id]
+            self.save()
+
+    def __iter__(self):
+        product_ids = self.cart.keys()
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            item = self.cart[str(product.id)].copy()
+            item['product'] = product
+            item['price'] = Decimal(item['price'])
+            item['total_price'] = item['price'] * item['quantity']
+            yield item
+
+    def __len__(self):
+        return sum(item['quantity'] for item in self.cart.values())
+
+    def get_total_price(self):
+        return sum(Decimal(item['price']) * item['quantity'] for item in self.cart.values())
+
+    def clear(self):
+        del self.session['cart']
+        self.save()</code></pre>
+        <div class="why"><b>Why a plain Python class here, not a Django model</b>The cart is <em>temporary</em> per-visitor state, not permanent business data — storing it in the session (not the database) means an anonymous visitor gets a working cart with zero extra tables, and it naturally clears itself when their session ends.</div>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/views.py</span><span class="badge">new</span></div>
+        <pre class="code" data-lang="python"><code>from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
+from store.models import Product
+from .cart import Cart
+
+@require_POST
+def cart_add(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    quantity = int(request.POST.get('quantity', 1))
+    cart.add(product=product, quantity=quantity)
+    return redirect('cart:cart_detail')
+
+@require_POST
+def cart_remove(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    cart.remove(product)
+    return redirect('cart:cart_detail')
+
+def cart_detail(request):
+    cart = Cart(request)
+    return render(request, 'cart/cart_detail.html', {'cart': cart})</code></pre>
+        <p><code>@require_POST</code> on <code>cart_add</code>/<code>cart_remove</code>: mutating actions should never respond to a plain <code>GET</code> link.</p>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/urls.py</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+
+app_name = 'cart'
+
+urlpatterns = [
+    path('', views.cart_detail, name='cart_detail'),
+    path('add/&lt;int:product_id&gt;/', views.cart_add, name='cart_add'),
+    path('remove/&lt;int:product_id&gt;/', views.cart_remove, name='cart_remove'),
+]</code></pre>
+        <p>Now go back to <code>ecommerce_project/urls.py</code> and confirm the <code>cart</code> include line from Step 10 is actually active.</p>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/templates/cart/cart_detail.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="bash"><code>mkdir -p cart/templates/cart</code></pre>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Your Cart{% endblock %}
+{% block content %}
+    &lt;h1&gt;Your Cart&lt;/h1&gt;
+    &lt;table&gt;
+        {% for item in cart %}
+            &lt;tr&gt;
+                &lt;td&gt;{{ item.product.name }}&lt;/td&gt;
+                &lt;td&gt;{{ item.quantity }}&lt;/td&gt;
+                &lt;td&gt;${{ item.total_price }}&lt;/td&gt;
+                &lt;td&gt;
+                    &lt;form action="{% url 'cart:cart_remove' item.product.id %}" method="post"&gt;
+                        {% csrf_token %}
+                        &lt;button type="submit"&gt;Remove&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/td&gt;
+            &lt;/tr&gt;
+        {% empty %}
+            &lt;tr&gt;&lt;td colspan="4"&gt;Your cart is empty.&lt;/td&gt;&lt;/tr&gt;
+        {% endfor %}
+    &lt;/table&gt;
+    &lt;p&gt;&lt;strong&gt;Total: ${{ cart.get_total_price }}&lt;/strong&gt;&lt;/p&gt;
+    {% if cart|length &gt; 0 %}
+        &lt;a href="{% url 'cart:checkout' %}"&gt;Proceed to Checkout&lt;/a&gt;
+    {% endif %}
+{% endblock %}</code></pre>
+      </div>
+    </section>
+
+    <section class="step" id="step-16" data-stage="view" style="--c:var(--view)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 16</span><h2>Open <code>cart/views.py</code> again — add the checkout stub</h2></div>
+        <span class="tag">view · url · template</span>
+      </div>
+      <div class="step-body">
+        <p>The cart template already links to <code>cart:checkout</code>, so that's the next thing to build (same "write the link first, build the target next" habit as Step 14).</p>
+        <div class="filebar"><span class="path">cart/views.py</span><span class="badge">add to bottom</span></div>
+        <pre class="code" data-lang="python"><code>def checkout(request):
+    cart = Cart(request)
+    if len(cart) == 0:
+        return redirect('cart:cart_detail')
+    if request.method == 'POST':
+        # Real payment processing would go here.
+        # For this simple project, we just clear the cart and show a confirmation.
+        cart.clear()
+        return render(request, 'cart/checkout_success.html')
+    return render(request, 'cart/checkout.html', {'cart': cart})</code></pre>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/urls.py</span><span class="badge">add route</span></div>
+        <pre class="code" data-lang="python"><code>urlpatterns = [
+    path('', views.cart_detail, name='cart_detail'),
+    path('add/&lt;int:product_id&gt;/', views.cart_add, name='cart_add'),
+    path('remove/&lt;int:product_id&gt;/', views.cart_remove, name='cart_remove'),
+    path('checkout/', views.checkout, name='checkout'),        # ← added
+]</code></pre>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/templates/cart/checkout.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+    &lt;h1&gt;Checkout&lt;/h1&gt;
+    &lt;p&gt;Order total: ${{ cart.get_total_price }}&lt;/p&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        &lt;input type="text" name="full_name" placeholder="Full name" required&gt;
+        &lt;input type="text" name="address" placeholder="Shipping address" required&gt;
+        &lt;button type="submit"&gt;Place Order&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+
+        <div class="filebar" style="margin-top:1.3rem"><span class="path">cart/templates/cart/checkout_success.html</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="html"><code>{% extends "base.html" %}
+{% block title %}Order Placed{% endblock %}
+{% block content %}
+    &lt;h1&gt;Thank you!&lt;/h1&gt;
+    &lt;p&gt;Your order has been placed. (This is a demo — no real payment was processed.)&lt;/p&gt;
+    &lt;a href="{% url 'store:product_list' %}"&gt;Continue shopping&lt;/a&gt;
+{% endblock %}</code></pre>
+        <div class="why"><b>Why this is a "stub" and not real payment</b>Wiring up Stripe/PayPal is a whole separate integration (API keys, webhooks, PCI compliance concerns) that deserves its own dedicated build — bolting it on here would bury the core CRUD/cart pattern this project is meant to teach. The stub keeps the <em>shape</em> of a real checkout (collect info → confirm → clear cart) without the extra complexity.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-17" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 17</span><h2>Fix a hidden gap — cart count in the header</h2></div>
+        <span class="tag">polish</span>
+      </div>
+      <div class="step-body">
+        <p>The "Add to Cart" button links to <code>cart:cart_add</code>, but nothing tells the header's cart link (<code>base.html</code>, Step 12) how many items are currently in the cart. Right now it just says "Cart" with no count — small, but worth fixing before calling this "done."</p>
+        <div class="filebar"><span class="path">cart/context_processors.py</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="python"><code>from .cart import Cart
+
+def cart(request):
+    return {'cart': Cart(request)}</code></pre>
+        <p><strong>Open <code>ecommerce_project/settings.py</code>, find <code>TEMPLATES</code> → <code>context_processors</code>, and add one line:</strong></p>
+        <pre class="code" data-lang="python"><code>'context_processors': [
+    'django.template.context_processors.debug',
+    'django.template.context_processors.request',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+    'cart.context_processors.cart',      # ← added
+],</code></pre>
+        <p><strong>Update <code>templates/base.html</code>'s header line:</strong></p>
+        <pre class="code" data-lang="html"><code>&lt;a href="{% url 'cart:cart_detail' %}"&gt;Cart ({{ cart|length }})&lt;/a&gt;</code></pre>
+        <div class="why"><b>Why this had to wait until now</b>A context processor needing <code>Cart(request)</code> couldn't exist before <code>cart/cart.py</code> did (Step 15) — a good example of a small polish step that only becomes possible, and obviously needed, once you can actually see the gap by using the site end to end.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-18" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 18</span><h2>Create <code>static/css/style.css</code></h2></div>
+        <span class="tag">style</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>mkdir -p static/css</code></pre>
+        <div class="filebar"><span class="path">static/css/style.css</span><span class="badge">new file</span></div>
+        <pre class="code" data-lang="css"><code>body { font-family: system-ui, sans-serif; margin: 0; }
+header { display: flex; gap: 1.5rem; padding: 1rem 2rem; background: #101828; }
+header a { color: #fff; text-decoration: none; }
+main { padding: 2rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+.card { border: 1px solid #e2e2e2; border-radius: 8px; padding: 1rem; }
+.card img { max-width: 100%; }
+table { width: 100%; border-collapse: collapse; }
+td { padding: 0.5rem; border-bottom: 1px solid #eee; }</code></pre>
+        <p>This is the last file added — deliberately last, because styling has nothing to fix or break in the underlying logic; it only makes the already-working flow look presentable.</p>
+      </div>
+    </section>
+
+    <section class="step" id="step-18-visual" data-stage="template" style="--c:var(--template)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 18.5</span><h2>Visual refresh — turn the working store into the finished QuickCart experience</h2></div>
+        <span class="tag">full UI · functional polish</span>
+      </div>
+      <div class="step-body">
+        <p>The earlier template steps intentionally teach the smallest working version first. Now replace those files with this complete presentation pass. It keeps the same Django models and URLs, while adding the responsive storefront, polished cart, safe quantity updates, stock-aware controls, and checkout confirmation shown in the final outcome.</p>
+        <div class="why"><b>Important build note</b>Copy each file <em>exactly</em>. This is a replacement pass, not a collection of snippets to merge. The CSS and class names are designed together, and the cart update view/route are required by the quantity input in the cart template.</div>
+        <p style="margin-top:1.2rem"><strong>Before you copy:</strong> make sure the cart route appears before the store include in <code>ecommerce_project/urls.py</code>. The store category route is intentionally broad and would otherwise treat <code>/cart/</code> as a category slug.</p>
+        <pre class="code" data-lang="python"><code>urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('cart/', include('cart.urls', namespace='cart')),
+    path('', include('store.urls', namespace='store')),
+]</code></pre>
+        <p style="margin-top:1.2rem"><strong>Then replace these project files:</strong></p>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/base.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% load static %}
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;meta name=&quot;theme-color&quot; content=&quot;#123d32&quot;&gt;
+    &lt;title&gt;{% block title %}QuickCart{% endblock %} · QuickCart&lt;/title&gt;
+    &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+    &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+    &lt;link href=&quot;https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;{% static &#x27;css/style.css&#x27; %}&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header class=&quot;site-header&quot;&gt;
+        &lt;div class=&quot;nav-shell&quot;&gt;
+            &lt;a class=&quot;brand&quot; href=&quot;{% url &#x27;store:product_list&#x27; %}&quot; aria-label=&quot;QuickCart home&quot;&gt;
+                &lt;span class=&quot;brand-mark&quot;&gt;Q&lt;/span&gt;&lt;span&gt;quick&lt;span&gt;cart&lt;/span&gt;&lt;/span&gt;
+            &lt;/a&gt;
+            &lt;nav class=&quot;main-nav&quot; aria-label=&quot;Primary navigation&quot;&gt;
+                &lt;a href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;Shop&lt;/a&gt;
+                &lt;a href=&quot;{% url &#x27;store:product_list&#x27; %}#categories&quot;&gt;Categories&lt;/a&gt;
+            &lt;/nav&gt;
+            &lt;a class=&quot;cart-link&quot; href=&quot;{% url &#x27;cart:cart_detail&#x27; %}&quot; aria-label=&quot;View cart, {{ cart|length }} items&quot;&gt;
+                &lt;span class=&quot;bag-icon&quot; aria-hidden=&quot;true&quot;&gt;♧&lt;/span&gt;
+                &lt;span class=&quot;cart-link-label&quot;&gt;Cart&lt;/span&gt;
+                &lt;span class=&quot;cart-count&quot;&gt;{{ cart|length }}&lt;/span&gt;
+            &lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/header&gt;
+    &lt;main&gt;
+        {% block content %}{% endblock %}
+    &lt;/main&gt;
+    &lt;footer class=&quot;site-footer&quot;&gt;
+        &lt;a class=&quot;brand brand-footer&quot; href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;&lt;span class=&quot;brand-mark&quot;&gt;Q&lt;/span&gt;&lt;span&gt;quick&lt;span&gt;cart&lt;/span&gt;&lt;/span&gt;&lt;/a&gt;
+        &lt;p&gt;Thoughtful essentials, delivered simply.&lt;/p&gt;
+        &lt;p class=&quot;footer-note&quot;&gt;Demo store · Secure checkout&lt;/p&gt;
+    &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/store/product_list.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &quot;base.html&quot; %}
+{% block title %}{% if category %}{{ category.name }}{% else %}Everyday essentials{% endif %}{% endblock %}
+{% block content %}
+&lt;section class=&quot;shop-hero&quot;&gt;
+    &lt;div class=&quot;hero-copy&quot;&gt;
+        &lt;p class=&quot;eyebrow&quot;&gt;&lt;span&gt;&lt;/span&gt; Better everyday shopping&lt;/p&gt;
+        &lt;h1&gt;Good things for &lt;em&gt;daily life.&lt;/em&gt;&lt;/h1&gt;
+        &lt;p class=&quot;hero-text&quot;&gt;A considered collection of essentials, selected to make the everyday feel a little easier.&lt;/p&gt;
+        &lt;a class=&quot;button button-dark&quot; href=&quot;#products&quot;&gt;Explore the collection &lt;span&gt;→&lt;/span&gt;&lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;hero-art&quot; aria-hidden=&quot;true&quot;&gt;
+        &lt;div class=&quot;sun&quot;&gt;&lt;/div&gt;&lt;div class=&quot;arch arch-one&quot;&gt;&lt;/div&gt;&lt;div class=&quot;arch arch-two&quot;&gt;&lt;/div&gt;&lt;div class=&quot;hero-leaf leaf-one&quot;&gt;⌇&lt;/div&gt;&lt;div class=&quot;hero-leaf leaf-two&quot;&gt;⌇&lt;/div&gt;
+        &lt;p&gt;simple&lt;br&gt;goods&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;section class=&quot;catalog-section&quot; id=&quot;products&quot;&gt;
+    &lt;div class=&quot;section-heading&quot;&gt;
+        &lt;div&gt;&lt;p class=&quot;eyebrow&quot;&gt;&lt;span&gt;&lt;/span&gt; Shop the edit&lt;/p&gt;&lt;h2&gt;{% if category %}{{ category.name }}{% else %}Popular picks{% endif %}&lt;/h2&gt;&lt;/div&gt;
+        &lt;p&gt;{{ products|length }} item{{ products|length|pluralize }} to discover&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;nav class=&quot;category-pills&quot; id=&quot;categories&quot; aria-label=&quot;Product categories&quot;&gt;
+        &lt;a class=&quot;{% if not category %}active{% endif %}&quot; href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;All items&lt;/a&gt;
+        {% for c in categories %}&lt;a class=&quot;{% if category.slug == c.slug %}active{% endif %}&quot; href=&quot;{% url &#x27;store:product_list_by_category&#x27; c.slug %}&quot;&gt;{{ c.name }}&lt;/a&gt;{% endfor %}
+    &lt;/nav&gt;
+    &lt;div class=&quot;product-grid&quot;&gt;
+        {% for product in products %}
+        &lt;article class=&quot;product-card&quot;&gt;
+            &lt;a class=&quot;product-image shade-{{ forloop.counter0|divisibleby:3 }}&quot; href=&quot;{% url &#x27;store:product_detail&#x27; product.slug %}&quot; aria-label=&quot;View {{ product.name }}&quot;&gt;
+                {% if product.image %}&lt;img src=&quot;{{ product.image.url }}&quot; alt=&quot;{{ product.name }}&quot;&gt;{% else %}&lt;span class=&quot;product-monogram&quot;&gt;{{ product.name|slice:&quot;:1&quot; }}&lt;/span&gt;{% endif %}
+                {% if product.stock &lt; 1 %}&lt;span class=&quot;sold-out&quot;&gt;Sold out&lt;/span&gt;{% else %}&lt;span class=&quot;quick-view&quot;&gt;View item &lt;b&gt;→&lt;/b&gt;&lt;/span&gt;{% endif %}
+            &lt;/a&gt;
+            &lt;div class=&quot;product-info&quot;&gt;&lt;p class=&quot;product-category&quot;&gt;{{ product.category.name }}&lt;/p&gt;&lt;div class=&quot;product-name-row&quot;&gt;&lt;h3&gt;&lt;a href=&quot;{% url &#x27;store:product_detail&#x27; product.slug %}&quot;&gt;{{ product.name }}&lt;/a&gt;&lt;/h3&gt;&lt;strong&gt;${{ product.price }}&lt;/strong&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;/article&gt;
+        {% empty %}
+        &lt;div class=&quot;empty-state&quot;&gt;&lt;span&gt;⌁&lt;/span&gt;&lt;h2&gt;No items found&lt;/h2&gt;&lt;p&gt;Try a different category, or return to the full collection.&lt;/p&gt;&lt;a class=&quot;button button-dark&quot; href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;View all items&lt;/a&gt;&lt;/div&gt;
+        {% endfor %}
+    &lt;/div&gt;
+&lt;/section&gt;
+{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">templates/store/product_detail.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &quot;base.html&quot; %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+&lt;div class=&quot;breadcrumb&quot;&gt;&lt;a href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;Shop&lt;/a&gt;&lt;span&gt;/&lt;/span&gt;&lt;a href=&quot;{% url &#x27;store:product_list_by_category&#x27; product.category.slug %}&quot;&gt;{{ product.category.name }}&lt;/a&gt;&lt;span&gt;/&lt;/span&gt;{{ product.name }}&lt;/div&gt;
+&lt;section class=&quot;product-detail&quot;&gt;
+    &lt;div class=&quot;detail-image&quot;&gt;
+        {% if product.image %}&lt;img src=&quot;{{ product.image.url }}&quot; alt=&quot;{{ product.name }}&quot;&gt;{% else %}&lt;span class=&quot;detail-monogram&quot;&gt;{{ product.name|slice:&quot;:1&quot; }}&lt;/span&gt;{% endif %}
+        &lt;span class=&quot;image-caption&quot;&gt;QuickCart edit&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;detail-copy&quot;&gt;
+        &lt;p class=&quot;eyebrow&quot;&gt;&lt;span&gt;&lt;/span&gt; {{ product.category.name }}&lt;/p&gt;
+        &lt;h1&gt;{{ product.name }}&lt;/h1&gt;&lt;p class=&quot;detail-price&quot;&gt;${{ product.price }}&lt;/p&gt;
+        &lt;p class=&quot;detail-description&quot;&gt;{{ product.description|default:&quot;A practical everyday essential, chosen for its simple design and reliable usefulness.&quot; }}&lt;/p&gt;
+        &lt;div class=&quot;detail-rule&quot;&gt;&lt;/div&gt;
+        {% if product.stock &gt; 0 %}
+        &lt;form class=&quot;add-form&quot; action=&quot;{% url &#x27;cart:cart_add&#x27; product.id %}&quot; method=&quot;post&quot;&gt;
+            {% csrf_token %}
+            &lt;label for=&quot;quantity&quot;&gt;Quantity&lt;/label&gt;
+            &lt;div class=&quot;add-row&quot;&gt;&lt;div class=&quot;quantity-picker&quot;&gt;&lt;input id=&quot;quantity&quot; type=&quot;number&quot; name=&quot;quantity&quot; value=&quot;1&quot; min=&quot;1&quot; max=&quot;{{ product.stock }}&quot;&gt;&lt;/div&gt;&lt;button class=&quot;button button-dark add-button&quot; type=&quot;submit&quot;&gt;Add to cart &lt;span&gt;→&lt;/span&gt;&lt;/button&gt;&lt;/div&gt;
+        &lt;/form&gt;
+        &lt;p class=&quot;stock-note&quot;&gt;&lt;i&gt;&lt;/i&gt;{{ product.stock }} available · Ready to ship&lt;/p&gt;
+        {% else %}&lt;p class=&quot;unavailable&quot;&gt;This item is currently sold out.&lt;/p&gt;{% endif %}
+        &lt;div class=&quot;perks&quot;&gt;&lt;span&gt;↗ Fast delivery&lt;/span&gt;&lt;span&gt;♡ Easy returns&lt;/span&gt;&lt;span&gt;▣ Secure checkout&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/section&gt;
+&lt;section class=&quot;detail-back&quot;&gt;&lt;a href=&quot;{% url &#x27;store:product_list_by_category&#x27; product.category.slug %}&quot;&gt;← Back to {{ product.category.name }}&lt;/a&gt;&lt;/section&gt;
+{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">cart/cart.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from decimal import Decimal
+from django.conf import settings
+from store.models import Product
+
+class Cart:
+    def __init__(self, request):
+        self.session = request.session
+        cart = self.session.get(&#x27;cart&#x27;)
+        if not cart:
+            cart = self.session[&#x27;cart&#x27;] = {}
+        self.cart = cart
+
+    def add(self, product, quantity=1):
+        product_id = str(product.id)
+        if product_id not in self.cart:
+            self.cart[product_id] = {&#x27;quantity&#x27;: 0, &#x27;price&#x27;: str(product.price)}
+        self.cart[product_id][&#x27;quantity&#x27;] += quantity
+        self.save()
+
+    def update(self, product, quantity):
+        product_id = str(product.id)
+        if product_id in self.cart:
+            self.cart[product_id][&#x27;quantity&#x27;] = quantity
+            self.save()
+
+    def save(self):
+        self.session.modified = True
+
+    def remove(self, product):
+        product_id = str(product.id)
+        if product_id in self.cart:
+            del self.cart[product_id]
+            self.save()
+
+    def __iter__(self):
+        product_ids = self.cart.keys()
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            item = self.cart[str(product.id)].copy()
+            item[&#x27;product&#x27;] = product
+            item[&#x27;price&#x27;] = Decimal(item[&#x27;price&#x27;])
+            item[&#x27;total_price&#x27;] = item[&#x27;price&#x27;] * item[&#x27;quantity&#x27;]
+            yield item
+
+    def __len__(self):
+        return sum(item[&#x27;quantity&#x27;] for item in self.cart.values())
+
+    def get_total_price(self):
+        return sum(Decimal(item[&#x27;price&#x27;]) * item[&#x27;quantity&#x27;] for item in self.cart.values())
+
+    def clear(self):
+        del self.session[&#x27;cart&#x27;]
+        self.save()
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">cart/views.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
+from store.models import Product
+from .cart import Cart
+
+@require_POST
+def cart_add(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    if product.stock &lt; 1:
+        return redirect(&#x27;store:product_detail&#x27;, slug=product.slug)
+    try:
+        requested_quantity = int(request.POST.get(&#x27;quantity&#x27;, 1))
+    except (TypeError, ValueError):
+        requested_quantity = 1
+    quantity = max(1, min(requested_quantity, product.stock))
+    cart.add(product=product, quantity=quantity)
+    return redirect(&#x27;cart:cart_detail&#x27;)
+
+@require_POST
+def cart_update(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    try:
+        requested_quantity = int(request.POST.get(&#x27;quantity&#x27;, 1))
+    except (TypeError, ValueError):
+        requested_quantity = 1
+    quantity = max(0, min(requested_quantity, product.stock))
+    if quantity:
+        cart.update(product, quantity)
+    else:
+        cart.remove(product)
+    return redirect(&#x27;cart:cart_detail&#x27;)
+
+@require_POST
+def cart_remove(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    cart.remove(product)
+    return redirect(&#x27;cart:cart_detail&#x27;)
+
+def cart_detail(request):
+    cart = Cart(request)
+    return render(request, &#x27;cart/cart_detail.html&#x27;, {&#x27;cart&#x27;: cart})
+
+def checkout(request):
+    cart = Cart(request)
+    if len(cart) == 0:
+        return redirect(&#x27;cart:cart_detail&#x27;)
+    if request.method == &#x27;POST&#x27;:
+        # Real payment processing would go here.
+        # For this simple project, we just clear the cart and show a confirmation.
+        cart.clear()
+        return render(request, &#x27;cart/checkout_success.html&#x27;)
+    return render(request, &#x27;cart/checkout.html&#x27;, {&#x27;cart&#x27;: cart})
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">cart/urls.py</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="python"><code>from django.urls import path
+from . import views
+
+app_name = &#x27;cart&#x27;
+
+urlpatterns = [
+    path(&#x27;&#x27;, views.cart_detail, name=&#x27;cart_detail&#x27;),
+    path(&#x27;add/&lt;int:product_id&gt;/&#x27;, views.cart_add, name=&#x27;cart_add&#x27;),
+    path(&#x27;update/&lt;int:product_id&gt;/&#x27;, views.cart_update, name=&#x27;cart_update&#x27;),
+    path(&#x27;remove/&lt;int:product_id&gt;/&#x27;, views.cart_remove, name=&#x27;cart_remove&#x27;),
+    path(&#x27;checkout/&#x27;, views.checkout, name=&#x27;checkout&#x27;),        # ← added
+]
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">cart/templates/cart/cart_detail.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &quot;base.html&quot; %}
+{% block title %}Your cart{% endblock %}
+{% block content %}
+&lt;section class=&quot;cart-page&quot;&gt;
+    &lt;div class=&quot;cart-heading&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;&lt;span&gt;&lt;/span&gt; Your selection&lt;/p&gt;&lt;h1&gt;Your cart &lt;small&gt;({{ cart|length }})&lt;/small&gt;&lt;/h1&gt;&lt;/div&gt;
+    {% if cart|length &gt; 0 %}
+    &lt;div class=&quot;cart-layout&quot;&gt;&lt;div class=&quot;cart-items&quot;&gt;
+        {% for item in cart %}&lt;article class=&quot;cart-item&quot;&gt;
+            &lt;div class=&quot;cart-thumb&quot;&gt;{% if item.product.image %}&lt;img src=&quot;{{ item.product.image.url }}&quot; alt=&quot;{{ item.product.name }}&quot;&gt;{% else %}&lt;span&gt;{{ item.product.name|slice:&quot;:1&quot; }}&lt;/span&gt;{% endif %}&lt;/div&gt;
+            &lt;div class=&quot;cart-item-info&quot;&gt;&lt;p&gt;{{ item.product.category.name }}&lt;/p&gt;&lt;h2&gt;&lt;a href=&quot;{% url &#x27;store:product_detail&#x27; item.product.slug %}&quot;&gt;{{ item.product.name }}&lt;/a&gt;&lt;/h2&gt;&lt;strong&gt;${{ item.price }}&lt;/strong&gt;&lt;/div&gt;
+            &lt;form class=&quot;cart-quantity&quot; action=&quot;{% url &#x27;cart:cart_update&#x27; item.product.id %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;label for=&quot;quantity-{{ item.product.id }}&quot;&gt;Quantity&lt;/label&gt;&lt;input id=&quot;quantity-{{ item.product.id }}&quot; name=&quot;quantity&quot; type=&quot;number&quot; value=&quot;{{ item.quantity }}&quot; min=&quot;0&quot; max=&quot;{{ item.product.stock }}&quot; onchange=&quot;this.form.submit()&quot;&gt;&lt;/form&gt;
+            &lt;div class=&quot;cart-line-total&quot;&gt;&lt;strong&gt;${{ item.total_price }}&lt;/strong&gt;&lt;form action=&quot;{% url &#x27;cart:cart_remove&#x27; item.product.id %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button type=&quot;submit&quot;&gt;Remove&lt;/button&gt;&lt;/form&gt;&lt;/div&gt;
+        &lt;/article&gt;{% endfor %}
+    &lt;/div&gt;
+    &lt;aside class=&quot;order-summary&quot;&gt;&lt;h2&gt;Order summary&lt;/h2&gt;&lt;div&gt;&lt;span&gt;Subtotal&lt;/span&gt;&lt;strong&gt;${{ cart.get_total_price }}&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&lt;span&gt;Delivery&lt;/span&gt;&lt;span&gt;Calculated at checkout&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;summary-total&quot;&gt;&lt;span&gt;Total&lt;/span&gt;&lt;strong&gt;${{ cart.get_total_price }}&lt;/strong&gt;&lt;/div&gt;&lt;a class=&quot;button button-dark checkout-button&quot; href=&quot;{% url &#x27;cart:checkout&#x27; %}&quot;&gt;Secure checkout &lt;span&gt;→&lt;/span&gt;&lt;/a&gt;&lt;p&gt;Taxes and delivery are calculated at checkout.&lt;/p&gt;&lt;/aside&gt;&lt;/div&gt;
+    {% else %}
+    &lt;div class=&quot;empty-state cart-empty&quot;&gt;&lt;span&gt;⌁&lt;/span&gt;&lt;h2&gt;Your cart is waiting&lt;/h2&gt;&lt;p&gt;Add a few practical finds and they’ll appear here.&lt;/p&gt;&lt;a class=&quot;button button-dark&quot; href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;Browse the collection&lt;/a&gt;&lt;/div&gt;
+    {% endif %}
+&lt;/section&gt;
+{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">cart/templates/cart/checkout.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &quot;base.html&quot; %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+&lt;section class=&quot;checkout-page&quot;&gt;&lt;div class=&quot;checkout-intro&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;&lt;span&gt;&lt;/span&gt; Final step&lt;/p&gt;&lt;h1&gt;Checkout&lt;/h1&gt;&lt;p&gt;Fill in your delivery details and we’ll take it from here.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&quot;checkout-layout&quot;&gt;&lt;form class=&quot;checkout-form&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;h2&gt;Delivery details&lt;/h2&gt;&lt;label for=&quot;full_name&quot;&gt;Full name&lt;/label&gt;&lt;input id=&quot;full_name&quot; type=&quot;text&quot; name=&quot;full_name&quot; autocomplete=&quot;name&quot; placeholder=&quot;Alex Morgan&quot; required&gt;&lt;label for=&quot;address&quot;&gt;Shipping address&lt;/label&gt;&lt;textarea id=&quot;address&quot; name=&quot;address&quot; autocomplete=&quot;street-address&quot; placeholder=&quot;Street address, city, postal code&quot; required&gt;&lt;/textarea&gt;&lt;button class=&quot;button button-dark&quot; type=&quot;submit&quot;&gt;Place demo order &lt;span&gt;→&lt;/span&gt;&lt;/button&gt;&lt;/form&gt;
+&lt;aside class=&quot;order-summary&quot;&gt;&lt;h2&gt;Order summary&lt;/h2&gt;{% for item in cart %}&lt;div class=&quot;mini-item&quot;&gt;&lt;span&gt;{{ item.quantity }} × {{ item.product.name }}&lt;/span&gt;&lt;strong&gt;${{ item.total_price }}&lt;/strong&gt;&lt;/div&gt;{% endfor %}&lt;div class=&quot;summary-total&quot;&gt;&lt;span&gt;Total&lt;/span&gt;&lt;strong&gt;${{ cart.get_total_price }}&lt;/strong&gt;&lt;/div&gt;&lt;p&gt;Demo checkout — no payment is collected.&lt;/p&gt;&lt;/aside&gt;&lt;/div&gt;&lt;/section&gt;
+{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">cart/templates/cart/checkout_success.html</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="html"><code>{% extends &quot;base.html&quot; %}
+{% block title %}Order received{% endblock %}
+{% block content %}
+&lt;section class=&quot;success-page&quot;&gt;&lt;div class=&quot;success-mark&quot;&gt;✓&lt;/div&gt;&lt;p class=&quot;eyebrow&quot;&gt;&lt;span&gt;&lt;/span&gt; Order received&lt;/p&gt;&lt;h1&gt;Thanks for shopping with us.&lt;/h1&gt;&lt;p&gt;Your demo order is confirmed. We’ll keep the good things moving.&lt;/p&gt;&lt;a class=&quot;button button-dark&quot; href=&quot;{% url &#x27;store:product_list&#x27; %}&quot;&gt;Continue shopping &lt;span&gt;→&lt;/span&gt;&lt;/a&gt;&lt;/section&gt;
+{% endblock %}
+</code></pre>
+        <div class="filebar" style="margin-top:1.5rem"><span class="path">static/css/style.css</span><span class="badge">replace contents</span></div>
+        <pre class="code" data-lang="css"><code>:root{--ink:#17382e;--ink-dark:#102b23;--cream:#f8f6ef;--paper:#fffef9;--sand:#ece7d9;--muted:#718077;--line:#deddd4;--lime:#d7ec75;--coral:#efae91;--radius:18px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.5 &#x27;DM Sans&#x27;,Arial,sans-serif}a{color:inherit}button,input,textarea{font:inherit}.site-header{background:var(--cream);border-bottom:1px solid #e8e5db}.nav-shell{height:78px;max-width:1240px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:28px}.brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-1px}.brand&gt;span:last-child&gt;span{color:#7b9b31}.brand-mark{display:grid;place-items:center;width:27px;height:27px;background:var(--ink);border-radius:50%;color:#f6f2e7;font:700 15px Georgia}.main-nav{display:flex;gap:24px;margin-left:auto}.main-nav a,.cart-link{text-decoration:none;font-size:14px;font-weight:600}.main-nav a:hover{color:#719122}.cart-link{display:flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--line);border-radius:100px;padding:8px 12px}.bag-icon{font-size:18px;line-height:1}.cart-count{display:grid;place-items:center;min-width:19px;height:19px;border-radius:50%;background:var(--ink);color:white;font-size:11px}.shop-hero{max-width:1240px;margin:auto;padding:55px 32px 68px;display:grid;grid-template-columns:1.05fr .95fr;gap:8%;align-items:center}.eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:#708465;margin:0 0 15px;display:flex;align-items:center;gap:7px}.eyebrow span{width:7px;height:7px;border-radius:50%;background:#91b340}.hero-copy h1,.detail-copy h1,.cart-heading h1,.checkout-intro h1,.success-page h1{font:700 clamp(42px,5.3vw,74px)/.98 Fraunces,Georgia,serif;letter-spacing:-3.5px;margin:0;max-width:8ch}.hero-copy h1 em{font-weight:600;color:#819c39}.hero-text{color:var(--muted);font-size:17px;max-width:430px;margin:25px 0 30px}.button{display:inline-flex;align-items:center;justify-content:center;gap:18px;border:none;border-radius:100px;padding:14px 20px;text-decoration:none;font-size:14px;font-weight:700;cursor:pointer;transition:transform .2s,background .2s}.button:hover{transform:translateY(-2px)}.button-dark{background:var(--ink);color:#fff}.button-dark:hover{background:#254d40}.hero-art{height:365px;border-radius:170px 170px 18px 18px;background:#cfe275;position:relative;overflow:hidden;isolation:isolate}.sun{position:absolute;width:190px;height:190px;border-radius:50%;background:#f9e5b2;top:52px;left:calc(50% - 95px)}.arch{position:absolute;border:2px solid #54785d;border-bottom:0;border-radius:150px 150px 0 0;width:240px;height:290px;bottom:-2px;left:calc(50% - 120px)}.arch-two{width:177px;height:222px;left:calc(50% - 88px);border-color:#f7f2e5}.hero-art p{z-index:2;position:absolute;bottom:22px;right:28px;margin:0;text-transform:uppercase;font-weight:700;letter-spacing:2px;line-height:1.1;font-size:12px}.hero-leaf{position:absolute;z-index:2;color:#1a503b;font-size:88px;transform:rotate(29deg);line-height:.5}.leaf-one{left:55px;bottom:58px}.leaf-two{right:64px;top:100px;transform:rotate(-52deg);font-size:66px}.catalog-section{background:var(--paper);padding:62px max(32px,calc((100vw - 1176px)/2)) 92px}.section-heading{display:flex;justify-content:space-between;align-items:end;gap:25px}.section-heading h2,.order-summary h2,.checkout-form h2{font:700 34px/1 Fraunces,Georgia,serif;letter-spacing:-1.5px;margin:0}.section-heading&gt;p{color:var(--muted);font-size:13px}.category-pills{display:flex;flex-wrap:wrap;gap:9px;margin:28px 0 34px}.category-pills a{border:1px solid var(--line);border-radius:100px;padding:9px 15px;text-decoration:none;font-size:13px;font-weight:600;transition:.2s}.category-pills a:hover,.category-pills .active{background:var(--ink);color:#fff;border-color:var(--ink)}.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:25px}.product-image{height:255px;background:#e8ddca;display:flex;align-items:center;justify-content:center;position:relative;border-radius:14px;overflow:hidden;text-decoration:none}.product-image.shade-True{background:#d7e8b3}.product-card:nth-child(3n) .product-image{background:#f1cfb3}.product-image img,.detail-image img,.cart-thumb img{width:100%;height:100%;object-fit:cover}.product-monogram,.detail-monogram{font:700 100px/1 Fraunces,Georgia,serif;color:#65864b;opacity:.78}.product-card:nth-child(3n) .product-monogram{color:#b77655}.quick-view,.sold-out{position:absolute;bottom:12px;left:12px;right:12px;padding:10px 13px;background:#fffef9e8;border-radius:9px;font-size:12px;font-weight:700;opacity:0;transform:translateY(8px);transition:.25s}.quick-view b{float:right}.sold-out{opacity:1;text-align:center;color:#81503e}.product-image:hover .quick-view{opacity:1;transform:translateY(0)}.product-info{padding:14px 2px 0}.product-category{margin:0 0 3px;text-transform:uppercase;color:#86917a;letter-spacing:1px;font-size:10px;font-weight:700}.product-name-row{display:flex;justify-content:space-between;gap:8px}.product-name-row h3{font-size:15px;margin:0;font-weight:700}.product-name-row h3 a{text-decoration:none}.product-name-row h3 a:hover{text-decoration:underline}.product-name-row strong{font-size:14px}.empty-state{text-align:center;border:1px dashed #cad0bd;padding:65px 25px;grid-column:1/-1;border-radius:var(--radius)}.empty-state&gt;span{font-size:35px;color:#84a541}.empty-state h2{font:700 30px Fraunces,serif;margin:8px}.empty-state p{color:var(--muted);margin:0 0 22px}.breadcrumb,.detail-back{max-width:1176px;margin:0 auto;padding:22px 32px;color:var(--muted);font-size:13px}.breadcrumb a{text-decoration:none;color:var(--ink)}.breadcrumb span{padding:0 8px;color:#a6afa3}.product-detail{max-width:1176px;margin:4px auto 38px;padding:0 32px;display:grid;grid-template-columns:1fr 1fr;gap:9%;align-items:center}.detail-image{height:510px;background:#dbeab9;border-radius:18px;display:grid;place-items:center;position:relative;overflow:hidden}.detail-monogram{font-size:190px}.image-caption{position:absolute;bottom:18px;left:18px;background:#fffdf6dd;border-radius:100px;padding:7px 11px;font-size:11px;font-weight:700}.detail-copy h1{font-size:clamp(39px,4.4vw,62px);max-width:11ch}.detail-price{font-size:21px;font-weight:700;margin:16px 0}.detail-description{color:var(--muted);max-width:470px;line-height:1.7}.detail-rule{height:1px;background:var(--line);margin:27px 0}.add-form label,.checkout-form label,.cart-quantity label{font-size:12px;font-weight:700;display:block;margin-bottom:8px}.add-row{display:flex;gap:10px}.quantity-picker input,.cart-quantity input{border:1px solid var(--line);border-radius:100px;background:var(--paper);padding:12px;width:75px;color:var(--ink);font-weight:700}.add-button{flex:1}.stock-note{font-size:12px;color:var(--muted)}.stock-note i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#8bab42;margin-right:7px}.unavailable{padding:14px;background:#f8e5dc;border-radius:8px;color:#8e513d}.perks{display:flex;flex-wrap:wrap;gap:14px;border-top:1px solid var(--line);margin-top:23px;padding-top:17px;color:#637269;font-size:12px;font-weight:600}.detail-back{border-top:1px solid var(--line);padding-top:25px;padding-bottom:40px}.detail-back a{font-weight:700;text-decoration:none}.cart-page,.checkout-page{max-width:1176px;margin:auto;padding:55px 32px 88px}.cart-heading h1{font-size:50px;max-width:none}.cart-heading h1 small{font:500 18px &#x27;DM Sans&#x27;;color:var(--muted);letter-spacing:0}.cart-layout,.checkout-layout{display:grid;grid-template-columns:1.5fr .75fr;gap:48px;margin-top:38px}.cart-items{border-top:1px solid var(--line)}.cart-item{display:grid;grid-template-columns:104px 1fr 100px 92px;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}.cart-thumb{width:104px;height:105px;border-radius:10px;background:#dce8bf;display:grid;place-items:center;overflow:hidden}.cart-thumb span{font:700 38px Fraunces;color:#66854a}.cart-item-info p{margin:0 0 2px;color:#819079;text-transform:uppercase;letter-spacing:1px;font-size:9px;font-weight:700}.cart-item-info h2{font:700 17px Fraunces;margin:0 0 6px}.cart-item-info h2 a{text-decoration:none}.cart-item-info strong{font-size:13px}.cart-quantity label{font-size:10px}.cart-line-total{text-align:right}.cart-line-total strong{font-size:14px}.cart-line-total button{margin-top:10px;padding:0;border:0;background:transparent;text-decoration:underline;color:var(--muted);font-size:11px;cursor:pointer}.order-summary{align-self:start;background:#edf3d6;padding:25px;border-radius:14px}.order-summary h2{font-size:25px;margin-bottom:21px}.order-summary&gt;div{display:flex;justify-content:space-between;gap:15px;padding:11px 0;color:#5d7164;font-size:13px;border-bottom:1px solid #d3dfaf}.order-summary .summary-total{padding-top:18px;border-bottom:0;color:var(--ink);font-weight:700}.summary-total strong{font-size:19px}.checkout-button{width:100%;margin-top:17px}.order-summary&gt;p{font-size:11px;color:#718070;margin:16px 0 0}.cart-empty{margin-top:32px;background:var(--paper)}.checkout-intro h1{font-size:50px;max-width:none}.checkout-intro&gt;p:last-child{color:var(--muted);margin:13px 0 0}.checkout-layout{grid-template-columns:1.2fr .8fr;margin-top:34px}.checkout-form{padding:26px;background:var(--paper);border:1px solid var(--line);border-radius:14px}.checkout-form h2{font-size:26px;margin-bottom:24px}.checkout-form label{margin-top:17px}.checkout-form input,.checkout-form textarea{width:100%;padding:13px;border:1px solid var(--line);border-radius:8px;background:#fff;outline-color:#89a449}.checkout-form textarea{height:98px;resize:vertical}.checkout-form button{margin-top:23px}.mini-item span{max-width:70%}.success-page{min-height:65vh;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;padding:80px 25px}.success-mark{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:#d7ec75;font-size:32px;margin-bottom:22px}.success-page h1{max-width:12ch;font-size:48px}.success-page&gt;p:not(.eyebrow){max-width:420px;color:var(--muted);margin:20px 0 27px}.site-footer{border-top:1px solid #dedbd0;max-width:1176px;margin:auto;padding:28px 0 35px;display:flex;align-items:center;gap:25px;color:var(--muted);font-size:12px}.site-footer p{margin:0}.footer-note{margin-left:auto!important}@media(max-width:800px){.nav-shell{padding:0 20px;height:68px}.main-nav{display:none}.shop-hero{grid-template-columns:1fr;padding:40px 20px 48px}.hero-copy h1{font-size:52px}.hero-art{height:270px;max-width:520px;width:100%;justify-self:center}.catalog-section{padding:45px 20px 65px}.product-grid{grid-template-columns:repeat(2,1fr);gap:18px}.product-image{height:215px}.product-detail{grid-template-columns:1fr;padding:0 20px;gap:35px}.breadcrumb,.detail-back{padding-left:20px;padding-right:20px}.detail-image{height:360px}.cart-page,.checkout-page{padding:40px 20px 65px}.cart-layout,.checkout-layout{grid-template-columns:1fr;gap:26px}.site-footer{margin:0 20px;flex-wrap:wrap}.footer-note{margin-left:0!important}}@media(max-width:500px){.cart-link-label{display:none}.product-grid{gap:13px}.product-image{height:155px}.product-monogram{font-size:65px}.product-name-row{display:block}.product-name-row strong{display:block;margin-top:2px}.section-heading h2{font-size:29px}.section-heading&gt;p{display:none}.cart-item{grid-template-columns:75px 1fr 72px;gap:12px}.cart-thumb{width:75px;height:76px}.cart-line-total{grid-column:3;grid-row:1}.cart-quantity{grid-column:2;grid-row:2}.cart-item-info{grid-column:2;grid-row:1}.add-row{flex-wrap:wrap}.quantity-picker{width:100%}.quantity-picker input{width:100%}.add-button{width:100%}.site-footer{display:grid;gap:12px}.hero-copy h1{font-size:45px}}
+</code></pre>
+        <div class="why" style="margin-top:1.2rem"><b>Why the fallback initials are useful</b>Products can be added from Django Admin before images are ready. The templates deliberately show a designed letter tile when <code>product.image</code> is empty, so the shop still looks complete while juniors learn image upload later.</div>
+      </div>
+    </section>
+
+    <section class="step" id="step-19" data-stage="meta" style="--c:var(--meta)">
+      <div class="step-head">
+        <div class="step-head-left"><span class="step-num">STEP 19</span><h2>Terminal — run the full flow end to end</h2></div>
+        <span class="tag">verify</span>
+      </div>
+      <div class="step-body">
+        <pre class="code" data-lang="bash"><code>python manage.py runserver</code></pre>
+        <p>Walk through it exactly like a real visitor:</p>
+        <ul class="checklist">
+          <li><code>/</code> → see the product grid</li>
+          <li>Click a product → detail page</li>
+          <li>Set quantity, "Add to Cart" → redirected to <code>/cart/</code>, item appears, header shows <code>Cart (1)</code></li>
+          <li>"Proceed to Checkout" → fill the form, "Place Order" → confirmation page, cart is now empty</li>
+        </ul>
+        <div class="why" style="margin-top:1.1rem"><b>If anything 404s or 500s</b>Read the traceback, find the first frame inside <code>store/</code> or <code>cart/</code> (not Django's internals), and check that file against what this walkthrough shows.</div>
+      </div>
+    </section>
+
+    <div class="pattern">
+      <span class="eyebrow"><span class="dot"></span>The pattern worth remembering</span>
+      <h3>The build order was never random.</h3>
+      <div class="loopstrip">
+        <span class="node" style="--c:var(--model)">Model</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--migrate)">Migrate</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--admin)">Admin (seed data)</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--view)">View</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--url)">URL</span><span class="arrow">→</span>
+        <span class="node" style="--c:var(--template)">Template</span>
+      </div>
+      <p>It followed one repeating loop, and whenever a template referenced something that didn't exist yet (<code>cart:cart_add</code>, <code>cart:checkout</code>), that became the very next thing built. That's the real habit this walkthrough is teaching: build the layer that has nothing to depend on first (the data shape), and let each following file's requirements pull the next file into existence — rather than trying to plan every file up front.</p>
+
+      <div class="filebar" style="margin-top:1.6rem"><span class="path">final project tree</span><span class="badge">build order</span></div>
+      <div class="tree">quickcart/
+├── manage.py
+├── <span class="hi">ecommerce_project/</span>
+│   ├── settings.py        <span class="cm">(Steps 3, 11, 17)</span>
+│   └── urls.py             <span class="cm">(Steps 10, 15)</span>
+├── <span class="hi">store/</span>
+│   ├── models.py            <span class="cm">(Step 4)</span>
+│   ├── admin.py              <span class="cm">(Step 6)</span>
+│   ├── views.py                <span class="cm">(Step 8)</span>
+│   ├── urls.py                  <span class="cm">(Step 9)</span>
+│   └── templates/store/
+│       ├── product_list.html      <span class="cm">(Step 13)</span>
+│       └── product_detail.html     <span class="cm">(Step 14)</span>
+├── <span class="hi">cart/</span>
+│   ├── cart.py                <span class="cm">(Step 15)</span>
+│   ├── views.py                 <span class="cm">(Steps 15, 16, 17)</span>
+│   ├── urls.py                    <span class="cm">(Steps 15, 16)</span>
+│   ├── context_processors.py        <span class="cm">(Step 17)</span>
+│   └── templates/cart/
+│       ├── cart_detail.html          <span class="cm">(Step 15)</span>
+│       ├── checkout.html               <span class="cm">(Step 16)</span>
+│       └── checkout_success.html         <span class="cm">(Step 16)</span>
+├── <span class="hi">templates/</span>
+│   └── base.html               <span class="cm">(Step 12, updated Step 17)</span>
+├── <span class="hi">static/css/</span>
+│   └── style.css                 <span class="cm">(Step 18)</span>
+└── media/products/                 <span class="cm">(created automatically on first image upload)</span></div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <span class="mono">quickcart / build-log.md</span>
+  <span>20 steps + a visual refresh · 2 apps · 1 repeating loop</span>
+</footer>
+
+<script>
+// ---- syntax dimming: comments + strings, per line, safe runtime-only ----
+document.querySelectorAll('pre.code code').forEach(block=>{
+  const lang = block.parentElement.getAttribute('data-lang');
+  const lines = block.textContent.split('\n');
+  const commentPrefix = (lang === 'python' || lang === 'bash') ? '#' : null;
+  const escaped = lines.map(line=>{
+    let html = line
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // re-unescape already-escaped html-lang lines (they were pre-escaped in source)
+    return html;
+  });
+  block.innerHTML = escaped.map((line, i)=>{
+    const raw = lines[i];
+    const trimmed = raw.trim();
+    if (commentPrefix && trimmed.startsWith(commentPrefix)) {
+      return '<span class="comment-line">'+line+'</span>';
+    }
+    // highlight trailing python comments like "# ..." after code on same line
+    if (lang === 'python' || lang === 'bash') {
+      const idx = raw.indexOf(' # ');
+      if (idx !== -1) {
+        const before = line.substring(0, idx);
+        const after = line.substring(idx);
+        return before + '<span class="comment-line">'+after+'</span>';
+      }
+    }
+    return line;
+  }).join('\n');
+});
+
+// ---- html pre-escaped content already has &lt; &gt; in source, so decode wasn't needed above ----
+// (html/css blocks are authored already-escaped; python/bash blocks are raw text escaped at runtime)
+
+// ---- populate step nav ----
+const steps = Array.from(document.querySelectorAll('.step'));
+const stepnav = document.getElementById('stepnav');
+steps.forEach(s=>{
+  const num = s.querySelector('.step-num').textContent.replace('STEP ','');
+  const title = s.querySelector('h2').textContent;
+  const stage = s.getAttribute('data-stage');
+  const color = getComputedStyle(s).getPropertyValue('--c') || 'var(--meta)';
+  const a = document.createElement('a');
+  a.href = '#'+s.id;
+  a.dataset.target = s.id;
+  a.style.setProperty('--c', s.style.getPropertyValue('--c'));
+  a.innerHTML = '<span class="n">'+num.padStart(2,'0')+'</span><span>'+title+'</span>';
+  stepnav.appendChild(a);
+});
+
+// ---- scrollspy: highlight active step in nav + loop tracker ----
+const navLinks = Array.from(stepnav.querySelectorAll('a'));
+const loopNodes = Array.from(document.querySelectorAll('.loop-node'));
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      navLinks.forEach(a=>a.classList.toggle('active', a.dataset.target===id));
+      const stage = entry.target.getAttribute('data-stage');
+      loopNodes.forEach(n=>n.classList.toggle('active', n.dataset.stage===stage));
+      const activeLink = stepnav.querySelector('a.active');
+      if(activeLink) activeLink.scrollIntoView({block:'nearest'});
+    }
+  });
+}, {rootMargin:'-15% 0px -70% 0px', threshold:0});
+steps.forEach(s=>observer.observe(s));
+
+// ---- progress bar ----
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progress.style.width = scrolled + '%';
+}, {passive:true});
+
+// ---- mobile nav toggle ----
+const navToggle = document.getElementById('navToggle');
+navToggle.addEventListener('click', ()=>{
+  stepnav.classList.toggle('open');
+  navToggle.querySelector('span:last-child').textContent = stepnav.classList.contains('open') ? '▴' : '▾';
+});
+</script>
+</body>
+</html>

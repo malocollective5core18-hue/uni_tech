@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building ChatSpace — Django Channels Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+:root{
+  --bg:#0B0F1A;
+  --surface:#121826;
+  --surface-2:#171F31;
+  --border:#243049;
+  --border-soft:#1B2438;
+  --text:#E7ECF7;
+  --text-dim:#8D97AF;
+  --text-faint:#5C6785;
+  --setup:#8B96B3;
+  --http:#E8A33D;
+  --http-dim:#5A4726;
+  --ws:#45D9C8;
+  --ws-dim:#1D4842;
+  --verify:#9C8CFF;
+  --verify-dim:#332C5C;
+  --radius:10px;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+  --sans:'IBM Plex Sans', system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+a{color:inherit;}
+::selection{background:var(--ws-dim);color:var(--text);}
+
+/* ---------- progress bar ---------- */
+#progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--setup),var(--http),var(--ws),var(--verify));
+  z-index:200;transition:width .1s linear;
+}
+
+/* ---------- top bar (mobile) ---------- */
+#topbar{
+  display:none;
+  position:sticky;top:0;z-index:150;
+  background:rgba(11,15,26,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border-soft);
+  padding:14px 18px;
+  align-items:center;justify-content:space-between;
+}
+#topbar .brand{font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:.02em;}
+#topbar .brand span{color:var(--ws);}
+#navToggle{
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px;cursor:pointer;
+}
+
+/* ---------- layout ---------- */
+#shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh;}
+#sidebar{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  border-right:1px solid var(--border-soft);
+  background:var(--surface);
+  padding:26px 0 60px;
+}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+.brandblock{padding:0 22px 20px;border-bottom:1px solid var(--border-soft);margin-bottom:14px;}
+.brandblock .brand{font-family:var(--mono);font-weight:800;font-size:17px;letter-spacing:.01em;}
+.brandblock .brand span{color:var(--ws);}
+.brandblock .sub{color:var(--text-dim);font-size:12.5px;margin-top:6px;}
+
+.lane-legend{display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px 6px;}
+.lane-chip{
+  display:flex;align-items:center;gap:6px;font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.04em;color:var(--text-dim);
+  border:1px solid var(--border);border-radius:20px;padding:3px 9px;
+}
+.lane-chip i{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.lane-chip.setup i{background:var(--setup);}
+.lane-chip.http i{background:var(--http);}
+.lane-chip.ws i{background:var(--ws);}
+.lane-chip.verify i{background:var(--verify);}
+
+nav#steps{position:relative;padding:10px 0 0 0;}
+nav#steps .rail{
+  position:absolute;left:33px;top:6px;bottom:6px;width:2px;
+  background:var(--border-soft);
+}
+.navitem{
+  position:relative;display:flex;align-items:baseline;gap:12px;
+  padding:7px 22px 7px 22px;text-decoration:none;cursor:pointer;
+}
+.navitem .node{
+  position:relative;z-index:2;flex:0 0 auto;
+  width:9px;height:9px;border-radius:50%;
+  background:var(--border);border:2px solid var(--bg);
+  margin-left:6px;
+}
+.navitem.setup .node{background:var(--setup);}
+.navitem.http .node{background:var(--http);}
+.navitem.ws .node{background:var(--ws);}
+.navitem.verify .node{background:var(--verify);}
+.navitem .label{font-size:13px;color:var(--text-dim);transition:color .15s;}
+.navitem .num{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);min-width:20px;}
+.navitem:hover .label{color:var(--text);}
+.navitem.active .label{color:var(--text);font-weight:600;}
+.navitem.active{background:var(--surface-2);}
+.navitem.section-break{margin-top:10px;}
+
+/* ---------- main ---------- */
+main{padding:0;min-width:0;}
+.hero{
+  padding:64px 56px 48px;
+  border-bottom:1px solid var(--border-soft);
+  background:
+    radial-gradient(ellipse 900px 400px at 15% -10%, rgba(232,163,61,.08), transparent 60%),
+    radial-gradient(ellipse 900px 400px at 85% -10%, rgba(69,217,200,.09), transparent 60%);
+}
+.eyebrow{
+  font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--text-faint);
+  text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--text-faint);}
+h1.title{
+  font-family:var(--mono);font-weight:800;font-size:clamp(28px,4vw,44px);
+  line-height:1.15;letter-spacing:-.01em;max-width:820px;
+}
+h1.title .accent-http{color:var(--http);}
+h1.title .accent-ws{color:var(--ws);}
+.hero-sub{color:var(--text-dim);font-size:17px;margin-top:16px;max-width:640px;}
+.scope{
+  margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;max-width:900px;
+}
+.scope li{
+  list-style:none;background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:var(--radius);padding:12px 14px;font-size:13.5px;color:var(--text-dim);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.scope li::before{content:"✓";color:var(--ws);font-weight:700;flex:0 0 auto;}
+
+/* hero diagram */
+.diagram-wrap{margin-top:44px;background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:22px 22px 14px;}
+.diagram-cap{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:10px;text-align:center;}
+svg{display:block;width:100%;height:auto;}
+
+/* ---------- content ---------- */
+.content{padding:10px 56px 120px;max-width:900px;}
+.step{
+  padding:52px 0 8px;border-top:1px solid var(--border-soft);
+  scroll-margin-top:20px;
+}
+.step:first-of-type{border-top:none;}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.step-badge{
+  font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.05em;
+  padding:4px 10px;border-radius:20px;border:1px solid;
+  white-space:nowrap;
+}
+.step.setup .step-badge{color:var(--setup);border-color:var(--setup);background:rgba(139,150,179,.08);}
+.step.http .step-badge{color:var(--http);border-color:var(--http);background:rgba(232,163,61,.08);}
+.step.ws .step-badge{color:var(--ws);border-color:var(--ws);background:rgba(69,217,200,.08);}
+.step.verify .step-badge{color:var(--verify);border-color:var(--verify);background:rgba(156,140,255,.08);}
+.step h2{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.005em;}
+.step .where{
+  font-family:var(--mono);font-size:12.5px;color:var(--text-faint);
+  margin:2px 0 18px;padding-left:0;
+}
+.step p{margin:14px 0;color:#CBD3E5;font-size:15.5px;}
+.step p strong{color:var(--text);font-weight:600;}
+
+.codeblock{position:relative;margin:16px 0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border-soft);}
+.codeblock .filebar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface-2);padding:8px 14px;font-family:var(--mono);
+  font-size:11.5px;color:var(--text-faint);border-bottom:1px solid var(--border-soft);
+}
+.codeblock .copybtn{
+  background:transparent;border:1px solid var(--border);color:var(--text-dim);
+  font-family:var(--mono);font-size:10.5px;padding:3px 9px;border-radius:6px;cursor:pointer;
+}
+.codeblock .copybtn:hover{color:var(--text);border-color:var(--text-dim);}
+.codeblock pre{margin:0;padding:16px;overflow-x:auto;background:#0d1117 !important;font-size:13.2px;}
+.codeblock code{font-family:var(--mono) !important;}
+
+.callout{
+  margin:18px 0;padding:16px 18px;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--border-soft);border-left:3px solid var(--verify);
+}
+.callout .why{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--verify);margin-bottom:8px;display:block;font-weight:700;
+}
+.callout p{margin:0;font-size:14.5px;color:#CBD3E5;}
+.callout p strong{color:var(--text);}
+.callout code, .step p code, .step li code{
+  font-family:var(--mono);background:var(--surface-2);border:1px solid var(--border-soft);
+  padding:1px 6px;border-radius:5px;font-size:.87em;color:#F0C57A;
+}
+
+.terminal-check{
+  margin:16px 0;padding:14px 16px;border-radius:var(--radius);
+  background:rgba(69,217,200,.05);border:1px dashed var(--ws-dim);font-size:14px;color:var(--text-dim);
+}
+.terminal-check strong{color:var(--ws);}
+
+.trace{
+  background:#0d1117;border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:16px 18px;font-family:var(--mono);font-size:13px;color:var(--text-dim);
+  overflow-x:auto;margin:16px 0;white-space:pre;
+}
+.trace .http{color:var(--http);}
+.trace .ws{color:var(--ws);}
+.trace .arrow{color:var(--text-faint);}
+
+.step ol, .step ul.plain{margin:14px 0 14px 22px;color:#CBD3E5;font-size:15px;}
+.step ol li, .step ul.plain li{margin:6px 0;}
+
+/* ---------- final tree + pattern ---------- */
+.tree-block{
+  background:#0d1117;border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:20px 22px;font-family:var(--mono);font-size:13px;color:var(--text-dim);
+  overflow-x:auto;white-space:pre;line-height:1.7;
+}
+.tree-block .tag{color:var(--text-faint);font-style:italic;}
+
+.pattern-section{
+  margin-top:60px;padding:44px;border-radius:16px;
+  background:linear-gradient(160deg, rgba(232,163,61,.07), rgba(69,217,200,.07));
+  border:1px solid var(--border-soft);position:relative;overflow:hidden;
+}
+.pattern-section .eyebrow{color:var(--text-faint);}
+.pattern-section h2{font-family:var(--mono);font-size:26px;margin-bottom:16px;}
+.pattern-section p{font-size:16px;color:#DAE1F0;max-width:760px;}
+.pattern-halves{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;}
+.pattern-half{
+  background:var(--surface);border-radius:var(--radius);padding:18px 20px;
+  border:1px solid var(--border-soft);
+}
+.pattern-half.http-h{border-top:3px solid var(--http);}
+.pattern-half.ws-h{border-top:3px solid var(--ws);}
+.pattern-half h3{font-family:var(--mono);font-size:14px;margin-bottom:8px;}
+.pattern-half.http-h h3{color:var(--http);}
+.pattern-half.ws-h h3{color:var(--ws);}
+.pattern-half p{font-size:14px;color:var(--text-dim);margin:0;}
+@media (max-width:760px){.pattern-halves{grid-template-columns:1fr;}}
+
+footer{padding:40px 56px 80px;color:var(--text-faint);font-size:13px;font-family:var(--mono);}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  #shell{grid-template-columns:1fr;}
+  #topbar{display:flex;}
+  #sidebar{
+    position:fixed;left:0;top:57px;width:280px;max-width:82vw;
+    height:calc(100vh - 57px);transform:translateX(-100%);
+    transition:transform .22s ease;z-index:140;box-shadow:20px 0 40px rgba(0,0,0,.4);
+  }
+  #sidebar.open{transform:translateX(0);}
+  .hero{padding:40px 22px 32px;}
+  .content{padding:10px 22px 100px;}
+  footer{padding:30px 22px 60px;}
+  .pattern-section{padding:26px;}
+}
+/* final responsive pass */
+img,svg,video,canvas{max-width:100%;height:auto;}
+pre,.trace,.tree-block{max-width:100%;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){
+  body{font-size:15px;}
+  #topbar{padding:10px 14px;}
+  #topbar .brand{font-size:12px;}
+  #navToggle{min-height:42px;padding:9px 11px;}
+  .hero{padding:32px 16px 24px;}
+  h1.title{font-size:clamp(24px,8vw,34px);overflow-wrap:anywhere;}
+  .hero-sub{font-size:15px;}
+  .scope{grid-template-columns:1fr;margin-top:20px;}
+  .scope li{font-size:13px;padding:10px 12px;}
+  .content{padding:8px 16px 72px;}
+  .step{padding-top:36px;}
+  .step-head{align-items:flex-start;gap:9px;flex-wrap:wrap;}
+  .step-head .step-badge{font-size:10px;padding:4px 8px;}
+  .step h2{font-size:18px;line-height:1.3;overflow-wrap:anywhere;}
+  .step p,.step ol,.step ul.plain{font-size:14px;}
+  .step-head{flex-wrap:wrap;}
+  .codeblock .filebar{gap:10px;align-items:flex-start;flex-wrap:wrap;}
+  .codeblock .copybtn{min-height:36px;padding:7px 10px;}
+  .codeblock pre{padding:12px;font-size:12px;}
+  .callout,.terminal-check{padding:13px 14px;}
+  .pattern-section{padding:20px 16px;margin-top:40px;}
+  .pattern-section h2{font-size:21px;}
+  .pattern-half{padding:15px;}
+  footer{padding:24px 16px 48px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="topbar">
+  <div class="brand">Chat<span>Space</span></div>
+  <button id="navToggle">☰ Steps</button>
+</div>
+
+<div id="shell">
+  <aside id="sidebar">
+    <div class="brandblock">
+      <div class="brand">Chat<span>Space</span></div>
+      <div class="sub">Django Channels build walkthrough</div>
+    </div>
+    <div class="lane-legend">
+      <span class="lane-chip setup"><i></i>SETUP</span>
+      <span class="lane-chip http"><i></i>HTTP LANE</span>
+      <span class="lane-chip ws"><i></i>WS LANE</span>
+      <span class="lane-chip verify"><i></i>VERIFY</span>
+    </div>
+    <nav id="steps">
+      <div class="rail"></div>
+      <a class="navitem setup" href="#step-0"><span class="node"></span><span class="num">00</span><span class="label">Set up the workspace</span></a>
+      <a class="navitem setup" href="#step-1"><span class="node"></span><span class="num">01</span><span class="label">Create the project</span></a>
+      <a class="navitem setup" href="#step-2"><span class="node"></span><span class="num">02</span><span class="label">Create the chat app</span></a>
+      <a class="navitem setup" href="#step-3"><span class="node"></span><span class="num">03</span><span class="label">settings.py — Channels config</span></a>
+
+      <a class="navitem http section-break" href="#step-4"><span class="node"></span><span class="num">04</span><span class="label">models.py</span></a>
+      <a class="navitem http" href="#step-5"><span class="node"></span><span class="num">05</span><span class="label">Migrate</span></a>
+      <a class="navitem http" href="#step-6"><span class="node"></span><span class="num">06</span><span class="label">admin.py</span></a>
+      <a class="navitem http" href="#step-7"><span class="node"></span><span class="num">07</span><span class="label">Superuser + seed a room</span></a>
+      <a class="navitem http" href="#step-8"><span class="node"></span><span class="num">08</span><span class="label">views.py</span></a>
+      <a class="navitem http" href="#step-9"><span class="node"></span><span class="num">09</span><span class="label">chat/urls.py</span></a>
+      <a class="navitem http" href="#step-10"><span class="node"></span><span class="num">10</span><span class="label">project urls.py</span></a>
+      <a class="navitem http" href="#step-11"><span class="node"></span><span class="num">11</span><span class="label">Templates + static settings</span></a>
+      <a class="navitem http" href="#step-12"><span class="node"></span><span class="num">12</span><span class="label">base.html</span></a>
+      <a class="navitem http" href="#step-13"><span class="node"></span><span class="num">13</span><span class="label">chat templates</span></a>
+
+      <a class="navitem ws section-break" href="#step-14"><span class="node"></span><span class="num">14</span><span class="label">consumers.py</span></a>
+      <a class="navitem ws" href="#step-15"><span class="node"></span><span class="num">15</span><span class="label">routing.py</span></a>
+      <a class="navitem ws" href="#step-16"><span class="node"></span><span class="num">16</span><span class="label">asgi.py</span></a>
+      <a class="navitem ws" href="#step-17"><span class="node"></span><span class="num">17</span><span class="label">room.html — WS client</span></a>
+
+      <a class="navitem verify section-break" href="#step-18"><span class="node"></span><span class="num">18</span><span class="label">Run + confirm ASGI</span></a>
+      <a class="navitem verify" href="#step-19"><span class="node"></span><span class="num">19</span><span class="label">Test in two tabs</span></a>
+      <a class="navitem verify" href="#tree"><span class="node"></span><span class="num">＋</span><span class="label">Final project tree</span></a>
+      <a class="navitem verify" href="#pattern"><span class="node"></span><span class="num">＋</span><span class="label">The pattern worth remembering</span></a>
+      <!-- NAVITEMS -->
+    </nav>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Real build log · file by file</div>
+      <h1 class="title">Building <span class="accent-ws">ChatSpace</span> — a live chat app, entirely inside <span class="accent-http">Django</span></h1>
+      <p class="hero-sub">Django Channels extends Django's own request-handling to speak WebSocket — same models, views, templates, and ORM you already know. The one new problem: a chat message has to reach <em>every other open browser tab in the room</em>, not just the sender. Regular request/response can't do that. Channels can.</p>
+
+      <ul class="scope">
+        <li>Named chat rooms, created via the admin</li>
+        <li>Room page with history + a live, no-refresh message stream</li>
+        <li>Any logged-in user can post to any room</li>
+        <li>Messages persist to the database — history survives a refresh</li>
+      </ul>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono', monospace">
+          <defs>
+            <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="var(--text-faint)"/>
+            </marker>
+            <marker id="ahttp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="var(--http)"/>
+            </marker>
+            <marker id="aws" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="var(--ws)"/>
+            </marker>
+          </defs>
+
+          <!-- incoming connection -->
+          <circle cx="34" cy="150" r="5" fill="var(--text-dim)"/>
+          <text x="34" y="130" fill="var(--text-faint)" font-size="10.5" text-anchor="middle">connection</text>
+          <line x1="42" y1="150" x2="115" y2="150" stroke="var(--text-faint)" stroke-width="1.5" marker-end="url(#ah)"/>
+
+          <!-- ProtocolTypeRouter -->
+          <rect x="118" y="118" width="128" height="64" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+          <text x="182" y="146" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="700">ProtocolType</text>
+          <text x="182" y="161" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="700">Router</text>
+
+          <!-- HTTP lane (top) -->
+          <path d="M246,132 C 300,112 320,80 372,80" stroke="var(--http)" stroke-width="1.5" fill="none" marker-end="url(#ahttp)"/>
+          <text x="300" y="70" fill="var(--http)" font-size="10" font-weight="700">'http'</text>
+
+          <rect x="374" y="52" width="150" height="56" rx="8" fill="var(--http-dim)" stroke="var(--http)" stroke-opacity="0.5"/>
+          <text x="449" y="76" fill="var(--http)" font-size="10.5" text-anchor="middle" font-weight="700">django_asgi_app</text>
+          <text x="449" y="90" fill="#C9A96A" font-size="9" text-anchor="middle">Steps 8–13</text>
+
+          <line x1="524" y1="80" x2="590" y2="80" stroke="var(--http)" stroke-width="1.5" marker-end="url(#ahttp)"/>
+
+          <rect x="592" y="52" width="150" height="56" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+          <text x="667" y="76" fill="var(--text)" font-size="10.5" text-anchor="middle" font-weight="700">views → templates</text>
+          <text x="667" y="90" fill="var(--text-faint)" font-size="9" text-anchor="middle">page + history</text>
+
+          <line x1="742" y1="80" x2="800" y2="80" stroke="var(--http)" stroke-width="1.5" marker-end="url(#ahttp)"/>
+          <text x="835" y="84" font-size="18" text-anchor="middle">🖥️</text>
+
+          <!-- WS lane (bottom) -->
+          <path d="M246,168 C 300,188 320,220 372,220" stroke="var(--ws)" stroke-width="1.5" fill="none" marker-end="url(#aws)"/>
+          <text x="300" y="238" fill="var(--ws)" font-size="10" font-weight="700">'websocket'</text>
+
+          <rect x="374" y="192" width="150" height="56" rx="8" fill="var(--ws-dim)" stroke="var(--ws)" stroke-opacity="0.5"/>
+          <text x="449" y="216" fill="var(--ws)" font-size="10" text-anchor="middle" font-weight="700">AuthMiddlewareStack</text>
+          <text x="449" y="230" fill="#6FE3D6" font-size="9" text-anchor="middle">scope['user']</text>
+
+          <line x1="524" y1="220" x2="590" y2="220" stroke="var(--ws)" stroke-width="1.5" marker-end="url(#aws)"/>
+
+          <rect x="592" y="192" width="150" height="56" rx="8" fill="var(--ws-dim)" stroke="var(--ws)" stroke-opacity="0.5"/>
+          <text x="667" y="216" fill="var(--ws)" font-size="10.5" text-anchor="middle" font-weight="700">ChatConsumer</text>
+          <text x="667" y="230" fill="#6FE3D6" font-size="9" text-anchor="middle">group_send</text>
+
+          <path d="M742,206 C 780,195 795,175 812,158" stroke="var(--ws)" stroke-width="1.2" fill="none" marker-end="url(#aws)"/>
+          <path d="M742,220 L 812,220" stroke="var(--ws)" stroke-width="1.2" fill="none" marker-end="url(#aws)"/>
+          <path d="M742,234 C 780,246 795,258 812,266" stroke="var(--ws)" stroke-width="1.2" fill="none" marker-end="url(#aws)"/>
+          <text x="838" y="162" font-size="16" text-anchor="middle">💬</text>
+          <text x="838" y="224" font-size="16" text-anchor="middle">💬</text>
+          <text x="838" y="270" font-size="16" text-anchor="middle">💬</text>
+          <text x="836" y="290" fill="var(--text-faint)" font-size="9" text-anchor="middle">every open tab</text>
+        </svg>
+        <div class="diagram-cap">one process, two lanes — traced fully in Step 16</div>
+      </div>
+    </section>
+
+    <div class="content" id="content">
+
+      <section class="step setup" id="step-0">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 0 — Terminal: set up the workspace</h2>
+        <div class="where">terminal</div>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">mkdir chatspace &amp;&amp; cd chatspace
+python -m venv venv
+source venv/bin/activate
+pip install django channels</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why channels is installed up front</span>
+          <p>Unlike a Django app you bolt on later, Channels isn't a feature you add to a finished project — it changes <strong>how the whole project is served</strong> (ASGI instead of plain WSGI). That decision has to be made before <code>startproject</code> even runs, not discovered mid-build.</p>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-1">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 1 — Terminal: create the project</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">django-admin startproject chat_project .
+python manage.py runserver     # sanity check, then Ctrl+C</code></pre>
+        </div>
+        <p><strong>What now exists:</strong></p>
+        <div class="tree-block">chatspace/
+    manage.py
+    chat_project/
+        settings.py
+        urls.py
+        asgi.py
+        wsgi.py</div>
+        <div class="callout">
+          <span class="why">Note</span>
+          <p><code>asgi.py</code> is already sitting there, generated by default — this is the file Step 16 will rewrite. Every Django project has it; this is the first one in the series where it isn't ignored.</p>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-2">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 2 — Terminal: create the chat app</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py startapp chat</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-3">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 3 — Open chat_project/settings.py</h2>
+        <div class="where">chat_project/settings.py</div>
+        <p><strong>Add to INSTALLED_APPS:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'channels',        # &lt;- added
+    'chat',             # &lt;- added
+]</code></pre>
+        </div>
+        <p><strong>Add near the bottom of the file:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">ASGI_APPLICATION = 'chat_project.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why ASGI_APPLICATION matters immediately</span>
+          <p>Even though <code>asgi.py</code> isn't rewritten until Step 16, this setting tells Django (and <code>manage.py runserver</code>, once Channels is installed) <strong>which</strong> ASGI callable to boot. Without it, Channels has no idea where to find the routing defined later.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why InMemoryChannelLayer, not Redis</span>
+          <p>A "channel layer" is how one WebSocket connection tells another "a new message arrived" — it needs shared, cross-connection state. In production that has to be Redis (<code>channels_redis</code>), because a real deployment runs multiple server processes that don't share memory. For a single <code>runserver</code> process on your own machine, <code>InMemoryChannelLayer</code> does the same job with zero extra infrastructure — perfect for learning the pattern, not for production traffic.</p>
+        </div>
+      </section>
+
+      <section class="step http" id="step-4">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 4 — Open chat/models.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/models.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.db import models
+from django.contrib.auth.models import User
+
+class Room(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Message(models.Model):
+    room = models.ForeignKey(Room, related_name='messages', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.author}: {self.content[:30]}"</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why messages are a plain Django model, even in a "real-time" app</span>
+          <p>The WebSocket layer (Step 14) only handles <strong>delivery</strong> — getting a message to open tabs instantly. <strong>Storage</strong> is a completely separate concern and doesn't care whether the message arrived over HTTP or a socket. Keeping this model exactly like any other Django model is what lets Step 13's room page show message history using an ordinary queryset — no different from a product list.</p>
+        </div>
+      </section>
+
+      <section class="step http" id="step-5">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 5 — Terminal: turn the models into tables</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py makemigrations chat
+python manage.py migrate</code></pre>
+        </div>
+      </section>
+
+      <section class="step http" id="step-6">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 6 — Open chat/admin.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/admin.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.contrib import admin
+from .models import Room, Message
+
+@admin.register(Room)
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+
+admin.site.register(Message)</code></pre>
+        </div>
+      </section>
+
+      <section class="step http" id="step-7">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 7 — Terminal: create an admin login, seed a room</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py createsuperuser
+python manage.py runserver</code></pre>
+        </div>
+        <p>Log into <code>/admin/</code>, create one <strong>Room</strong> (e.g. "General"). Same reasoning as every earlier project: without a real room to point at, the next several steps would have nothing to display and no way to tell "broken" apart from "empty."</p>
+      </section>
+
+      <section class="step http" id="step-8">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 8 — Open chat/views.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Room
+
+@login_required
+def room_list(request):
+    rooms = Room.objects.all()
+    return render(request, 'chat/room_list.html', {'rooms': rooms})
+
+@login_required
+def room(request, slug):
+    room = get_object_or_404(Room, slug=slug)
+    messages = room.messages.select_related('author')
+    return render(request, 'chat/room.html', {'room': room, 'messages': messages})</code></pre>
+        </div>
+        <p>This view's only job is rendering the page shell and message <strong>history</strong> — the live part comes entirely from the WebSocket built in Steps 14–17, not from this view. That split — HTTP view loads the page and past messages, WebSocket handles everything after this point in time — is the core idea of the whole project.</p>
+        <div class="callout">
+          <span class="why">Why select_related('author')</span>
+          <p>It avoids an N+1 query while looping over message history in the template — the same efficiency principle applied here from the start.</p>
+        </div>
+      </section>
+
+      <section class="step http" id="step-9">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 9 — Create chat/urls.py (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.urls import path
+from . import views
+
+app_name = 'chat'
+
+urlpatterns = [
+    path('', views.room_list, name='room_list'),
+    path('room/&lt;slug:slug&gt;/', views.room, name='room'),
+]</code></pre>
+        </div>
+      </section>
+
+      <section class="step http" id="step-10">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 10 — Open chat_project/urls.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.contrib import admin
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('chat.urls', namespace='chat')),
+    path('login/', auth_views.LoginView.as_view(template_name='chat/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='chat:room_list'), name='logout'),
+]</code></pre>
+        </div>
+        <p>Using Django's built-in <code>LoginView</code>/<code>LogoutView</code> here instead of writing custom ones — this project's only real feature is the chat itself, so there's no reason to hand-roll auth views again.</p>
+        <p><strong>Also add to chat_project/settings.py:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'chat:room_list'</code></pre>
+        </div>
+      </section>
+
+      <section class="step http" id="step-11">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 11 — Open chat_project/settings.py once more — templates/static</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],     # &lt;- added
+        'APP_DIRS': True,
+        ...
+    },
+]</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']</code></pre>
+        </div>
+      </section>
+
+      <section class="step http" id="step-12">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 12 — Create templates/base.html</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">mkdir templates</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span>templates/base.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;{% block title %}ChatSpace{% endblock %}&lt;/title&gt;
+    {% load static %}
+    &lt;link rel="stylesheet" href="{% static 'css/style.css' %}"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;a href="{% url 'chat:room_list' %}"&gt;ChatSpace&lt;/a&gt;
+        {% if user.is_authenticated %}
+            &lt;span&gt;{{ user.username }}&lt;/span&gt;
+            &lt;form action="{% url 'logout' %}" method="post" style="display:inline"&gt;
+                {% csrf_token %}
+                &lt;button type="submit"&gt;Log out&lt;/button&gt;
+            &lt;/form&gt;
+        {% else %}
+            &lt;a href="{% url 'login' %}"&gt;Log in&lt;/a&gt;
+        {% endif %}
+    &lt;/header&gt;
+    &lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;
+    {% block extra_js %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+        <p>Same <code>{% block extra_js %}</code> habit as earlier projects — left empty here, filled in Step 17 by the one page that actually needs a live socket open.</p>
+      </section>
+
+      <section class="step http" id="step-13">
+        <div class="step-head"><span class="step-badge">HTTP LANE</span></div>
+        <h2>Step 13 — Create the chat templates</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">mkdir -p chat/templates/chat</code></pre>
+        </div>
+
+        <p><strong>login.html</strong> (minimal, points at Django's built-in LoginView from Step 10):</p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/templates/chat/login.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+    &lt;h1&gt;Log In&lt;/h1&gt;
+    &lt;form method="post"&gt;
+        {% csrf_token %}
+        {{ form.as_p }}
+        &lt;button type="submit"&gt;Log In&lt;/button&gt;
+    &lt;/form&gt;
+{% endblock %}</code></pre>
+        </div>
+
+        <p><strong>room_list.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/templates/chat/room_list.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}Rooms{% endblock %}
+{% block content %}
+    &lt;h1&gt;Rooms&lt;/h1&gt;
+    &lt;ul&gt;
+        {% for r in rooms %}
+            &lt;li&gt;&lt;a href="{% url 'chat:room' r.slug %}"&gt;{{ r.name }}&lt;/a&gt;&lt;/li&gt;
+        {% empty %}
+            &lt;li&gt;No rooms yet — ask an admin to create one.&lt;/li&gt;
+        {% endfor %}
+    &lt;/ul&gt;
+{% endblock %}</code></pre>
+        </div>
+
+        <p><strong>room.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/templates/chat/room.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% extends "base.html" %}
+{% block title %}{{ room.name }}{% endblock %}
+{% block content %}
+    &lt;h1&gt;{{ room.name }}&lt;/h1&gt;
+
+    &lt;div id="message-log"&gt;
+        {% for message in messages %}
+            &lt;p data-message&gt;&lt;strong&gt;{{ message.author.username }}:&lt;/strong&gt; {{ message.content }}&lt;/p&gt;
+        {% endfor %}
+    &lt;/div&gt;
+
+    &lt;input id="message-input" type="text" placeholder="Type a message..."&gt;
+    &lt;button id="message-submit"&gt;Send&lt;/button&gt;
+
+    {{ room.slug|json_script:"room-slug" }}
+{% endblock %}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why json_script, not {{ room.slug }} straight into JS</span>
+          <p><code>{{ room.slug|json_script:"room-slug" }}</code> is the one new tag in this project — it safely embeds the room's slug as JSON inside a <code>&lt;script type="application/json"&gt;</code> tag, so Step 17's JavaScript can read it without any risk of the slug breaking out of a quoted string.</p>
+        </div>
+        <p>The <code>#message-log</code>, <code>#message-input</code>, <code>#message-submit</code> IDs are written now, deliberately — Step 17's JavaScript will target these exact IDs, the same "write the interface first" habit every project in this series has followed.</p>
+        <div class="terminal-check"><strong>Terminal check:</strong> <code>python manage.py runserver</code> — log in, visit the room list, open "General." You should see the (currently empty) message log and an input box that does nothing yet. Everything up to here is plain Django; nothing real-time exists until the next steps.</div>
+      </section>
+
+      <section class="step ws" id="step-14">
+        <div class="step-head"><span class="step-badge">WS LANE</span></div>
+        <h2>Step 14 — Create chat/consumers.py (new file)</h2>
+        <p>This is the Channels equivalent of <code>views.py</code> — instead of handling one request and returning one response, a <strong>consumer</strong> handles one open WebSocket connection for as long as it stays open, and can send messages back at any time, not just in reply to something the client sent.</p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/consumers.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from .models import Room, Message
+
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_slug = self.scope['url_route']['kwargs']['slug']
+        self.room_group_name = f'chat_{self.room_slug}'
+
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        content = data['message'].strip()
+        if not content:
+            return
+
+        user = self.scope['user']
+        await self.save_message(user, content)
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'username': user.username,
+                'message': content,
+            }
+        )
+
+    async def chat_message(self, event):
+        await self.send(text_data=json.dumps({
+            'username': event['username'],
+            'message': event['message'],
+        }))
+
+    @database_sync_to_async
+    def save_message(self, user, content):
+        room = Room.objects.get(slug=self.room_slug)
+        Message.objects.create(room=room, author=user, content=content)</code></pre>
+        </div>
+
+        <p><strong>Reading each method in the order events actually happen:</strong></p>
+        <div class="callout">
+          <span class="why">connect()</span>
+          <p>Runs once, when a browser opens the socket. <code>self.scope['url_route']['kwargs']['slug']</code> reads the room slug out of the URL (wired in Step 15) — the same job <code>slug</code> does in a normal Django view's URL kwargs. <code>group_add</code> joins a named "group" — every consumer in <code>chat_General</code>, for instance, can now receive anything sent to that group. That's the fan-out mechanism a plain HTTP view has no equivalent for.</p>
+        </div>
+        <div class="callout">
+          <span class="why">receive()</span>
+          <p>Runs every time <strong>this specific browser</strong> sends a message over the socket. It saves the message to the database, then calls <code>group_send</code> — which doesn't send anything directly to <em>this</em> browser, it broadcasts to the whole group (everyone in the same room, including the sender).</p>
+        </div>
+        <div class="callout">
+          <span class="why">chat_message()</span>
+          <p>This method's name isn't arbitrary: <code>group_send</code>'s <code>'type': 'chat_message'</code> tells Channels to call <strong>this exact method</strong> on every consumer in the group. It runs once per connected browser, and is what actually pushes the JSON out over each individual socket via <code>self.send()</code>.</p>
+        </div>
+        <div class="callout">
+          <span class="why">save_message()</span>
+          <p>Wrapped in <code>@database_sync_to_async</code> because Django's ORM is synchronous (blocking) code, but a consumer's methods are <code>async</code>. This decorator runs the wrapped function safely on a separate thread pool instead of blocking the entire async event loop — every database call inside a consumer needs this wrapper, no exceptions.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why self.scope['user'], not something the client sends</span>
+          <p>The message's <code>content</code> comes from the browser, but the <code>user</code> never does — trusting a client-supplied username would let anyone impersonate anyone else. <code>scope['user']</code> is populated by Channels' auth middleware (wired in Step 16) from the same session cookie a normal Django view would use, so it's exactly as trustworthy as <code>request.user</code> anywhere else.</p>
+        </div>
+      </section>
+
+      <section class="step ws" id="step-15">
+        <div class="step-head"><span class="step-badge">WS LANE</span></div>
+        <h2>Step 15 — Create chat/routing.py (new file)</h2>
+        <p>A consumer needs a URL pattern too — just a different kind, since it's matched against a WebSocket connection, not an HTTP request.</p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/routing.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.urls import re_path
+from . import consumers
+
+websocket_urlpatterns = [
+    re_path(r'ws/chat/(?P&lt;slug&gt;[\w-]+)/$', consumers.ChatConsumer.as_asgi()),
+]</code></pre>
+        </div>
+        <p><code>re_path</code> (regex-based) is used here instead of <code>path()</code> — Channels' routing predates <code>path()</code>'s cleaner syntax, and this is still the conventional way most Channels tutorials and the official docs express WebSocket routes. <code>[\w-]+</code> matches the same kind of slug a <code>SlugField</code> produces.</p>
+      </section>
+
+      <section class="step ws" id="step-16">
+        <div class="step-head"><span class="step-badge">WS LANE</span></div>
+        <h2>Step 16 — Open chat_project/asgi.py</h2>
+        <p>This is the file every earlier project in this series generated and never touched. Now it earns its purpose: routing HTTP requests one way and WebSocket connections another, out of the <strong>same</strong> running server process.</p>
+        <p><strong>Replace the file's contents with:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat_project/asgi.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import os
+from django.core.asgi import get_asgi_application
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_project.settings')
+django_asgi_app = get_asgi_application()
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+import chat.routing
+
+application = ProtocolTypeRouter({
+    'http': django_asgi_app,
+    'websocket': AuthMiddlewareStack(
+        URLRouter(chat.routing.websocket_urlpatterns)
+    ),
+})</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why django_asgi_app is created before importing chat.routing</span>
+          <p>Django's app registry has to finish initializing before any code that imports models (like <code>chat/consumers.py</code>, via <code>chat/routing.py</code>) is allowed to run — importing <code>chat.routing</code> too early raises <code>AppRegistryNotReady</code>. This exact ordering is one of the most common Channels setup mistakes.</p>
+        </div>
+
+        <p><strong>Tracing what this router actually does:</strong></p>
+        <div class="trace">Incoming connection
+   │
+   ▼ ProtocolTypeRouter checks the connection type
+   │
+   ├── <span class="http">'http'</span>      <span class="arrow">→</span> django_asgi_app <span class="arrow">→</span> the entire normal Django stack
+   │                  (urls.py → views.py → templates — everything from Steps 8–13)
+   │
+   └── <span class="ws">'websocket'</span> <span class="arrow">→</span> AuthMiddlewareStack (reads the session cookie, populates scope['user'])
+                     <span class="arrow">→</span> URLRouter(chat.routing.websocket_urlpatterns)
+                     <span class="arrow">→</span> matches ws/chat/&lt;slug&gt;/ → ChatConsumer</div>
+        <p><code>AuthMiddlewareStack</code> is what makes <code>self.scope['user']</code> in <code>consumers.py</code> (Step 14) trustworthy — without it, every WebSocket connection would see an <code>AnonymousUser</code>, regardless of whether the browser is logged in on the HTTP side.</p>
+      </section>
+
+      <section class="step ws" id="step-17">
+        <div class="step-head"><span class="step-badge">WS LANE</span></div>
+        <h2>Step 17 — Open room.html once more — add the WebSocket client</h2>
+        <p>Everything server-side is now in place. This is the last piece: the browser code that opens the socket, sends what's typed, and renders what comes back.</p>
+        <p><strong>Add at the bottom of room.html:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span>chat/templates/chat/room.html</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-html">{% block extra_js %}
+&lt;script&gt;
+    const roomSlug = JSON.parse(document.getElementById('room-slug').textContent);
+    const socket = new WebSocket(
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+        + window.location.host
+        + '/ws/chat/' + roomSlug + '/'
+    );
+
+    const log = document.getElementById('message-log');
+    const input = document.getElementById('message-input');
+    const submit = document.getElementById('message-submit');
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const p = document.createElement('p');
+        p.setAttribute('data-message', '');
+        p.innerHTML = `&lt;strong&gt;${data.username}:&lt;/strong&gt; ${data.message}`;
+        log.appendChild(p);
+        log.scrollTop = log.scrollHeight;
+    };
+
+    socket.onclose = function () {
+        console.error('Chat socket closed unexpectedly — refresh to reconnect.');
+    };
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        socket.send(JSON.stringify({ message: text }));
+        input.value = '';
+    }
+
+    submit.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+&lt;/script&gt;
+{% endblock %}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why roomSlug is read from json_script, not typed directly into this script</span>
+          <p>The slug is server-controlled data (<code>{{ room.slug }}</code>) being placed into JavaScript — exactly the situation Django's own docs warn needs care. <code>json_script</code> guarantees it arrives as safely-escaped JSON, so <code>JSON.parse(...)</code> is always parsing valid, safe data no matter what characters end up in a room's slug.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why the socket URL is built from window.location, not hardcoded</span>
+          <p>Hardcoding <code>ws://127.0.0.1:8000/...</code> would break the moment this is deployed anywhere other than local development — a different host, and <code>https</code> pages require <code>wss</code>, not <code>ws</code>. Building it from the current page's own location keeps it correct everywhere automatically.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why the sender's message isn't appended inside sendMessage()</span>
+          <p>The sender's own message only appears once it comes back through <code>socket.onmessage</code> — because <code>group_send</code> (Step 14) broadcasts to <strong>everyone in the group, including the sender</strong>. This is deliberate: the message the sender sees is the exact same one everyone else sees, confirmed as actually saved and broadcast, not just optimistically drawn on screen before we know it worked.</p>
+        </div>
+      </section>
+
+      <section class="step verify" id="step-18">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 18 — Terminal: run it and confirm Channels is actually serving</h2>
+        <div class="codeblock">
+          <div class="filebar"><span>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py runserver</code></pre>
+        </div>
+        <p>With <code>channels</code> in <code>INSTALLED_APPS</code> and <code>ASGI_APPLICATION</code> set, Django's own <code>runserver</code> command is automatically replaced by Channels' development server — check the terminal output for <code>Starting ASGI/Daphne version ... development server</code> instead of the usual WSGI line. If you still see the plain WSGI startup message, double check Step 3's settings changes.</p>
+      </section>
+
+      <section class="step verify" id="step-19">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 19 — Terminal-free: test the full flow in two tabs</h2>
+        <ol>
+          <li>Log in as one user in Tab A, open the "General" room.</li>
+          <li>Log in as a second user (e.g. your superuser, in an incognito window) in Tab B, open the same room.</li>
+          <li>Type a message in Tab A, hit Enter.</li>
+          <li><strong>Watch Tab B</strong> — the message appears instantly, with no refresh, and it's also now saved: refreshing either tab shows it in the message history rendered by <code>views.py</code>'s <code>room()</code> view (Step 8).</li>
+          <li>Open DevTools → Network → WS in either tab to watch the raw JSON frames flowing both ways — useful for confirming exactly what <code>consumers.py</code> is sending before touching the JavaScript at all.</li>
+        </ol>
+        <div class="callout">
+          <span class="why">If a message doesn't appear on the other tab</span>
+          <p>Work through it the same way as every earlier debugging step in this series: check the browser console first (a JS error there means the socket never opened, often a wrong URL path), then check the Django terminal (a Python traceback there points at <code>consumers.py</code>, most often a missing <code>@database_sync_to_async</code> around an ORM call).</p>
+        </div>
+      </section>
+
+      <section class="step verify" id="step-20-visual">
+        <div class="step-head"><span class="step-badge">FINAL PASS</span></div>
+        <h2>Step 20 — Product polish: give the working chat a finished interface</h2>
+        <p>All real-time behavior is complete after Step 19. This final pass changes presentation only: it replaces the starter templates and adds a responsive visual system without altering the Room, Message, consumer, routing, or ASGI architecture you just learned.</p>
+        <div class="callout"><span class="why">Replace complete files, not pieces</span><p>Copy each file below in full. The class names, the JavaScript IDs, and the CSS form one small system. The socket code retains the secure <code>json_script</code> data bridge and only adds DOM nodes with <code>textContent</code>, so message content cannot become HTML.</p></div>
+        <p><strong>templates/base.html</strong></p>
+        <div class="codeblock"><div class="filebar"><span>templates/base.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% load static %}
+&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+  &lt;title&gt;{% block title %}ChatSpace{% endblock %} · ChatSpace&lt;/title&gt;
+  &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+  &lt;link href=&quot;https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;{% static &#x27;css/style.css&#x27; %}&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header class=&quot;site-header&quot;&gt;
+  &lt;a class=&quot;brand&quot; href=&quot;{% url &#x27;chat:room_list&#x27; %}&quot;&gt;&lt;span&gt;✦&lt;/span&gt; chatspace&lt;/a&gt;
+  &lt;nav&gt;{% if user.is_authenticated %}&lt;a href=&quot;{% url &#x27;chat:room_list&#x27; %}&quot;&gt;Rooms&lt;/a&gt;&lt;span class=&quot;identity&quot;&gt;@{{ user.username }}&lt;/span&gt;&lt;form action=&quot;{% url &#x27;logout&#x27; %}&quot; method=&quot;post&quot;&gt;{% csrf_token %}&lt;button&gt;Log out&lt;/button&gt;&lt;/form&gt;{% else %}&lt;a class=&quot;nav-button&quot; href=&quot;{% url &#x27;login&#x27; %}&quot;&gt;Log in&lt;/a&gt;{% endif %}&lt;/nav&gt;
+&lt;/header&gt;
+&lt;main&gt;{% block content %}{% endblock %}&lt;/main&gt;
+{% block extra_js %}{% endblock %}
+&lt;/body&gt;&lt;/html&gt;</code></pre></div>
+        <p><strong>chat/templates/chat/login.html</strong></p>
+        <div class="codeblock"><div class="filebar"><span>chat/templates/chat/login.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}
+{% block title %}Log in{% endblock %}
+{% block content %}&lt;section class=&quot;auth-panel&quot;&gt;&lt;div class=&quot;auth-art&quot;&gt;&lt;span&gt;✦&lt;/span&gt;&lt;p&gt;conversations&lt;br&gt;with room&lt;br&gt;to breathe&lt;/p&gt;&lt;/div&gt;&lt;form method=&quot;post&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Welcome to ChatSpace&lt;/p&gt;&lt;h1&gt;Come on in.&lt;/h1&gt;&lt;p&gt;Log in to join the rooms and follow the conversation as it unfolds.&lt;/p&gt;{% csrf_token %}{{ form.as_p }}&lt;button class=&quot;button&quot;&gt;Log in →&lt;/button&gt;&lt;/form&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>chat/templates/chat/room_list.html</strong></p>
+        <div class="codeblock"><div class="filebar"><span>chat/templates/chat/room_list.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}
+{% block title %}Rooms{% endblock %}
+{% block content %}&lt;section class=&quot;rooms-page&quot;&gt;&lt;div class=&quot;rooms-intro&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Your shared spaces&lt;/p&gt;&lt;h1&gt;Find the right&lt;br&gt;&lt;em&gt;conversation.&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;Small rooms for ideas, questions, and the everyday things worth sharing.&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;room-grid&quot;&gt;{% for r in rooms %}&lt;a class=&quot;room-card&quot; href=&quot;{% url &#x27;chat:room&#x27; r.slug %}&quot;&gt;&lt;span class=&quot;room-icon&quot;&gt;{{ r.name|slice:&quot;:1&quot; }}&lt;/span&gt;&lt;div&gt;&lt;p&gt;Open room&lt;/p&gt;&lt;h2&gt;{{ r.name }}&lt;/h2&gt;&lt;span&gt;Join the conversation →&lt;/span&gt;&lt;/div&gt;&lt;/a&gt;{% empty %}&lt;div class=&quot;empty&quot;&gt;&lt;h2&gt;No rooms yet.&lt;/h2&gt;&lt;p&gt;Ask an administrator to make the first one.&lt;/p&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;/section&gt;{% endblock %}</code></pre></div>
+        <p><strong>chat/templates/chat/room.html</strong></p>
+        <div class="codeblock"><div class="filebar"><span>chat/templates/chat/room.html — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-html">{% extends &quot;base.html&quot; %}
+{% block title %}{{ room.name }}{% endblock %}
+{% block content %}&lt;section class=&quot;chat-page&quot;&gt;&lt;a class=&quot;back-link&quot; href=&quot;{% url &#x27;chat:room_list&#x27; %}&quot;&gt;← All rooms&lt;/a&gt;&lt;div class=&quot;chat-shell&quot;&gt;&lt;aside&gt;&lt;span class=&quot;room-icon large&quot;&gt;{{ room.name|slice:&quot;:1&quot; }}&lt;/span&gt;&lt;p class=&quot;eyebrow&quot;&gt;Live room&lt;/p&gt;&lt;h1&gt;{{ room.name }}&lt;/h1&gt;&lt;p&gt;This room is open now. Messages appear for everyone here, in real time.&lt;/p&gt;&lt;span class=&quot;live&quot;&gt;&lt;i&gt;&lt;/i&gt; Connected&lt;/span&gt;&lt;/aside&gt;&lt;div class=&quot;conversation&quot;&gt;&lt;div class=&quot;conversation-head&quot;&gt;&lt;div&gt;&lt;p&gt;Conversation&lt;/p&gt;&lt;small&gt;Messages are saved automatically&lt;/small&gt;&lt;/div&gt;&lt;span class=&quot;live&quot;&gt;&lt;i&gt;&lt;/i&gt; Live&lt;/span&gt;&lt;/div&gt;&lt;div id=&quot;message-log&quot; class=&quot;message-log&quot;&gt;{% for message in messages %}&lt;article data-message&gt;&lt;span&gt;{{ message.author.username|slice:&quot;:1&quot; }}&lt;/span&gt;&lt;p&gt;&lt;strong&gt;{{ message.author.username }}&lt;/strong&gt;{{ message.content }}&lt;/p&gt;&lt;/article&gt;{% empty %}&lt;div class=&quot;welcome-message&quot;&gt;&lt;span&gt;✦&lt;/span&gt;&lt;p&gt;Be the first to start this conversation.&lt;/p&gt;&lt;/div&gt;{% endfor %}&lt;/div&gt;&lt;div class=&quot;composer&quot;&gt;&lt;input id=&quot;message-input&quot; type=&quot;text&quot; maxlength=&quot;500&quot; placeholder=&quot;Write a message…&quot; autocomplete=&quot;off&quot;&gt;&lt;button id=&quot;message-submit&quot; aria-label=&quot;Send message&quot;&gt;↑&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;{{ room.slug|json_script:&quot;room-slug&quot; }}&lt;/section&gt;{% endblock %}
+{% block extra_js %}&lt;script&gt;
+const roomSlug=JSON.parse(document.getElementById(&#x27;room-slug&#x27;).textContent);
+const socket=new WebSocket((location.protocol===&#x27;https:&#x27;?&#x27;wss://&#x27;:&#x27;ws://&#x27;)+location.host+&#x27;/ws/chat/&#x27;+roomSlug+&#x27;/&#x27;);
+const log=document.getElementById(&#x27;message-log&#x27;),input=document.getElementById(&#x27;message-input&#x27;),submit=document.getElementById(&#x27;message-submit&#x27;);
+socket.onmessage=e=&gt;{const data=JSON.parse(e.data),article=document.createElement(&#x27;article&#x27;);article.setAttribute(&#x27;data-message&#x27;,&#x27;&#x27;);article.innerHTML=&#x27;&lt;span&gt;&#x27;+data.username.slice(0,1)+&#x27;&lt;/span&gt;&lt;p&gt;&lt;strong&gt;&#x27;+data.username+&#x27;&lt;/strong&gt;&lt;/p&gt;&#x27;;article.querySelector(&#x27;p&#x27;).append(document.createTextNode(data.message));log.append(article);log.scrollTop=log.scrollHeight};
+function send(){const text=input.value.trim();if(text&amp;&amp;socket.readyState===WebSocket.OPEN){socket.send(JSON.stringify({message:text}));input.value=&#x27;&#x27;}}
+submit.addEventListener(&#x27;click&#x27;,send);input.addEventListener(&#x27;keydown&#x27;,e=&gt;{if(e.key===&#x27;Enter&#x27;)send()});
+&lt;/script&gt;{% endblock %}</code></pre></div>
+        <p><strong>static/css/style.css</strong></p>
+        <div class="codeblock"><div class="filebar"><span>static/css/style.css — replace contents</span><button class="copybtn">Copy</button></div><pre><code class="language-css">:root{--ink:#202d46;--paper:#fffdf8;--bg:#f5f2eb;--muted:#77808c;--line:#e1ded5;--mint:#b9ddd2;--lilac:#dcd6ed}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 &quot;DM Sans&quot;,sans-serif}.site-header{max-width:1160px;height:76px;margin:auto;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font:700 22px Fraunces;text-decoration:none;letter-spacing:-1px}.brand span{color:#719d92}nav{display:flex;gap:18px;align-items:center;font-size:13px;font-weight:700}nav a{text-decoration:none}nav form{margin:0}nav button{border:0;background:none;font:inherit;cursor:pointer;color:var(--ink)}.identity{color:var(--muted)}.nav-button,.button{border:0;border-radius:99px;background:var(--ink);color:white;padding:11px 16px;text-decoration:none;font:700 13px &quot;DM Sans&quot;;cursor:pointer}.rooms-page{max-width:1160px;margin:auto;padding:62px 0 90px}.rooms-intro{max-width:540px}.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#6b958b;font-weight:700;margin:0 0 13px}.rooms-intro h1,.chat-shell aside h1,.auth-panel h1{font:700 clamp(45px,5.5vw,72px)/.98 Fraunces;letter-spacing:-3px;margin:0}.rooms-intro h1 em{color:#779f93;font-weight:600}.rooms-intro&gt;p:last-child,.chat-shell aside&gt;p:not(.eyebrow),.auth-panel form&gt;p:not(.eyebrow){color:var(--muted);font-size:17px;max-width:440px;margin:20px 0}.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:45px}.room-card{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:22px;text-decoration:none;min-height:215px;display:flex;flex-direction:column;justify-content:space-between;transition:.2s}.room-card:hover{transform:translateY(-4px);border-color:#99b9af}.room-icon{display:grid;place-items:center;width:42px;height:42px;background:var(--mint);border-radius:12px;font:700 24px Fraunces;color:#395e58}.room-card:nth-child(2n) .room-icon{background:var(--lilac);color:#5a5270}.room-card p{margin:0;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}.room-card h2{font:700 27px Fraunces;margin:4px 0}.room-card div&gt;span{font-size:12px;font-weight:700}.chat-page{max-width:1160px;margin:auto;padding:23px 0 75px}.back-link{font-size:13px;font-weight:700}.chat-shell{display:grid;grid-template-columns:.72fr 1.28fr;gap:36px;margin-top:25px}.chat-shell aside{padding:35px 15px}.large{width:62px;height:62px;font-size:34px}.live{font-size:11px;font-weight:700;color:#628a7c}.live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#72b69f;margin-right:5px}.conversation{height:590px;background:var(--paper);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}.conversation-head{padding:18px 20px;display:flex;justify-content:space-between;border-bottom:1px solid var(--line)}.conversation-head p{font:700 15px Fraunces;margin:0}.conversation-head small{color:var(--muted);font-size:10px}.message-log{overflow-y:auto;padding:18px 20px;flex:1}.message-log article{display:flex;gap:10px;margin:0 0 17px}.message-log article&gt;span{display:grid;place-items:center;flex:0 0 29px;height:29px;border-radius:50%;background:var(--lilac);font:700 14px Fraunces}.message-log p{margin:0;background:#f2f5ee;border-radius:3px 12px 12px 12px;padding:8px 11px;font-size:13px;max-width:78%}.message-log strong{display:block;font-size:10px;margin-bottom:2px;color:#56677a}.welcome-message{text-align:center;color:var(--muted);padding-top:130px}.welcome-message span{font-size:32px;color:#8aaea5}.composer{display:flex;gap:9px;padding:15px;border-top:1px solid var(--line)}.composer input{border:1px solid var(--line);border-radius:99px;padding:11px 14px;flex:1;outline-color:#7ba89d}.composer button{border:0;border-radius:50%;width:42px;background:var(--ink);color:white;font-size:20px;cursor:pointer}.auth-panel{max-width:920px;margin:55px auto;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}.auth-art{background:var(--mint);padding:45px;min-height:480px;display:flex;flex-direction:column;justify-content:space-between}.auth-art span{font-size:45px}.auth-art p{font:700 34px/1 Fraunces;text-transform:uppercase}.auth-panel form{padding:48px}.auth-panel h1{font-size:43px}.auth-panel form p label{display:block;font-size:12px;font-weight:700;margin:17px 0 6px}.auth-panel input{width:100%;padding:11px;border:1px solid var(--line);border-radius:7px}.empty{padding:50px;text-align:center;border:1px dashed #bacac2;border-radius:14px;grid-column:1/-1}@media(max-width:800px){.site-header,.rooms-page,.chat-page{margin-left:20px;margin-right:20px}.rooms-page{padding-top:43px}.room-grid{grid-template-columns:1fr 1fr}.chat-shell,.auth-panel{grid-template-columns:1fr}.chat-shell aside{padding:15px 0}.conversation{height:520px}.auth-art{min-height:190px}.auth-panel form{padding:30px}}@media(max-width:500px){nav .identity{display:none}.room-grid{grid-template-columns:1fr}.rooms-intro h1{font-size:45px}.auth-art{display:none}}</code></pre></div>
+        <div class="terminal-check"><strong>Visual verification:</strong> run <code>python manage.py runserver</code>, log in in two windows, then open the same room. The room should look polished on mobile and desktop, messages should appear instantly in both windows, and refreshing should keep the history.</div>
+      </section>
+
+      <section class="step verify" id="tree">
+        <div class="step-head"><span class="step-badge">REFERENCE</span></div>
+        <h2>Final project tree</h2>
+        <div class="tree-block">chatspace/
+├── manage.py
+├── chat_project/
+│   ├── settings.py       <span class="tag">(Steps 3, 10, 11)</span>
+│   ├── urls.py              <span class="tag">(Step 10)</span>
+│   └── asgi.py                 <span class="tag">(Step 16)</span>
+├── chat/
+│   ├── models.py                  <span class="tag">(Step 4)</span>
+│   ├── admin.py                     <span class="tag">(Step 6)</span>
+│   ├── views.py                       <span class="tag">(Step 8)</span>
+│   ├── urls.py                          <span class="tag">(Step 9)</span>
+│   ├── consumers.py                       <span class="tag">(Step 14)</span>
+│   ├── routing.py                           <span class="tag">(Step 15)</span>
+│   └── templates/chat/
+│       ├── login.html                          <span class="tag">(Step 13)</span>
+│       ├── room_list.html                        <span class="tag">(Step 13)</span>
+│       └── room.html                                <span class="tag">(Steps 13, 17)</span>
+├── templates/base.html          <span class="tag">(Step 12)</span>
+└── static/css/style.css           <span class="tag">(same pattern as every prior project — omitted here)</span></div>
+      </section>
+
+      <section class="pattern-section" id="pattern">
+        <div class="eyebrow">Closing thesis</div>
+        <h2>The pattern worth remembering</h2>
+        <p>The build order splits cleanly into two halves that mirror each other. Knowing which of your two "views" — the HTTP one or the consumer — is responsible for which job is the whole design.</p>
+        <div class="pattern-halves">
+          <div class="pattern-half http-h">
+            <h3>Steps 4–13 · Completely ordinary Django</h3>
+            <p>model → migrate → admin → view → url → template, identical in shape to any other Django app. It would work fine — minus live updates — if the walkthrough stopped here.</p>
+          </div>
+          <div class="pattern-half ws-h">
+            <h3>Steps 14–17 · Exactly one new capability</h3>
+            <p>A consumer, a WebSocket route, an ASGI router that can tell HTTP and WebSocket traffic apart, and the JavaScript to use it — layered on top without changing anything already built.</p>
+          </div>
+        </div>
+        <p style="margin-top:22px;">Channels doesn't replace Django's request/response model — it runs <em>alongside</em> it. Loading history is an HTTP job. Streaming what happens next is a WebSocket job. That split is the actual lesson.</p>
+      </section>
+
+    </div>
+
+    <footer>ChatSpace walkthrough · 20 steps plus a final product pass · read top to bottom, in order — each step assumes the last one happened.</footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script>
+hljs.highlightAll();
+
+// copy buttons
+document.querySelectorAll('.codeblock').forEach(block=>{
+  const btn = block.querySelector('.copybtn');
+  const code = block.querySelector('code');
+  if(!btn || !code) return;
+  btn.addEventListener('click', ()=>{
+    navigator.clipboard.writeText(code.innerText).then(()=>{
+      const orig = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(()=>{ btn.textContent = orig; }, 1400);
+    });
+  });
+});
+
+// progress bar
+const progress = document.getElementById('progress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = h.scrollTop;
+  const max = h.scrollHeight - h.clientHeight;
+  progress.style.width = (max > 0 ? (scrolled/max)*100 : 0) + '%';
+}
+document.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+// mobile nav toggle
+const sidebar = document.getElementById('sidebar');
+const navToggle = document.getElementById('navToggle');
+if(navToggle){
+  navToggle.addEventListener('click', ()=> sidebar.classList.toggle('open'));
+}
+document.querySelectorAll('.navitem').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    if(window.innerWidth <= 980) sidebar.classList.remove('open');
+  });
+});
+
+// scrollspy
+const navItems = Array.from(document.querySelectorAll('.navitem'));
+const sections = navItems.map(item=> document.querySelector(item.getAttribute('href'))).filter(Boolean);
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const idx = sections.indexOf(entry.target);
+    if(idx === -1) return;
+    if(entry.isIntersecting){
+      navItems.forEach(n=>n.classList.remove('active'));
+      navItems[idx].classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+sections.forEach(sec=> io.observe(sec));
+</script>
+</body>
+</html>

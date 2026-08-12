@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git &amp; GitHub Mastery Path — From Zero to Production-Ready</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF9F5;
+    --paper-dim:#F1EFE8;
+    --ink:#1B1E24;
+    --ink-soft:#565C66;
+    --line:#DEDACE;
+    --teal:#0F6E63;
+    --teal-dim:#E4F1EE;
+    --amber:#B8791F;
+    --amber-dim:#FBF0DD;
+    --rust:#A33B3B;
+    --rust-dim:#F8E9E7;
+    --term-bg:#161B22;
+    --term-head:#20262F;
+    --term-text:#D8DEE6;
+    --term-mint:#7EE0C4;
+    --term-amber:#E3B15C;
+    --term-muted:#7C8797;
+    --main-branch:#1B1E24;
+    --feature-branch:#0F6E63;
+    --hotfix-branch:#A33B3B;
+    --develop-branch:#3D5A80;
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--teal); color:#fff;}
+
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+    margin:0 0 0.4em 0;
+  }
+  a{color:var(--teal);}
+  p{margin:0 0 1em 0;}
+  code{
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--paper-dim);
+    padding:0.1em 0.4em;
+    border-radius:4px;
+    font-size:0.88em;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:5.5rem 1.5rem 4.5rem;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero-inner{
+    max-width:820px;
+    margin:0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:0.6em;
+    margin-bottom:1.4em;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 0 4px var(--teal-dim);
+  }
+  .hero h1{
+    font-size:clamp(2.1rem, 4.4vw, 3.2rem);
+    line-height:1.08;
+    max-width:14ch;
+  }
+  .hero .sub{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:1.15rem;
+    color:var(--ink-soft);
+    margin:0.9em 0 1.6em;
+  }
+  .hero-desc{max-width:64ch; color:var(--ink-soft); font-size:1rem;}
+  .hero-graph{
+    position:absolute;
+    right:-40px; top:0; bottom:0;
+    width:420px;
+    opacity:0.9;
+    z-index:1;
+  }
+  @media (max-width:900px){ .hero-graph{display:none;} }
+
+  .stat-row{
+    display:flex; gap:2.2rem; margin-top:2.4rem; flex-wrap:wrap;
+  }
+  .stat-row div{font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--ink-soft);}
+  .stat-row strong{display:block; font-family:'Fraunces', serif; font-size:1.5rem; color:var(--ink); font-weight:600;}
+
+  /* ---------- TOC ---------- */
+  .toc{
+    max-width:820px; margin:0 auto; padding:2.6rem 1.5rem;
+  }
+  .toc h2{font-size:1rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; font-weight:600;}
+  .toc-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem 2rem; margin-top:1rem;
+  }
+  @media (max-width:640px){ .toc-grid{grid-template-columns:1fr;} }
+  .toc-grid a{
+    display:flex; gap:0.7em; align-items:baseline;
+    text-decoration:none; color:var(--ink); padding:0.35em 0;
+    border-bottom:1px dashed var(--line);
+    font-size:0.95rem;
+  }
+  .toc-grid a:hover{color:var(--teal);}
+  .toc-num{font-family:'IBM Plex Mono', monospace; color:var(--teal); font-size:0.82rem; flex-shrink:0;}
+
+  /* ---------- LEDGER / PHASE STRUCTURE ---------- */
+  .ledger{
+    max-width:960px; margin:0 auto; padding:1rem 1.5rem 6rem;
+    position:relative;
+  }
+  .phase{
+    position:relative;
+    padding:0 0 0 3.2rem;
+    margin-bottom:1rem;
+  }
+  .phase::before{ /* connecting line */
+    content:"";
+    position:absolute;
+    left:14px; top:6px; bottom:-2.6rem;
+    width:2px;
+    background:repeating-linear-gradient(to bottom, var(--line) 0 6px, transparent 6px 11px);
+  }
+  .phase:last-of-type::before{display:none;}
+  .node{
+    position:absolute; left:0; top:0;
+    width:30px;height:30px;border-radius:50%;
+    background:var(--paper);
+    border:2.5px solid var(--teal);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600; font-size:0.85rem; color:var(--teal);
+    z-index:2;
+  }
+  .phase-head{padding:0.5rem 0 1.2rem;}
+  .phase-kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.76rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:0.35em;
+  }
+  .phase h2{font-size:1.65rem; margin-bottom:0.5rem;}
+  .goal{
+    color:var(--ink-soft); max-width:70ch; font-size:0.98rem;
+  }
+  .goal strong{color:var(--ink);}
+
+  h3.stepline{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--teal); font-weight:600;
+    margin:2.1rem 0 0.8rem;
+    display:flex; align-items:center; gap:0.6em;
+  }
+  h3.stepline::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  ol.steps{ margin:0 0 1.2rem 0; padding-left:1.3rem; }
+  ol.steps li{ margin-bottom:0.55rem; font-size:0.97rem; }
+  ol.steps code{font-size:0.85em;}
+
+  /* ---------- TERMINAL BLOCK ---------- */
+  .term{
+    background:var(--term-bg);
+    border-radius:var(--radius);
+    overflow:hidden;
+    margin:1.1rem 0 1.6rem;
+    box-shadow:0 8px 24px -14px rgba(0,0,0,0.4);
+  }
+  .term-head{
+    background:var(--term-head);
+    padding:0.6rem 0.9rem;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .term-head span{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .term-head span:nth-child(1){background:#E5645A;}
+  .term-head span:nth-child(2){background:#E3B15C;}
+  .term-head span:nth-child(3){background:#5FBF7A;}
+  .term-title{
+    margin-left:0.6rem; font-family:'IBM Plex Mono', monospace;
+    font-size:0.74rem; color:var(--term-muted); letter-spacing:0.03em;
+  }
+  .term-body{
+    padding:1rem 1.2rem 1.2rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.83rem;
+    line-height:1.7;
+    color:var(--term-text);
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .term-body .ln{display:block;}
+  .term-body .prompt{color:var(--term-mint);}
+  .term-body .prompt::before{content:"$ "; color:var(--term-muted);}
+  .term-body .out{color:var(--term-text); opacity:0.92;}
+  .term-body .dim{color:var(--term-muted);}
+  .term-body .flag-untracked{color:var(--rust);}
+  .term-body .flag-staged{color:#5FBF7A;}
+  .term-body .flag-mod{color:var(--term-amber);}
+  .term-body .conflict{color:var(--term-amber); font-weight:600;}
+
+  /* ---------- FILE TREE BEFORE/AFTER ---------- */
+  .tree-wrap{
+    display:grid; grid-template-columns:1fr 1fr; gap:1rem;
+    margin:1.1rem 0 1.6rem;
+  }
+  @media (max-width:640px){ .tree-wrap{grid-template-columns:1fr;} }
+  .tree-col{
+    background:var(--paper-dim); border:1px solid var(--line); border-radius:var(--radius);
+    padding:0.9rem 1rem 1.1rem;
+  }
+  .tree-col h4{
+    font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--ink-soft); margin-bottom:0.6rem;
+  }
+  .tree-col pre{
+    margin:0; font-family:'IBM Plex Mono', monospace; font-size:0.82rem; line-height:1.65;
+    color:var(--ink);
+  }
+  .tree-col .new{color:var(--teal); font-weight:600;}
+  .tree-col .changed{color:var(--amber); font-weight:600;}
+  .tree-col .gone{color:var(--rust); text-decoration:line-through; opacity:0.75;}
+
+  /* ---------- DIAGRAM ---------- */
+  .diagram{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:1.2rem 1rem 0.9rem; margin:1.1rem 0 1.6rem;
+  }
+  .diagram svg{display:block; width:100%; height:auto;}
+  .diagram-cap{
+    font-family:'IBM Plex Mono', monospace; font-size:0.74rem; color:var(--ink-soft);
+    text-align:center; margin-top:0.6rem; letter-spacing:0.02em;
+  }
+  .diagram-title{
+    font-family:'IBM Plex Mono', monospace; font-size:0.74rem; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--teal); margin-bottom:0.4rem; font-weight:600;
+  }
+  .node-c{transition:transform 0.15s ease;}
+  .node-c:hover{transform:translateY(-2px);}
+
+  /* ---------- CALLOUTS ---------- */
+  .callout{
+    border-radius:var(--radius);
+    padding:0.95rem 1.1rem;
+    margin:1.1rem 0;
+    font-size:0.93rem;
+  }
+  .callout .cal-label{
+    font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.09em;
+    text-transform:uppercase; font-weight:600; margin-bottom:0.4em; display:block;
+  }
+  .callout.checkpoint{background:var(--teal-dim); color:#0B4B43;}
+  .callout.checkpoint .cal-label{color:var(--teal);}
+  .callout.pitfall{background:var(--rust-dim); color:#6E2626;}
+  .callout.pitfall .cal-label{color:var(--rust);}
+  .callout.answer{background:var(--amber-dim); color:#6B4A0F;}
+  .callout.answer .cal-label{color:var(--amber);}
+
+  /* ---------- CHECKLIST ---------- */
+  .checklist-section{
+    background:var(--ink); color:var(--paper);
+    padding:4rem 1.5rem 5rem;
+  }
+  .checklist-inner{max-width:820px; margin:0 auto;}
+  .checklist-inner h2{color:var(--paper); font-size:1.9rem;}
+  .checklist-inner > p{color:#B9BDC6; max-width:65ch;}
+  .cat{margin-top:2.2rem;}
+  .cat h4{
+    font-family:'IBM Plex Mono', monospace; text-transform:uppercase; letter-spacing:0.08em;
+    font-size:0.8rem; color:var(--term-mint); margin-bottom:0.8rem;
+  }
+  .cat ul{list-style:none; margin:0; padding:0;}
+  .cat li{
+    padding:0.55rem 0 0.55rem 2rem;
+    position:relative;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    font-size:0.94rem; color:#DDE0E6;
+  }
+  .cat li::before{
+    content:"";
+    position:absolute; left:0; top:0.68rem;
+    width:16px;height:16px;border-radius:4px;
+    border:1.5px solid var(--term-mint);
+  }
+  .closing{
+    max-width:820px; margin:3rem auto 0; padding:0 1.5rem;
+    font-family:'Fraunces', serif; font-style:italic; font-size:1.1rem;
+    color:var(--ink-soft); line-height:1.6; text-align:center;
+  }
+  .closing{max-width:820px;}
+
+  footer{
+    text-align:center; padding:2.5rem 1.5rem 3.5rem;
+    font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--ink-soft);
+  }
+
+  .refnote{
+    display:inline-flex; align-items:center; gap:0.5em;
+    font-family:'IBM Plex Mono', monospace; font-size:0.82rem;
+    background:var(--paper-dim); border:1px solid var(--line);
+    padding:0.5em 0.8em; border-radius:8px; color:var(--ink-soft);
+    margin-bottom:1.4rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Practical build path · not a cheat sheet</div>
+    <h1>Git &amp; GitHub Mastery Path</h1>
+    <p class="sub">From zero to production-ready, one real repository at a time.</p>
+    <p class="hero-desc">
+      This isn't a reference doc — it's a sequence of real exercises with the actual commands,
+      the actual terminal output you'll see, the actual before/after state of your files, and
+      diagrams of what's happening under the hood at every step. Reading teaches recognition.
+      Doing teaches recall. This document makes you do it.
+    </p>
+    <div class="stat-row">
+      <div><strong>8</strong>phases, in order</div>
+      <div><strong>1</strong>capstone incident</div>
+      <div><strong>26</strong>checklist items you'll actually earn</div>
+    </div>
+  </div>
+  <svg class="hero-graph" viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg">
+    <line x1="70" y1="40" x2="70" y2="480" stroke="var(--line)" stroke-width="2"/>
+    <line x1="180" y1="160" x2="180" y2="340" stroke="var(--feature-branch)" stroke-width="2" stroke-dasharray="5 5"/>
+    <path d="M70,160 C120,160 130,160 180,160" stroke="var(--feature-branch)" stroke-width="2" fill="none"/>
+    <path d="M180,340 C130,340 120,340 70,340" stroke="var(--feature-branch)" stroke-width="2" fill="none"/>
+    <g font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">
+      <circle cx="70" cy="40" r="7" fill="var(--ink)"/><text x="90" y="45">init</text>
+      <circle cx="70" cy="120" r="7" fill="var(--ink)"/><text x="90" y="125">commit</text>
+      <circle cx="180" cy="160" r="7" fill="var(--feature-branch)"/><text x="200" y="165">feature</text>
+      <circle cx="180" cy="250" r="7" fill="var(--feature-branch)"/><text x="200" y="255">commit</text>
+      <circle cx="70" cy="250" r="7" fill="var(--ink)"/><text x="90" y="255">commit</text>
+      <circle cx="180" cy="340" r="7" fill="var(--feature-branch)"/><text x="200" y="345">ready</text>
+      <circle cx="70" cy="400" r="9" fill="var(--teal)"/><text x="90" y="405">merge</text>
+      <circle cx="70" cy="470" r="7" fill="var(--ink)"/><text x="90" y="475">tag v1</text>
+    </g>
+  </svg>
+</section>
+
+<!-- ===================== TOC ===================== -->
+<nav class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#phase1"><span class="toc-num">01</span> Local Basics — Commits &amp; History</a>
+    <a href="#phase2"><span class="toc-num">02</span> The Three Areas — Staging &amp; Undoing</a>
+    <a href="#phase3"><span class="toc-num">03</span> Branching &amp; Merge Conflicts</a>
+    <a href="#phase4"><span class="toc-num">04</span> GitHub &amp; Remotes</a>
+    <a href="#phase5"><span class="toc-num">05</span> Feature Branch Workflow &amp; PRs</a>
+    <a href="#phase6"><span class="toc-num">06</span> Advanced Git — Stash to Bisect</a>
+    <a href="#phase7"><span class="toc-num">07</span> Clean History &amp; Conventions</a>
+    <a href="#phase8"><span class="toc-num">08</span> Production Readiness</a>
+    <a href="#capstone"><span class="toc-num">✦</span> Capstone — Live Hotfix Simulation</a>
+    <a href="#checklist"><span class="toc-num">✓</span> Final Mastery Checklist</a>
+  </div>
+</nav>
+
+<div class="ledger">
+
+<!-- ===================== PHASE 1 ===================== -->
+<section class="phase" id="phase1">
+  <div class="node">01</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Local basics</div>
+    <h2>Commits &amp; History</h2>
+    <p class="goal"><strong>Goal:</strong> internalize that a commit is a snapshot, and that Git tracks
+    <em>changes over time</em>, not just current file state.</p>
+  </div>
+
+  <h3 class="stepline">Run it</h3>
+  <ol class="steps">
+    <li>Create a folder, run <code>git init</code>, confirm with <code>git status</code>.</li>
+    <li>Configure identity: <code>git config --global user.name "..."</code> and <code>user.email</code>.</li>
+    <li>Create <code>notes.txt</code> with one line. <code>git status</code> shows it as <strong>untracked</strong>.</li>
+    <li><code>git add notes.txt</code>, then <code>git status</code> again — now <strong>staged</strong>.</li>
+    <li><code>git commit -m "Add initial notes"</code>.</li>
+    <li>Add a second line, run <code>git status</code> — now <strong>modified, not staged</strong>.</li>
+    <li>Commit that too. Compare <code>git log</code> vs <code>git log --oneline</code>.</li>
+    <li>Make 3 more small commits, one change each, with a real message each time.</li>
+  </ol>
+
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — practice-repo</div></div>
+    <div class="term-body"><span class="ln prompt">git init</span><span class="ln out">Initialized empty Git repository in ~/practice-repo/.git/</span>
+<span class="ln prompt">echo "First line of notes" &gt; notes.txt</span>
+<span class="ln prompt">git status</span><span class="ln out dim">On branch main
+No commits yet
+Untracked files:</span><span class="ln out flag-untracked">  notes.txt</span>
+<span class="ln prompt">git add notes.txt</span>
+<span class="ln prompt">git status</span><span class="ln out dim">Changes to be committed:</span><span class="ln out flag-staged">  new file:   notes.txt</span>
+<span class="ln prompt">git commit -m "Add initial notes"</span><span class="ln out">[main (root-commit) a1c9e02] Add initial notes
+ 1 file changed, 1 insertion(+)
+ create mode 100644 notes.txt</span>
+<span class="ln prompt">echo "Second line" &gt;&gt; notes.txt</span>
+<span class="ln prompt">git status</span><span class="ln out dim">Changes not staged for commit:</span><span class="ln out flag-mod">  modified:   notes.txt</span>
+<span class="ln prompt">git add . &amp;&amp; git commit -m "Add second line to notes"</span><span class="ln out">[main 7f3b118] Add second line to notes
+ 1 file changed, 1 insertion(+)</span>
+<span class="ln prompt">git log --oneline</span><span class="ln out term-amber">7f3b118 Add second line to notes
+a1c9e02 Add initial notes</span></div>
+  </div>
+
+  <div class="tree-wrap">
+    <div class="tree-col">
+      <h4>Working directory — before step 3</h4>
+      <pre>practice-repo/
+└── .git/          <span class="dim">(empty repo)</span></pre>
+    </div>
+    <div class="tree-col">
+      <h4>Working directory — after step 8</h4>
+      <pre>practice-repo/
+├── .git/
+│   └── (5 commits in history)
+└── <span class="new">notes.txt</span>   <span class="dim">← tracked, 5 lines</span></pre>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">What <code>git log --oneline</code> actually shows you</div>
+    <svg viewBox="0 0 720 130" xmlns="http://www.w3.org/2000/svg">
+      <line x1="60" y1="65" x2="600" y2="65" stroke="var(--line)" stroke-width="2"/>
+      <g class="node-c"><circle cx="60" cy="65" r="10" fill="var(--main-branch)"/><text x="60" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">a1c9e02</text><text x="60" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">initial notes</text></g>
+      <g class="node-c"><circle cx="240" cy="65" r="10" fill="var(--main-branch)"/><text x="240" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">7f3b118</text><text x="240" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">2nd line</text></g>
+      <g class="node-c"><circle cx="420" cy="65" r="10" fill="var(--main-branch)"/><text x="420" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">c88de41</text><text x="420" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">commit 3</text></g>
+      <g class="node-c"><circle cx="600" cy="65" r="11" fill="var(--teal)"/><text x="600" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--teal)">HEAD → main</text><text x="600" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">commit 5</text></g>
+    </svg>
+    <div class="diagram-cap">Each dot is a full snapshot. HEAD just points at the latest one — the others don't vanish.</div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    If you delete <code>notes.txt</code> right now with <code>rm notes.txt</code>, is your data actually gone?
+    <em>(No — it's still in every commit before the deletion. Be able to explain why in one sentence before moving on.)</em>
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Writing vague commit messages ("fix", "update", "asdf") during practice because "it's just practice."
+    Build the real habit now — <code>"Fix off-by-one error in pagination loop"</code> is the actual skill;
+    typing <code>git commit -m</code> correctly is not.
+  </div>
+</section>
+
+<!-- ===================== PHASE 2 ===================== -->
+<section class="phase" id="phase2">
+  <div class="node">02</div>
+  <div class="phase-head">
+    <div class="phase-kicker">The three areas</div>
+    <h2>Staging &amp; Undoing</h2>
+    <p class="goal"><strong>Goal:</strong> stop thinking of Git as one step ("save") and start seeing the three
+    distinct areas — working directory, staging area, commit history — because every undo command only makes sense
+    once you know which area it operates on.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">The three areas, and which command moves you which way</div>
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="IBM Plex Mono" font-size="12">
+        <rect x="20" y="60" width="180" height="90" rx="10" fill="var(--rust-dim)" stroke="var(--rust)" stroke-width="1.5"/>
+        <text x="110" y="100" text-anchor="middle" font-weight="600" fill="#6E2626">Working</text>
+        <text x="110" y="118" text-anchor="middle" fill="#6E2626">Directory</text>
+
+        <rect x="270" y="60" width="180" height="90" rx="10" fill="var(--amber-dim)" stroke="var(--amber)" stroke-width="1.5"/>
+        <text x="360" y="100" text-anchor="middle" font-weight="600" fill="#6B4A0F">Staging</text>
+        <text x="360" y="118" text-anchor="middle" fill="#6B4A0F">Area (index)</text>
+
+        <rect x="520" y="60" width="180" height="90" rx="10" fill="var(--teal-dim)" stroke="var(--teal)" stroke-width="1.5"/>
+        <text x="610" y="100" text-anchor="middle" font-weight="600" fill="#0B4B43">Repository</text>
+        <text x="610" y="118" text-anchor="middle" fill="#0B4B43">(commit history)</text>
+
+        <line x1="200" y1="80" x2="270" y2="80" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="235" y="72" text-anchor="middle" fill="var(--ink-soft)">add</text>
+        <line x1="450" y1="80" x2="520" y2="80" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="485" y="72" text-anchor="middle" fill="var(--ink-soft)">commit</text>
+
+        <line x1="270" y1="130" x2="200" y2="130" stroke="var(--rust)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrr)"/>
+        <text x="235" y="150" text-anchor="middle" fill="var(--rust)">reset</text>
+        <line x1="200" y1="185" x2="90" y2="150" stroke="var(--rust)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="110" y="200" text-anchor="middle" fill="var(--rust)">checkout -- / restore (discards!)</text>
+      </g>
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink)"/></marker>
+        <marker id="arrr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--rust)"/></marker>
+      </defs>
+    </svg>
+    <div class="diagram-cap"><code>reset</code> moves changes back but keeps them. <code>checkout --</code> / <code>restore</code> throws them away for good.</div>
+  </div>
+
+  <h3 class="stepline">Run it</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — practice-repo</div></div>
+    <div class="term-body"><span class="ln prompt">echo "Third line" &gt;&gt; notes.txt</span>
+<span class="ln prompt">git diff</span><span class="ln out dim">diff --git a/notes.txt b/notes.txt</span><span class="ln out flag-staged">+Third line</span>
+<span class="ln prompt">git add notes.txt &amp;&amp; git diff</span><span class="ln out dim">(nothing — the diff moved)</span>
+<span class="ln prompt">git diff --staged</span><span class="ln out flag-staged">+Third line</span>
+<span class="ln prompt">echo "oops, bad edit" &gt;&gt; notes.txt</span>
+<span class="ln prompt">git restore notes.txt</span><span class="ln out dim">(the bad edit is gone — permanently)</span>
+<span class="ln prompt">git add notes.txt &amp;&amp; git reset notes.txt</span><span class="ln out dim">Unstaged changes after reset:
+M       notes.txt</span><span class="ln out dim">(still in working dir — check with git diff)</span>
+<span class="ln prompt">git commit -am "Add third line"</span><span class="ln out">[main d4e9a01] Add third line</span>
+<span class="ln prompt">git commit --amend -m "Add third line to notes.txt"</span><span class="ln out">[main 9b2f120] Add third line to notes.txt</span>
+<span class="ln prompt">git revert 9b2f120</span><span class="ln out">[main 3aa701c] Revert "Add third line to notes.txt"
+ 1 file changed, 1 deletion(-)</span></div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    What's the practical difference between <code>git checkout -- file</code> and <code>git reset file</code>,
+    in terms of which area each one touches? Write the answer yourself before checking a reference.
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Confusing <code>reset</code> (moves changes back toward working, doesn't delete them) with
+    <code>checkout --</code>/<code>restore</code> (actually discards them). This confusion is exactly how
+    people lose real work — practice the distinction now, on throwaway files.
+  </div>
+</section>
+
+<!-- ===================== PHASE 3 ===================== -->
+<section class="phase" id="phase3">
+  <div class="node">03</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Branching</div>
+    <h2>Branching &amp; Merge Conflicts</h2>
+    <p class="goal"><strong>Goal:</strong> get comfortable branching <em>and</em> get comfortable with a real merge
+    conflict — most juniors panic the first time they see conflict markers because they've never deliberately
+    caused one on purpose in a safe environment.</p>
+  </div>
+
+  <h3 class="stepline">Run it</h3>
+  <ol class="steps">
+    <li><code>git checkout -b feature-a</code></li>
+    <li>On <code>feature-a</code>, edit line 1 of <code>notes.txt</code>, commit.</li>
+    <li><code>git checkout main</code>, edit that <em>same line 1</em> differently, commit.</li>
+    <li><code>git merge feature-a</code> — <strong>this will conflict on purpose.</strong></li>
+    <li>Open the file, resolve the <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> markers by hand, delete them.</li>
+    <li><code>git add notes.txt</code>, <code>git commit</code> (accept the pre-filled merge message).</li>
+    <li><code>git log --all --graph</code> to see it visually.</li>
+    <li><code>git branch -D feature-a</code></li>
+  </ol>
+
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — merge conflict</div></div>
+    <div class="term-body"><span class="ln prompt">git checkout -b feature-a</span><span class="ln out dim">Switched to a new branch 'feature-a'</span>
+<span class="ln prompt">sed -i '1s/.*/Line 1 — rewritten on feature-a/' notes.txt</span>
+<span class="ln prompt">git commit -am "Rewrite line 1 for feature-a"</span><span class="ln out">[feature-a e5c210f] Rewrite line 1 for feature-a</span>
+<span class="ln prompt">git checkout main</span><span class="ln out dim">Switched to branch 'main'</span>
+<span class="ln prompt">sed -i '1s/.*/Line 1 — updated on main/' notes.txt</span>
+<span class="ln prompt">git commit -am "Update line 1 on main"</span><span class="ln out">[main 1c88a02] Update line 1 on main</span>
+<span class="ln prompt">git merge feature-a</span><span class="ln out flag-untracked">Auto-merging notes.txt
+CONFLICT (content): Merge conflict in notes.txt
+Automatic merge failed; fix conflicts and then commit the result.</span></div>
+  </div>
+
+  <div class="tree-wrap">
+    <div class="tree-col">
+      <h4>notes.txt — mid-conflict</h4>
+      <pre><span class="dim">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+<span class="changed">Line 1 — updated on main</span>
+<span class="dim">=======</span>
+<span class="new">Line 1 — rewritten on feature-a</span>
+<span class="dim">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-a</span>
+Second line
+Third line</pre>
+    </div>
+    <div class="tree-col">
+      <h4>notes.txt — resolved &amp; committed</h4>
+      <pre><span class="new">Line 1 — updated on main, incorporating
+feature-a's rewrite</span>
+Second line
+Third line
+<span class="dim">← markers deleted, file staged &amp; committed</span></pre>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title"><code>git log --all --graph</code> after the merge</div>
+    <svg viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg">
+      <line x1="60" y1="150" x2="360" y2="150" stroke="var(--main-branch)" stroke-width="2"/>
+      <path d="M180,150 C180,80 220,80 300,80" stroke="var(--feature-branch)" stroke-width="2" fill="none"/>
+      <path d="M300,80 C380,80 420,150 480,150" stroke="var(--feature-branch)" stroke-width="2" fill="none"/>
+      <line x1="360" y1="150" x2="480" y2="150" stroke="var(--main-branch)" stroke-width="2"/>
+      <g font-family="IBM Plex Mono" font-size="11">
+        <circle cx="60" cy="150" r="9" fill="var(--main-branch)"/><text x="60" y="175" text-anchor="middle" fill="var(--ink-soft)">A</text>
+        <circle cx="180" cy="150" r="9" fill="var(--main-branch)"/><text x="180" y="175" text-anchor="middle" fill="var(--ink-soft)">B (main edit)</text>
+        <circle cx="300" cy="80" r="9" fill="var(--feature-branch)"/><text x="300" y="60" text-anchor="middle" fill="var(--feature-branch)">F (feature-a edit)</text>
+        <circle cx="480" cy="150" r="11" fill="var(--amber)"/><text x="480" y="175" text-anchor="middle" fill="var(--amber)">M — merge commit</text>
+        <text x="480" y="35" text-anchor="middle" fill="var(--ink-soft)">conflict resolved here</text>
+      </g>
+    </svg>
+    <div class="diagram-cap">B and F both touched line 1 of the same file — that's the exact condition that forces a conflict instead of an auto-merge.</div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    Why did this conflict happen? <em>(Two branches changed the same lines of the same file. Different files,
+    or different lines of the same file, merge automatically without asking you.)</em>
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Panicking and running <code>git merge --abort</code> the first time markers appear, then avoiding branching
+    altogether. Do this until resolving a conflict feels boring, not scary.
+  </div>
+</section>
+
+<!-- ===================== PHASE 4 ===================== -->
+<section class="phase" id="phase4">
+  <div class="node">04</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Remotes</div>
+    <h2>GitHub &amp; Remotes</h2>
+    <p class="goal"><strong>Goal:</strong> understand that GitHub is just <em>one remote copy</em> of your repository
+    — not a fundamentally different tool — and get comfortable with the fetch/pull/push cycle.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">Local repo ↔ origin (GitHub)</div>
+    <svg viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="55" width="200" height="80" rx="10" fill="var(--paper-dim)" stroke="var(--line)" stroke-width="1.5"/>
+      <text x="140" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" font-weight="600">Local repo</text>
+      <rect x="480" y="55" width="200" height="80" rx="10" fill="var(--teal-dim)" stroke="var(--teal)" stroke-width="1.5"/>
+      <text x="580" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" font-weight="600" fill="#0B4B43">origin (GitHub)</text>
+
+      <line x1="240" y1="75" x2="480" y2="75" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <text x="360" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">push</text>
+
+      <line x1="480" y1="100" x2="240" y2="100" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr3)"/>
+      <text x="360" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--amber)">fetch (downloads, doesn't merge)</text>
+
+      <line x1="480" y1="130" x2="240" y2="130" stroke="var(--teal)" stroke-width="2" marker-end="url(#arr4)"/>
+      <text x="360" y="148" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--teal)">pull = fetch + merge</text>
+
+      <defs>
+        <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink)"/></marker>
+        <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--amber)"/></marker>
+        <marker id="arr4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--teal)"/></marker>
+      </defs>
+    </svg>
+    <div class="diagram-cap">GitHub isn't special magic — it's a remote your local repo talks to over these three commands.</div>
+  </div>
+
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — connect to GitHub</div></div>
+    <div class="term-body"><span class="ln prompt">git remote add origin https://github.com/you/practice-repo.git</span>
+<span class="ln prompt">git remote -v</span><span class="ln out dim">origin  https://github.com/you/practice-repo.git (fetch)
+origin  https://github.com/you/practice-repo.git (push)</span>
+<span class="ln prompt">git push -u origin main</span><span class="ln out">Enumerating objects: 12, done.
+Writing objects: 100% (12/12), done.
+To github.com:you/practice-repo.git
+ * [new branch]      main -&gt; main
+Branch 'main' set up to track 'origin/main'.</span>
+<span class="ln dim">&lt;you edit a file directly in the GitHub web UI and commit there&gt;</span>
+<span class="ln prompt">git fetch</span><span class="ln out dim">remote: Counting objects: 3, done.
+   9b2f120..a44e871  main       -&gt; origin/main</span>
+<span class="ln prompt">git log origin/main -1 --oneline</span><span class="ln out flag-staged">a44e871 Edit via GitHub web UI</span>
+<span class="ln prompt">git log -1 --oneline</span><span class="ln out dim">9b2f120 Revert "Add third line..."   ← your local main doesn't have it yet</span>
+<span class="ln prompt">git pull origin main</span><span class="ln out">Updating 9b2f120..a44e871
+Fast-forward
+ notes.txt | 1 +
+ 1 file changed, 1 insertion(+)</span>
+<span class="ln prompt">git clone https://github.com/you/practice-repo.git a-second-copy</span><span class="ln out dim">Cloning into 'a-second-copy'... done. (full history included)</span></div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    What's the actual difference between <code>git fetch</code> and <code>git pull</code>?
+    <em>If your answer doesn't mention that pull = fetch + merge, revisit this section before continuing.</em>
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Treating <code>git push</code> as "save to the cloud" without expecting it can be <strong>rejected</strong>
+    because the remote has commits you don't have locally. Deliberately trigger this once, read the rejection
+    message, <code>git pull</code>, then push again.
+  </div>
+</section>
+
+<!-- ===================== PHASE 5 ===================== -->
+<section class="phase" id="phase5">
+  <div class="node">05</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Team workflow</div>
+    <h2>Feature Branch Workflow &amp; Pull Requests</h2>
+    <p class="goal"><strong>Goal:</strong> practice the actual workflow used at almost every real company —
+    not just the commands, but the <em>sequence and reasoning</em> behind them.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">Two PRs racing on the same line — the second one conflicts</div>
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="50" y1="180" x2="650" y2="180" stroke="var(--main-branch)" stroke-width="2"/>
+      <path d="M160,180 C160,110 200,110 260,110" stroke="var(--feature-branch)" stroke-width="2" fill="none"/>
+      <path d="M260,110 C320,110 340,180 400,180" stroke="var(--feature-branch)" stroke-width="2" fill="none"/>
+      <path d="M160,180 C160,60 220,60 300,60" stroke="var(--amber)" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
+      <line x1="300" y1="60" x2="470" y2="60" stroke="var(--amber)" stroke-width="2" stroke-dasharray="5 4"/>
+      <path d="M470,60 C530,60 540,180 590,180" stroke="var(--amber)" stroke-width="2" fill="none"/>
+
+      <g font-family="IBM Plex Mono" font-size="11">
+        <circle cx="160" cy="180" r="9" fill="var(--main-branch)"/>
+        <circle cx="260" cy="110" r="9" fill="var(--feature-branch)"/><text x="260" y="90" text-anchor="middle" fill="var(--feature-branch)">PR #1 commit</text>
+        <circle cx="400" cy="180" r="10" fill="var(--teal)"/><text x="400" y="205" text-anchor="middle" fill="var(--teal)">PR #1 merged ✓</text>
+
+        <circle cx="470" cy="60" r="9" fill="var(--amber)"/><text x="470" y="40" text-anchor="middle" fill="var(--amber)">PR #2 commit (same line)</text>
+        <circle cx="590" cy="180" r="10" fill="var(--rust)"/><text x="590" y="205" text-anchor="middle" fill="var(--rust)">PR #2 — conflict shown on GitHub</text>
+      </g>
+    </svg>
+    <div class="diagram-cap">Fix: merge <code>main</code> into the PR-2 branch locally, resolve, push — the resolution lives on the branch where it's still reviewable.</div>
+  </div>
+
+  <h3 class="stepline">Run it — the conflict-resolution half</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — resolving a PR-level conflict</div></div>
+    <div class="term-body"><span class="ln prompt">git checkout main</span>
+<span class="ln prompt">git pull origin main</span><span class="ln out dim">Fast-forward, main is up to date</span>
+<span class="ln prompt">git checkout your-second-branch</span>
+<span class="ln prompt">git merge main</span><span class="ln out flag-untracked">CONFLICT (content): Merge conflict in notes.txt
+Automatic merge failed; fix conflicts and then commit the result.</span>
+<span class="ln dim">&lt;edit notes.txt, remove markers, keep the right content&gt;</span>
+<span class="ln prompt">git add notes.txt</span>
+<span class="ln prompt">git commit -m "Merge main into your-second-branch, resolve conflict"</span><span class="ln out">[your-second-branch 6de881a] Merge main into your-second-branch, resolve conflict</span>
+<span class="ln prompt">git push origin your-second-branch</span><span class="ln out dim">... PR page now shows "This branch has no conflicts with the base branch"</span></div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    Why merge <code>main</code> <em>into</em> the feature branch, rather than the other way around?
+    <em>(So the merge commit and its conflict resolution live on the feature branch, where a teammate can
+    still review it via the PR, instead of landing directly on main unreviewed.)</em>
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Resolving PR conflicts entirely in GitHub's web editor without ever practicing the local resolution — fine
+    for trivial conflicts, but real conflicts in application code need your actual editor and the ability to
+    run the code to verify the fix.
+  </div>
+</section>
+
+<!-- ===================== PHASE 6 ===================== -->
+<section class="phase" id="phase6">
+  <div class="node">06</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Advanced git</div>
+    <h2>Stash, Cherry-Pick, Rebase, Bisect</h2>
+    <p class="goal"><strong>Goal:</strong> these are the commands that separate "I know Git" from "I can get
+    myself out of trouble with Git" — each one solves a specific real situation, so practice them <em>in that
+    situation</em>, not in isolation.</p>
+  </div>
+
+  <h3 class="stepline">Stash — "I need to switch branches right now"</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — stash</div></div>
+    <div class="term-body"><span class="ln dim">&lt;editing notes.txt, unfinished, not committed&gt;</span>
+<span class="ln prompt">git stash</span><span class="ln out">Saved working directory and index state WIP on main: 6de881a Merge main...</span>
+<span class="ln prompt">git status</span><span class="ln out dim">nothing to commit, working tree clean</span>
+<span class="ln prompt">git checkout other-branch</span><span class="ln dim">&lt;...do what you needed...&gt;</span>
+<span class="ln prompt">git checkout main</span>
+<span class="ln prompt">git stash list</span><span class="ln out flag-mod">stash@{0}: WIP on main: 6de881a Merge main...</span>
+<span class="ln prompt">git stash pop</span><span class="ln out">Dropped stash@{0} — your unfinished edit is back, exactly as you left it</span></div>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">Four tools, four rescue situations</div>
+    <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="IBM Plex Mono" font-size="11">
+        <rect x="20" y="20" width="160" height="60" rx="8" fill="var(--paper-dim)" stroke="var(--line)"/>
+        <text x="100" y="45" text-anchor="middle" font-weight="600">stash</text>
+        <text x="100" y="62" text-anchor="middle" fill="var(--ink-soft)" font-size="9.5">shelve unfinished work</text>
+
+        <rect x="200" y="20" width="160" height="60" rx="8" fill="var(--paper-dim)" stroke="var(--line)"/>
+        <text x="280" y="45" text-anchor="middle" font-weight="600">cherry-pick</text>
+        <text x="280" y="62" text-anchor="middle" fill="var(--ink-soft)" font-size="9.5">copy one commit only</text>
+
+        <rect x="380" y="20" width="160" height="60" rx="8" fill="var(--paper-dim)" stroke="var(--line)"/>
+        <text x="460" y="45" text-anchor="middle" font-weight="600">rebase -i</text>
+        <text x="460" y="62" text-anchor="middle" fill="var(--ink-soft)" font-size="9.5">clean up before sharing</text>
+
+        <rect x="560" y="20" width="140" height="60" rx="8" fill="var(--paper-dim)" stroke="var(--line)"/>
+        <text x="630" y="45" text-anchor="middle" font-weight="600">bisect</text>
+        <text x="630" y="62" text-anchor="middle" fill="var(--ink-soft)" font-size="9.5">binary-search a bug</text>
+      </g>
+
+      <!-- cherry-pick mini viz -->
+      <g font-family="IBM Plex Mono" font-size="10">
+        <line x1="30" y1="150" x2="170" y2="150" stroke="var(--develop-branch)" stroke-width="2"/>
+        <circle cx="70" cy="150" r="7" fill="var(--develop-branch)"/>
+        <circle cx="130" cy="150" r="7" fill="var(--develop-branch)"/><text x="130" y="170" text-anchor="middle" fill="var(--develop-branch)">bugfix commit</text>
+        <line x1="30" y1="110" x2="170" y2="110" stroke="var(--main-branch)" stroke-width="2"/>
+        <circle cx="70" cy="110" r="7" fill="var(--main-branch)"/>
+        <circle cx="170" cy="110" r="8" fill="var(--teal)"/><text x="185" y="115" fill="var(--teal)" font-size="9">← picked</text>
+        <path d="M130,150 C150,140 150,130 168,113" stroke="var(--teal)" stroke-width="1.5" stroke-dasharray="3 2" fill="none" marker-end="url(#arrcp)"/>
+      </g>
+
+      <!-- rebase squash mini viz -->
+      <g font-family="IBM Plex Mono" font-size="9">
+        <circle cx="380" cy="105" r="6" fill="var(--amber)"/>
+        <circle cx="405" cy="105" r="6" fill="var(--amber)"/>
+        <circle cx="430" cy="105" r="6" fill="var(--amber)"/>
+        <circle cx="455" cy="105" r="6" fill="var(--amber)"/>
+        <text x="417" y="130" text-anchor="middle" fill="var(--ink-soft)">4 messy commits</text>
+        <path d="M417,140 L417,155" stroke="var(--ink-soft)" stroke-width="1.5" marker-end="url(#arrcp)"/>
+        <circle cx="417" cy="170" r="9" fill="var(--teal)"/>
+        <text x="417" y="195" text-anchor="middle" fill="var(--teal)">1 clean commit</text>
+      </g>
+
+      <!-- bisect mini viz -->
+      <g font-family="IBM Plex Mono" font-size="9">
+        <line x1="560" y1="110" x2="700" y2="110" stroke="var(--line)" stroke-width="2"/>
+        <circle cx="565" cy="110" r="6" fill="#5FBF7A"/><text x="565" y="128" text-anchor="middle" fill="#3d8a52">good</text>
+        <circle cx="700" cy="110" r="6" fill="var(--rust)"/><text x="700" y="128" text-anchor="middle" fill="var(--rust)">bad</text>
+        <circle cx="632" cy="110" r="7" fill="var(--amber)"/><text x="632" y="95" text-anchor="middle" fill="var(--amber)">test mid</text>
+        <text x="632" y="150" text-anchor="middle" fill="var(--ink-soft)">git narrows in log₂(n) steps</text>
+      </g>
+      <defs><marker id="arrcp" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="var(--teal)"/></marker></defs>
+    </svg>
+  </div>
+
+  <h3 class="stepline">Cherry-pick — "I need just that one fix"</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — cherry-pick</div></div>
+    <div class="term-body"><span class="ln prompt">git log feature-b --oneline</span><span class="ln out dim">c4a119e Unrelated feature start
+7dd2a01 Fix null-check bug in parser</span>
+<span class="ln prompt">git checkout main</span>
+<span class="ln prompt">git cherry-pick 7dd2a01</span><span class="ln out">[main 8ea310b] Fix null-check bug in parser
+ Date: ... (original author date preserved)</span><span class="ln out dim">← only that one change landed on main</span></div>
+  </div>
+
+  <h3 class="stepline">Interactive rebase — squash 4 sloppy commits into 1</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — rebase -i</div></div>
+    <div class="term-body"><span class="ln prompt">git log --oneline</span><span class="ln out dim">4d0a2f1 done
+9c8e120 actually fix it
+1b7f004 fix typo
+e2a910c wip</span>
+<span class="ln prompt">git rebase -i HEAD~4</span><span class="ln out dim">pick e2a910c wip
+squash 1b7f004 fix typo
+squash 9c8e120 actually fix it
+squash 4d0a2f1 done</span>
+<span class="ln dim">&lt;editor prompts for one combined message&gt;</span>
+<span class="ln prompt">git log --oneline</span><span class="ln out flag-staged">a90cd33 Add pagination to results list</span><span class="ln out dim">← 4 messy commits are now 1 clean one</span></div>
+  </div>
+
+  <h3 class="stepline">Bisect — "which of 50 commits broke it"</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — bisect</div></div>
+    <div class="term-body"><span class="ln prompt">git bisect start</span>
+<span class="ln prompt">git bisect bad</span><span class="ln out dim">current commit marked bad</span>
+<span class="ln prompt">git bisect good a1c9e02</span><span class="ln out dim">Bisecting: 5 revisions left to test after this (roughly 3 steps)</span>
+<span class="ln dim">&lt;test the checked-out commit&gt;</span>
+<span class="ln prompt">git bisect good</span><span class="ln out dim">Bisecting: 2 revisions left to test (roughly 1 step)</span>
+<span class="ln dim">&lt;test again&gt;</span>
+<span class="ln prompt">git bisect bad</span><span class="ln out flag-untracked">c88de41 is the first bad commit</span>
+<span class="ln prompt">git bisect reset</span></div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    For each of the four tools above, could you explain to someone else <em>when</em> to reach for it —
+    not just what it does — in one sentence?
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Learning <code>rebase -i</code> and immediately wanting to rewrite history on a branch other people have
+    already pulled — never rebase commits that have been pushed and shared, only your own local, not-yet-shared
+    work (this is why Phase 5's conflict resolution used <code>merge</code>, not <code>rebase</code>, once a PR
+    was already open).
+  </div>
+</section>
+
+<!-- ===================== PHASE 7 ===================== -->
+<section class="phase" id="phase7">
+  <div class="node">07</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Team conventions</div>
+    <h2>Clean History &amp; Team Conventions</h2>
+    <p class="goal"><strong>Goal:</strong> the difference between code that works and code a <em>team</em> can
+    work with — a repo where every commit and branch name tells a clear story is a real, practiced skill,
+    not a nice-to-have.</p>
+  </div>
+
+  <div class="tree-wrap">
+    <div class="tree-col">
+      <h4>git log --oneline — before</h4>
+      <pre><span class="gone">4d0a2f1 wip</span>
+<span class="gone">9c8e120 asdf</span>
+<span class="gone">1b7f004 fix</span>
+e2a910c Add pagination controls</pre>
+    </div>
+    <div class="tree-col">
+      <h4>git log --oneline — after reword/squash</h4>
+      <pre><span class="new">a90cd33 Add pagination to results list,
+        limit page size to 25 items</span>
+e2a910c Add pagination controls</pre>
+    </div>
+  </div>
+
+  <h3 class="stepline">Run it</h3>
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — .gitignore, branch names, alias</div></div>
+    <div class="term-body"><span class="ln prompt">cat &gt; .gitignore &lt;&lt; 'EOF'</span><span class="ln out dim">venv/
+__pycache__/
+.env
+node_modules/
+EOF</span>
+<span class="ln prompt">git add .gitignore &amp;&amp; git commit -m "Add .gitignore before tracked junk creeps in"</span>
+<span class="ln prompt">git checkout -b feature/user-authentication</span>
+<span class="ln prompt">git checkout -b bugfix/navbar-alignment</span>
+<span class="ln prompt">git checkout -b hotfix/critical-bug</span>
+<span class="ln prompt">git branch</span><span class="ln out flag-staged">  bugfix/navbar-alignment
+  feature/user-authentication
+* hotfix/critical-bug
+  main</span><span class="ln out dim">← scannable at a glance vs. ad-hoc names</span>
+<span class="ln prompt">git config --global alias.lg "log --oneline --all --graph"</span>
+<span class="ln prompt">git lg</span><span class="ln out dim">* a90cd33 (HEAD -&gt; main) Add pagination...</span></div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    If a new teammate cloned your practice repo right now with zero context, could they understand what it
+    is and get it running from the README and commit history alone?
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Treating clean history as something to fix "later" — it compounds the same way messy code does; the habit
+    has to form during the small, low-stakes commits, not get retrofitted onto a large tangled history.
+  </div>
+</section>
+
+<!-- ===================== PHASE 8 ===================== -->
+<section class="phase" id="phase8">
+  <div class="node">08</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Guardrails</div>
+    <h2>Production Readiness</h2>
+    <p class="goal"><strong>Goal:</strong> everything so far worked on a solo practice repo with no consequences.
+    Production repos add guardrails specifically <em>because</em> mistakes there have real cost — get familiar
+    with the guardrails themselves, not just the commands.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">Branch protection + CI, in one picture</div>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="IBM Plex Mono" font-size="11">
+        <text x="30" y="30" fill="var(--ink-soft)">direct push to main</text>
+        <line x1="30" y1="45" x2="220" y2="45" stroke="var(--rust)" stroke-width="2"/>
+        <text x="235" y="49" fill="var(--rust)" font-weight="600">✕ rejected</text>
+
+        <text x="30" y="90" fill="var(--ink-soft)">push feature branch → open PR</text>
+        <line x1="30" y1="105" x2="220" y2="105" stroke="var(--teal)" stroke-width="2"/>
+        <rect x="230" y="88" width="120" height="34" rx="6" fill="var(--paper-dim)" stroke="var(--line)"/>
+        <text x="290" y="109" text-anchor="middle" font-size="10">CI: Actions run</text>
+        <line x1="350" y1="105" x2="420" y2="105" stroke="var(--teal)" stroke-width="2" marker-end="url(#arr5)"/>
+        <rect x="420" y="88" width="90" height="34" rx="6" fill="var(--teal-dim)" stroke="var(--teal)"/>
+        <text x="465" y="109" text-anchor="middle" font-size="10" fill="#0B4B43">checks pass</text>
+        <line x1="510" y1="105" x2="580" y2="105" stroke="var(--teal)" stroke-width="2" marker-end="url(#arr5)"/>
+        <text x="640" y="109" text-anchor="middle" fill="var(--teal)" font-weight="600">✓ merge allowed</text>
+      </g>
+      <defs><marker id="arr5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--teal)"/></marker></defs>
+    </svg>
+    <div class="diagram-cap">The rule isn't personal discipline — it's enforced by the platform regardless of a moment of forgetfulness.</div>
+  </div>
+
+  <h3 class="stepline">Run it</h3>
+  <ol class="steps">
+    <li>GitHub → <strong>Settings → Branches</strong> → protect <code>main</code>: require a PR, require it up to date.</li>
+    <li>Create a hook: copy <code>.git/hooks/pre-commit.sample</code> → <code>pre-commit</code>, <code>chmod +x</code>, make it <code>echo "Running pre-commit checks..."</code>.</li>
+    <li>Tag a release: <code>git tag -a v1.0.0 -m "First stable version"</code>, <code>git push origin v1.0.0</code>.</li>
+    <li>Simulate a leaked secret in a commit — research (don't necessarily run) <code>git filter-repo</code>, and understand the real first move is <strong>rotate the credential</strong>, not just delete the commit.</li>
+    <li>Add <code>.github/workflows/test.yml</code> that runs <code>echo "tests would run here"</code> on every push — watch it in the Actions tab.</li>
+  </ol>
+
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">.github/workflows/test.yml</div></div>
+    <div class="term-body"><span class="ln out dim">name: test
+on: [push]
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "tests would run here"</span></div>
+  </div>
+
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — trying to bypass the protection</div></div>
+    <div class="term-body"><span class="ln prompt">git checkout main &amp;&amp; git commit -am "quick fix" &amp;&amp; git push</span><span class="ln out flag-untracked">! [remote rejected] main -&gt; main (protected branch hook declined)
+error: failed to push some refs</span><span class="ln out dim">← this is the feature working, not a bug</span></div>
+  </div>
+
+  <div class="callout checkpoint">
+    <span class="cal-label">Checkpoint question</span>
+    Why is "require a PR before merging to main" a meaningfully different safety net than just personally
+    deciding to always open PRs? <em>(It's enforced regardless of forgetfulness, tiredness, or urgency.)</em>
+  </div>
+  <div class="callout pitfall">
+    <span class="cal-label">Common pitfall</span>
+    Treating branch protection, hooks, and CI as "senior developer concerns" to learn later. They're cheap to
+    set up on a practice repo now — build the muscle memory before you're on a real team.
+  </div>
+</section>
+
+<!-- ===================== CAPSTONE ===================== -->
+<section class="phase" id="capstone">
+  <div class="node">✦</div>
+  <div class="phase-head">
+    <div class="phase-kicker">Capstone</div>
+    <h2>Simulate a Real Production Hotfix</h2>
+    <p class="goal">This combines everything above into one realistic scenario: a bug slips into production,
+    and you fix it without losing the fix when ongoing work eventually merges.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-title">main / develop / hotfix — the full incident, branch by branch</div>
+    <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="IBM Plex Mono" font-size="10">
+        <!-- main line -->
+        <line x1="40" y1="120" x2="720" y2="120" stroke="var(--main-branch)" stroke-width="2"/>
+        <text x="40" y="105" fill="var(--ink-soft)">main</text>
+        <!-- develop line -->
+        <line x1="140" y1="200" x2="720" y2="200" stroke="var(--develop-branch)" stroke-width="2"/>
+        <text x="140" y="220" fill="var(--develop-branch)">develop</text>
+
+        <circle cx="60" cy="120" r="8" fill="var(--main-branch)"/>
+        <path d="M60,120 C90,160 110,180 140,200" stroke="var(--line)" stroke-width="1.5" fill="none"/>
+        <circle cx="220" cy="200" r="8" fill="var(--develop-branch)"/><text x="220" y="240" text-anchor="middle" fill="var(--develop-branch)">in-progress work</text>
+
+        <circle cx="260" cy="120" r="9" fill="var(--rust)"/><text x="260" y="100" text-anchor="middle" fill="var(--rust)">bug ships to main</text>
+
+        <!-- hotfix branch -->
+        <path d="M260,120 C300,70 320,60 360,60" stroke="var(--hotfix-branch)" stroke-width="2" fill="none"/>
+        <circle cx="360" cy="60" r="8" fill="var(--hotfix-branch)"/><text x="360" y="42" text-anchor="middle" fill="var(--hotfix-branch)">hotfix/fix-critical-error</text>
+        <path d="M360,60 C420,60 440,110 470,120" stroke="var(--hotfix-branch)" stroke-width="2" fill="none"/>
+        <circle cx="470" cy="120" r="10" fill="var(--teal)"/><text x="470" y="102" text-anchor="middle" fill="var(--teal)">PR merged → v1.0.1</text>
+
+        <!-- critical: merge main back into develop -->
+        <path d="M470,120 C500,160 500,180 520,200" stroke="var(--teal)" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#arr6)"/>
+        <circle cx="560" cy="200" r="9" fill="var(--develop-branch)"/><text x="560" y="238" text-anchor="middle" fill="var(--teal)" font-weight="600">merge main → develop</text>
+      </g>
+      <defs><marker id="arr6" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--teal)"/></marker></defs>
+    </svg>
+    <div class="diagram-cap">Step 7 is the one people forget — without it, <code>develop</code> can reintroduce the bug when it eventually merges into <code>main</code>.</div>
+  </div>
+
+  <ol class="steps">
+    <li><code>main</code> = production. Create <code>develop</code>, add a couple of in-progress commits there.</li>
+    <li><strong>The incident:</strong> deliberately commit a bug directly to <code>main</code>.</li>
+    <li><code>git checkout -b hotfix/fix-critical-error main</code></li>
+    <li>Fix it, commit with a clear incident/fix message.</li>
+    <li>Open a PR into <code>main</code>, merge it (protection rules and all, from Phase 8).</li>
+    <li><code>git tag -a v1.0.1 -m "Hotfix: critical error in X"</code></li>
+    <li><strong>Critical step people forget</strong> — merge the fix back into <code>develop</code>:</li>
+  </ol>
+
+  <div class="term">
+    <div class="term-head"><span></span><span></span><span></span><div class="term-title">bash — don't lose the fix</div></div>
+    <div class="term-body"><span class="ln prompt">git checkout develop</span>
+<span class="ln prompt">git merge main</span><span class="ln out">Merge made by the 'recursive' strategy.
+ app.js | 1 +
+ 1 file changed, 1 insertion(+)</span></div>
+  </div>
+
+  <ol class="steps" start="8">
+    <li>Resolve any conflicts that come up (there may not be any — check).</li>
+    <li>Write a one-paragraph incident summary: what broke, how it was caught, how it was fixed, what would prevent it next time.</li>
+  </ol>
+
+  <div class="callout answer">
+    <span class="cal-label">If you can do all nine steps without opening a reference sheet</span>
+    You've internalized the actual workflow this document was building toward — not just the commands, but the
+    judgment of which ones to reach for, in what order, under real conditions.
+  </div>
+</section>
+
+</div>
+
+<!-- ===================== CHECKLIST ===================== -->
+<section class="checklist-section" id="checklist">
+  <div class="checklist-inner">
+    <div class="phase-kicker" style="color:var(--term-mint)">Final mastery checklist</div>
+    <h2>Check each box only once you've actually <em>done</em> it</h2>
+    <p>Not just read about it. Every item below maps back to an exercise above.</p>
+
+    <div class="cat">
+      <h4>Local Git</h4>
+      <ul>
+        <li>Made commits and can explain staging vs. working directory from memory</li>
+        <li>Used <code style="background:rgba(255,255,255,0.08);color:#DDE0E6;">git diff</code> and <code style="background:rgba(255,255,255,0.08);color:#DDE0E6;">git diff --staged</code> to inspect changes before committing</li>
+        <li>Used checkout/restore, reset, revert, and commit --amend — and can explain when each is correct</li>
+        <li>Created, switched, and deleted branches confidently</li>
+      </ul>
+    </div>
+
+    <div class="cat">
+      <h4>Conflicts</h4>
+      <ul>
+        <li>Deliberately caused and resolved a merge conflict, start to finish, without panicking</li>
+        <li>Resolved a conflict inside an open pull request, correctly merging main into the feature branch</li>
+      </ul>
+    </div>
+
+    <div class="cat">
+      <h4>GitHub &amp; Remotes</h4>
+      <ul>
+        <li>Connected a local repo to GitHub and pushed/pulled/fetched/cloned</li>
+        <li>Opened, reviewed, and merged a real pull request</li>
+        <li>Experienced and recovered from a rejected push</li>
+      </ul>
+    </div>
+
+    <div class="cat">
+      <h4>Advanced Tools</h4>
+      <ul>
+        <li>Used stash to context-switch without losing work</li>
+        <li>Used cherry-pick to move one specific commit between branches</li>
+        <li>Used interactive rebase to clean up messy commits before sharing them</li>
+        <li>Used bisect to find a bug-introducing commit</li>
+      </ul>
+    </div>
+
+    <div class="cat">
+      <h4>Team &amp; Production Practices</h4>
+      <ul>
+        <li>Wrote consistently clear commit messages and branch names</li>
+        <li>Set up .gitignore before, not after, sensitive/build files got tracked</li>
+        <li>Enabled branch protection and watched it actually block a direct push</li>
+        <li>Created a Git hook and a minimal CI workflow</li>
+        <li>Tagged a release</li>
+        <li>Completed the hotfix capstone end to end, including merging the fix back into ongoing work</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="closing">
+  Once every box is checked, you're not just someone who's read about Git — you're someone who has broken it,
+  fixed it, and built the judgment to know which tool a given real situation calls for. That judgment, not
+  command recall, is what "production-ready" actually means.
+</div>
+
+<footer>Git &amp; GitHub Mastery Path · a hands-on follow-up to your reference cheat sheets</footer>
+
+</body>
+</html>
