@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building MailHub — Django Email Automation + React Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+:root{
+  --bg:#0C1220;
+  --surface:#111A2C;
+  --surface-2:#162136;
+  --border:#233150;
+  --border-soft:#1B2740;
+  --text:#EAEEF7;
+  --text-dim:#8D98B8;
+  --text-faint:#57648A;
+  --setup:#8894B8;
+  --out:#E0524A;
+  --out-soft:#3A2229;
+  --in:#3E86D6;
+  --in-soft:#1B2C42;
+  --verify:#3FB88B;
+  --verify-soft:#173328;
+  --radius:10px;
+  --disp:'Space Grotesk', ui-sans-serif, sans-serif;
+  --sans:'Inter', system-ui, sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--sans);
+  line-height:1.62;font-size:16px;-webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+a{color:inherit;}
+::selection{background:var(--in-soft);color:var(--text);}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--setup),var(--out),var(--in),var(--verify));
+  z-index:200;transition:width .1s linear;}
+
+#topbar{display:none;position:sticky;top:0;z-index:150;
+  background:rgba(12,18,32,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border-soft);padding:14px 18px;
+  align-items:center;justify-content:space-between;}
+#topbar .brand{font-family:var(--disp);font-weight:700;font-size:14px;}
+#topbar .brand span{color:var(--in);}
+#navToggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px;cursor:pointer;}
+
+#shell{display:grid;grid-template-columns:288px 1fr;min-height:100vh;}
+#sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;
+  border-right:1px solid var(--border-soft);background:var(--surface);padding:26px 0 60px;}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+.brandblock{padding:0 22px 20px;border-bottom:1px solid var(--border-soft);margin-bottom:8px;}
+.brandblock .brand{font-family:var(--disp);font-weight:700;font-size:18px;}
+.brandblock .brand span{color:var(--in);}
+.brandblock .brand em{color:var(--out);font-style:normal;}
+.brandblock .sub{color:var(--text-dim);font-size:12.5px;margin-top:6px;}
+
+.lane-legend{display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px 6px;}
+.lane-chip{display:flex;align-items:center;gap:6px;font-family:var(--mono);
+  font-size:10px;letter-spacing:.03em;color:var(--text-dim);
+  border:1px solid var(--border);border-radius:20px;padding:3px 9px;}
+.lane-chip i{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.lane-chip.setup i{background:var(--setup);}
+.lane-chip.out i{background:var(--out);}
+.lane-chip.in i{background:var(--in);}
+.lane-chip.verify i{background:var(--verify);}
+
+nav#steps{padding:6px 0 0 0;}
+.partlabel{font-family:var(--disp);font-size:10.5px;font-weight:700;letter-spacing:.09em;
+  color:var(--text-faint);text-transform:uppercase;padding:16px 22px 4px;}
+.navitem{position:relative;display:flex;align-items:baseline;gap:10px;
+  padding:6px 22px 6px 18px;text-decoration:none;cursor:pointer;border-left:3px solid transparent;}
+.navitem.setup{border-left-color:var(--setup);}
+.navitem.out{border-left-color:var(--out);}
+.navitem.in{border-left-color:var(--in);}
+.navitem.verify{border-left-color:var(--verify);}
+.navitem .num{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);min-width:22px;}
+.navitem .label{font-size:13px;color:var(--text-dim);transition:color .15s;}
+.navitem:hover .label{color:var(--text);}
+.navitem.active{background:var(--surface-2);}
+.navitem.active .label{color:var(--text);font-weight:600;}
+
+main{padding:0;min-width:0;}
+.hero{padding:60px 54px 40px;border-bottom:1px solid var(--border-soft);
+  background:
+    radial-gradient(ellipse 900px 380px at 12% -10%, rgba(224,82,74,.08), transparent 60%),
+    radial-gradient(ellipse 900px 380px at 88% -10%, rgba(62,134,214,.09), transparent 60%);}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--text-faint);
+  text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--text-faint);}
+h1.title{font-family:var(--disp);font-weight:700;font-size:clamp(26px,3.8vw,42px);
+  line-height:1.18;letter-spacing:-.01em;max-width:820px;}
+h1.title .accent-out{color:var(--out);}
+h1.title .accent-in{color:var(--in);}
+.hero-sub{color:var(--text-dim);font-size:16.5px;margin-top:16px;max-width:660px;}
+.scope{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;max-width:920px;}
+.scope li{list-style:none;background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:var(--radius);padding:11px 13px;font-size:13.5px;color:var(--text-dim);
+  display:flex;gap:9px;align-items:flex-start;}
+.scope li::before{content:"✓";color:var(--verify);font-weight:700;flex:0 0 auto;}
+
+.diagram-wrap{margin-top:38px;background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:14px;padding:20px 22px 12px;}
+.diagram-cap{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);
+  letter-spacing:.06em;text-transform:uppercase;margin-top:8px;text-align:center;}
+svg{display:block;width:100%;height:auto;}
+
+/* connection setup panel */
+.setup-panel{margin:0 54px;margin-top:44px;padding:30px 32px;border-radius:16px;
+  background:linear-gradient(160deg, rgba(224,82,74,.06), rgba(62,134,214,.07));
+  border:1px solid var(--border-soft);}
+.setup-panel .eyebrow{color:var(--text-faint);}
+.setup-panel h2{font-family:var(--disp);font-size:22px;margin-bottom:10px;}
+.setup-panel > p{color:var(--text-dim);font-size:15px;max-width:720px;margin-bottom:22px;}
+.link-steps{display:grid;gap:12px;margin-bottom:24px;}
+.link-step{display:flex;gap:14px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:10px;padding:14px 16px;}
+.link-step .ls-num{font-family:var(--disp);font-weight:700;font-size:14px;color:var(--in);
+  background:var(--in-soft);width:26px;height:26px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;flex:0 0 auto;}
+.link-step .ls-body{flex:1;}
+.link-step .ls-body strong{font-size:14.5px;display:block;margin-bottom:3px;}
+.link-step .ls-body span{font-size:13.5px;color:var(--text-dim);}
+.link-step a.ls-link{font-family:var(--mono);font-size:12.5px;color:var(--in);
+  border:1px solid var(--in);border-radius:20px;padding:5px 12px;white-space:nowrap;
+  text-decoration:none;flex:0 0 auto;align-self:center;}
+.link-step a.ls-link:hover{background:var(--in-soft);}
+
+.test-form{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:22px 24px;}
+.test-form h3{font-family:var(--disp);font-size:15px;margin-bottom:4px;}
+.test-form .tf-note{font-size:12.5px;color:var(--text-faint);margin-bottom:18px;font-family:var(--mono);}
+.tf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.tf-field{display:flex;flex-direction:column;gap:5px;}
+.tf-field label{font-size:12px;color:var(--text-dim);font-family:var(--mono);}
+.tf-field input{background:var(--bg);border:1px solid var(--border);border-radius:7px;
+  padding:9px 11px;color:var(--text);font-family:var(--mono);font-size:13px;}
+.tf-field input:focus{outline:none;border-color:var(--in);}
+.tf-actions{display:flex;align-items:center;gap:14px;margin-top:18px;}
+#testConnBtn{background:var(--in);color:#fff;border:none;border-radius:8px;
+  padding:10px 20px;font-family:var(--disp);font-weight:600;font-size:13.5px;cursor:pointer;}
+#testConnBtn:hover{opacity:.9;}
+#testConnBtn:disabled{opacity:.5;cursor:default;}
+#testResult{font-family:var(--mono);font-size:13px;}
+#testResult.ok{color:var(--verify);}
+#testResult.fail{color:var(--out);}
+@media (max-width:680px){.tf-grid{grid-template-columns:1fr;}}
+
+.content{padding:10px 54px 120px;max-width:900px;}
+.part-banner{margin:52px 0 8px;padding:14px 20px;border-radius:8px;
+  font-family:var(--disp);font-weight:700;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.part-banner.setup-b{background:var(--surface-2);color:var(--setup);}
+.part-banner.out-b{background:var(--out-soft);color:#F0908A;}
+.part-banner.in-b{background:var(--in-soft);color:#8FB8EA;}
+.part-banner.verify-b{background:var(--verify-soft);color:#7DD4AE;}
+.part-banner span.desc{font-family:var(--sans);font-weight:400;text-transform:none;
+  letter-spacing:0;color:var(--text-dim);font-size:13px;}
+
+.step{padding:36px 0 8px;border-top:1px solid var(--border-soft);scroll-margin-top:20px;}
+.step:first-of-type{border-top:none;}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.step-badge{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.05em;
+  padding:3px 9px;border-radius:20px;border:1px solid;white-space:nowrap;}
+.step.setup .step-badge{color:var(--setup);border-color:var(--setup);background:var(--surface-2);}
+.step.out .step-badge{color:var(--out);border-color:var(--out);background:var(--out-soft);}
+.step.in .step-badge{color:var(--in);border-color:var(--in);background:var(--in-soft);}
+.step.verify .step-badge{color:var(--verify);border-color:var(--verify);background:var(--verify-soft);}
+.step h2{font-family:var(--disp);font-size:19.5px;font-weight:700;letter-spacing:-.005em;}
+.step p{margin:13px 0;color:#CBD3E5;font-size:15.3px;}
+.step p strong{color:var(--text);font-weight:600;}
+
+.codeblock{position:relative;margin:16px 0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border-soft);}
+.codeblock .filebar{display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface-2);padding:8px 14px;font-family:var(--mono);font-size:11.5px;
+  color:var(--text-faint);border-bottom:1px solid var(--border-soft);}
+.codeblock .filebar .fb-accent{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:8px;}
+.step.setup .filebar .fb-accent{background:var(--setup);}
+.step.out .filebar .fb-accent{background:var(--out);}
+.step.in .filebar .fb-accent{background:var(--in);}
+.step.verify .filebar .fb-accent{background:var(--verify);}
+.codeblock .copybtn{background:transparent;border:1px solid var(--border);color:var(--text-dim);
+  font-family:var(--mono);font-size:10.5px;padding:3px 9px;border-radius:6px;cursor:pointer;}
+.codeblock .copybtn:hover{color:var(--text);border-color:var(--text-dim);}
+.codeblock pre{margin:0;padding:16px;overflow-x:auto;background:#0d1117 !important;font-size:12.9px;}
+.codeblock code{font-family:var(--mono) !important;}
+
+.callout{margin:18px 0;padding:15px 18px;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--border-soft);border-left:3px solid var(--verify);}
+.step.out .callout{border-left-color:var(--out);}
+.step.in .callout{border-left-color:var(--in);}
+.callout .why{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:7px;display:block;font-weight:700;}
+.callout p{margin:0;font-size:14.3px;color:#CBD3E5;}
+.callout p strong{color:var(--text);}
+.callout code, .step p code, .step li code{font-family:var(--mono);background:var(--surface-2);
+  border:1px solid var(--border-soft);padding:1px 6px;border-radius:5px;font-size:.86em;color:#F0C57A;}
+
+.security-note{margin:16px 0;padding:14px 16px;border-radius:var(--radius);
+  background:var(--out-soft);border:1px dashed var(--out);font-size:14px;color:#EBD2CF;}
+.security-note strong{color:#F0908A;}
+
+.terminal-check{margin:16px 0;padding:13px 16px;border-radius:var(--radius);
+  background:var(--verify-soft);border:1px dashed var(--verify);font-size:14px;color:var(--text-dim);}
+.terminal-check strong{color:var(--verify);}
+
+.trace{background:#0d1117;border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:16px 18px;font-family:var(--mono);font-size:12.6px;color:var(--text-dim);
+  overflow-x:auto;margin:16px 0;white-space:pre;}
+.trace .o{color:var(--out);}
+.trace .i{color:var(--in);}
+.trace .arrow{color:var(--text-faint);}
+
+.step ol, .step ul.plain{margin:13px 0 13px 22px;color:#CBD3E5;font-size:15px;}
+.step ol li, .step ul.plain li{margin:6px 0;}
+
+.tree-block{background:#0d1117;border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:20px 22px;font-family:var(--mono);font-size:12.6px;color:var(--text-dim);
+  overflow-x:auto;white-space:pre;line-height:1.75;}
+.tree-block .tag{color:var(--text-faint);font-style:italic;}
+
+.pattern-section{margin-top:56px;padding:42px;border-radius:16px;
+  background:linear-gradient(160deg, rgba(224,82,74,.07), rgba(62,134,214,.07));
+  border:1px solid var(--border-soft);}
+.pattern-section .eyebrow{color:var(--text-faint);}
+.pattern-section h2{font-family:var(--disp);font-size:23px;margin-bottom:16px;}
+.pattern-section p{font-size:15.3px;color:#DAE1F0;max-width:760px;}
+.pattern-halves{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;}
+.pattern-half{background:var(--surface);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--border-soft);}
+.pattern-half.out-h{border-top:3px solid var(--out);}
+.pattern-half.in-h{border-top:3px solid var(--in);}
+.pattern-half h3{font-family:var(--disp);font-size:13.5px;margin-bottom:8px;}
+.pattern-half.out-h h3{color:var(--out);}
+.pattern-half.in-h h3{color:var(--in);}
+.pattern-half p{font-size:13.8px;color:var(--text-dim);margin:0;}
+@media (max-width:760px){.pattern-halves{grid-template-columns:1fr;}}
+
+footer{padding:40px 54px 80px;color:var(--text-faint);font-size:13px;font-family:var(--mono);}
+
+@media (max-width:980px){
+  #shell{grid-template-columns:1fr;}
+  #topbar{display:flex;}
+  #sidebar{position:fixed;left:0;top:57px;width:288px;max-width:82vw;height:calc(100vh - 57px);
+    transform:translateX(-100%);transition:transform .22s ease;z-index:140;box-shadow:20px 0 40px rgba(0,0,0,.4);}
+  #sidebar.open{transform:translateX(0);}
+  .hero{padding:38px 20px 28px;}
+  .setup-panel{margin:36px 18px 0;padding:22px 18px;}
+  .content{padding:10px 20px 100px;}
+  footer{padding:30px 20px 60px;}
+  .pattern-section{padding:24px;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="topbar">
+  <div class="brand">Mail<span>Hub</span></div>
+  <button id="navToggle">☰ Steps</button>
+</div>
+
+<div id="shell">
+  <aside id="sidebar">
+    <div class="brandblock">
+      <div class="brand">Mail<span>Hub</span></div>
+      <div class="sub">Django email automation + React dashboard</div>
+    </div>
+    <div class="lane-legend">
+      <span class="lane-chip setup"><i></i>SETUP</span>
+      <span class="lane-chip out"><i></i>OUTBOUND</span>
+      <span class="lane-chip in"><i></i>INBOUND</span>
+      <span class="lane-chip verify"><i></i>VERIFY</span>
+    </div>
+    <nav id="steps">
+      <div class="partlabel">Part A — Environment &amp; Postgres</div>
+      <a class="navitem setup" href="#step-0"><span class="num">00</span><span class="label">Workspace + installs</span></a>
+      <a class="navitem setup" href="#step-1"><span class="num">01</span><span class="label">Install PostgreSQL</span></a>
+      <a class="navitem setup" href="#step-2"><span class="num">02</span><span class="label">Create the database</span></a>
+      <a class="navitem setup" href="#step-3"><span class="num">03</span><span class="label">Create the project</span></a>
+      <a class="navitem setup" href="#step-4"><span class="num">04</span><span class="label">.env + DATABASES config</span></a>
+      <a class="navitem setup" href="#step-5"><span class="num">05</span><span class="label">Migrate — confirm Postgres works</span></a>
+
+      <div class="partlabel">Part B — Secure Connections</div>
+      <a class="navitem setup" href="#step-6"><span class="num">06</span><span class="label">Create the mailer app</span></a>
+      <a class="navitem setup" href="#step-7"><span class="num">07</span><span class="label">models.py — EmailAccount</span></a>
+      <a class="navitem setup" href="#step-8"><span class="num">08</span><span class="label">crypto.py — encrypt/decrypt</span></a>
+      <a class="navitem setup" href="#step-9"><span class="num">09</span><span class="label">Migrate + admin.py</span></a>
+      <a class="navitem setup" href="#step-10"><span class="num">10</span><span class="label">serializers.py</span></a>
+
+      <div class="partlabel">Part C — Test-Connection Endpoint</div>
+      <a class="navitem setup" href="#step-11"><span class="num">11</span><span class="label">connection_test.py</span></a>
+      <a class="navitem setup" href="#step-12"><span class="num">12</span><span class="label">views.py — test + save account</span></a>
+      <a class="navitem setup" href="#step-13"><span class="num">13</span><span class="label">API routes + one dashboard URL</span></a>
+
+      <div class="partlabel">Part D — Outbound Email</div>
+      <a class="navitem out" href="#step-14"><span class="num">14</span><span class="label">models.py — OutgoingEmail</span></a>
+      <a class="navitem out" href="#step-15"><span class="num">15</span><span class="label">mailer_service.py — send_email()</span></a>
+      <a class="navitem out" href="#step-16"><span class="num">16</span><span class="label">views.py — SendEmailView</span></a>
+
+      <div class="partlabel">Part E — Inbound Email</div>
+      <a class="navitem in" href="#step-17"><span class="num">17</span><span class="label">models.py — IncomingEmail</span></a>
+      <a class="navitem in" href="#step-18"><span class="num">18</span><span class="label">inbox_poller.py</span></a>
+      <a class="navitem in" href="#step-19"><span class="num">19</span><span class="label">scheduler.py + apps.py</span></a>
+
+      <div class="partlabel">Part F — Notifications</div>
+      <a class="navitem in" href="#step-20"><span class="num">20</span><span class="label">models.py — Notification</span></a>
+      <a class="navitem in" href="#step-21"><span class="num">21</span><span class="label">views.py + urls.py</span></a>
+
+      <div class="partlabel">Part G — React Dashboard</div>
+      <a class="navitem verify" href="#step-22"><span class="num">22</span><span class="label">Create the React app</span></a>
+      <a class="navitem verify" href="#step-23"><span class="num">23</span><span class="label">api.js — same-origin client</span></a>
+      <a class="navitem verify" href="#step-24"><span class="num">24</span><span class="label">ConnectEmailForm.jsx</span></a>
+      <a class="navitem verify" href="#step-25"><span class="num">25</span><span class="label">Dashboard.jsx</span></a>
+      <a class="navitem verify" href="#final-app"><span class="num">25+</span><span class="label">Assemble App.jsx</span></a>
+      <a class="navitem verify" href="#finish"><span class="num">25++</span><span class="label">Finish the real dashboard</span></a>
+
+      <div class="partlabel">Part H — Run &amp; Verify</div>
+      <a class="navitem verify" href="#step-26"><span class="num">26</span><span class="label">Serve everything from one URL</span></a>
+      <a class="navitem verify" href="#step-27"><span class="num">27</span><span class="label">Test the full flow</span></a>
+      <a class="navitem verify" href="#tree"><span class="num">＋</span><span class="label">Final project tree</span></a>
+      <a class="navitem verify" href="#pattern"><span class="num">＋</span><span class="label">The pattern worth remembering</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Real build log · which file, what I type, why</div>
+      <h1 class="title">Building <span class="accent-in">Mail</span><span class="accent-out">Hub</span> — one Django app that sends, reads, and displays your email</h1>
+      <p class="hero-sub">Two independent flows, one beginner-friendly project: <strong>outbound</strong> — your dashboard tells Django to send an email over SMTP — and <strong>inbound</strong> — Django checks your inbox on a timer over IMAP and turns new mail into in-app notifications. React is built once and served by Django, so your finished app has <strong>one URL</strong>, not separate frontend and backend addresses.</p>
+
+      <div class="security-note"><strong>Read this first.</strong> This guide is intentionally a local practice project. You need Python 3, Node.js/npm, PostgreSQL, and a Gmail App Password. Copy one file at a time, run each command before moving on, and never paste an App Password or <code>.env</code> value into GitHub, chat, or a screenshot.</div>
+
+      <ul class="scope">
+        <li>Paste your Gmail + App Password once, MailHub verifies it before saving</li>
+        <li>Compose and send email straight from the dashboard</li>
+        <li>Background job checks your inbox automatically, every couple minutes</li>
+        <li>New mail shows up as a live notification badge — no manual refresh needed</li>
+        <li>Open one address when finished: <code>http://127.0.0.1:8000/</code></li>
+      </ul>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono', monospace">
+          <defs>
+            <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#E0524A"/></marker>
+            <marker id="ai" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3E86D6"/></marker>
+          </defs>
+
+          <!-- OUTBOUND lane (top) -->
+          <text x="26" y="34" fill="#F0908A" font-size="11" font-weight="700" letter-spacing="1">OUTBOUND</text>
+
+          <rect x="26" y="46" width="120" height="46" rx="8" fill="#1B2740" stroke="#233150"/>
+          <text x="86" y="74" fill="#EAEEF7" font-size="10.5" text-anchor="middle">Dashboard compose</text>
+
+          <line x1="146" y1="69" x2="204" y2="69" stroke="#E0524A" stroke-width="1.5" marker-end="url(#ao)"/>
+
+          <rect x="206" y="46" width="130" height="46" rx="8" fill="#3A2229" stroke="#E0524A" stroke-opacity=".5"/>
+          <text x="271" y="74" fill="#F0908A" font-size="10.5" text-anchor="middle" font-weight="700">OutgoingEmail row</text>
+
+          <line x1="336" y1="69" x2="394" y2="69" stroke="#E0524A" stroke-width="1.5" marker-end="url(#ao)"/>
+
+          <rect x="396" y="46" width="130" height="46" rx="8" fill="#3A2229" stroke="#E0524A" stroke-opacity=".5"/>
+          <text x="461" y="74" fill="#F0908A" font-size="10.5" text-anchor="middle" font-weight="700">SMTP → Gmail</text>
+
+          <line x1="526" y1="69" x2="584" y2="69" stroke="#E0524A" stroke-width="1.5" marker-end="url(#ao)"/>
+          <text x="620" y="74" font-size="20" text-anchor="middle">📤</text>
+          <text x="620" y="94" fill="#57648A" font-size="9" text-anchor="middle">recipient's inbox</text>
+
+          <!-- divider -->
+          <line x1="26" y1="150" x2="874" y2="150" stroke="#1B2740" stroke-width="1"/>
+
+          <!-- INBOUND lane (bottom) -->
+          <text x="26" y="182" fill="#8FB8EA" font-size="11" font-weight="700" letter-spacing="1">INBOUND</text>
+
+          <text x="86" y="220" font-size="20" text-anchor="middle">📥</text>
+          <text x="86" y="238" fill="#57648A" font-size="9" text-anchor="middle">your Gmail inbox</text>
+
+          <line x1="112" y1="216" x2="184" y2="216" stroke="#3E86D6" stroke-width="1.5" marker-end="url(#ai)"/>
+          <text x="148" y="206" fill="#8FB8EA" font-size="9.5" text-anchor="middle">IMAP poll</text>
+
+          <rect x="186" y="192" width="140" height="48" rx="8" fill="#1B2C42" stroke="#3E86D6" stroke-opacity=".5"/>
+          <text x="256" y="212" fill="#8FB8EA" font-size="10.5" text-anchor="middle" font-weight="700">APScheduler job</text>
+          <text x="256" y="226" fill="#5F7BA8" font-size="9" text-anchor="middle">every 2 min</text>
+
+          <line x1="326" y1="216" x2="384" y2="216" stroke="#3E86D6" stroke-width="1.5" marker-end="url(#ai)"/>
+
+          <rect x="386" y="192" width="140" height="48" rx="8" fill="#1B2C42" stroke="#3E86D6" stroke-opacity=".5"/>
+          <text x="456" y="212" fill="#8FB8EA" font-size="10.5" text-anchor="middle" font-weight="700">IncomingEmail row</text>
+          <text x="456" y="226" fill="#5F7BA8" font-size="9" text-anchor="middle">parsed + saved</text>
+
+          <line x1="526" y1="216" x2="584" y2="216" stroke="#3E86D6" stroke-width="1.5" marker-end="url(#ai)"/>
+
+          <rect x="586" y="192" width="150" height="48" rx="8" fill="#173328" stroke="#3FB88B" stroke-opacity=".5"/>
+          <text x="661" y="212" fill="#7DD4AE" font-size="10.5" text-anchor="middle" font-weight="700">Notification</text>
+          <text x="661" y="226" fill="#4C8069" font-size="9" text-anchor="middle">created</text>
+
+          <line x1="736" y1="216" x2="784" y2="216" stroke="#3FB88B" stroke-width="1.5" marker-end="url(#ai)"/>
+          <text x="820" y="220" font-size="18" text-anchor="middle">🔔</text>
+          <text x="820" y="240" fill="#57648A" font-size="9" text-anchor="middle">dashboard badge</text>
+        </svg>
+        <div class="diagram-cap">outbound and inbound never touch the same code path — traced in Part D &amp; Part E</div>
+      </div>
+    </section>
+
+    <section class="setup-panel" id="connect">
+      <div class="eyebrow">Before you write any code</div>
+      <h2>Connect your email — external setup</h2>
+      <p>MailHub logs into Gmail on your behalf using an <strong>App Password</strong> — a <strong>16-character / 16-digit passcode</strong> Google generates specifically for one app, separate from your normal Google password, and revocable at any time. <strong>Never enter your normal Gmail password in MailHub.</strong> Complete the checks below in order before you try the dashboard form.</p>
+
+      <div class="link-steps">
+        <div class="link-step">
+          <span class="ls-num">1</span>
+          <div class="ls-body"><strong>Turn on 2-Step Verification — required</strong><span>Do not skip this check. App Passwords are unavailable until 2-Step Verification is enabled and working. Finish Google's confirmation flow before continuing.</span></div>
+          <a class="ls-link" href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank" rel="noopener">Open Google Account →</a>
+        </div>
+        <div class="link-step">
+          <span class="ls-num">2</span>
+          <div class="ls-body"><strong>Generate a new App Password for MailHub</strong><span>Google shows one 16-character passcode, often in four groups. Copy it immediately: it is shown only once. Paste it into MailHub exactly as Google gives it; MailHub removes display spaces when it checks the length.</span></div>
+          <a class="ls-link" href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">Open App Passwords →</a>
+        </div>
+        <div class="link-step">
+          <span class="ls-num">3</span>
+          <div class="ls-body"><strong>Confirm IMAP access</strong><span>For personal Gmail accounts, IMAP is on by default as of 2025. For work or school Google Workspace accounts, an administrator may need to allow IMAP or App Passwords. Use a personal Gmail account for this practice project if possible.</span></div>
+          <a class="ls-link" href="https://mail.google.com/mail/u/0/#settings/fwdandpop" target="_blank" rel="noopener">Open Gmail Settings →</a>
+        </div>
+      </div>
+
+      <div class="security-note"><strong>App Password rules for students:</strong> 1) enable 2-Step Verification first; 2) make a fresh 16-character App Password just for MailHub; 3) paste it only into the local dashboard; 4) never save it in a note, source file, screenshot, or Git repository; 5) if you change your normal Google password, make a new App Password and reconnect MailHub; 6) revoke the MailHub App Password in Google when you finish the practice project.</div>
+
+      <div class="test-form">
+        <h3>Test Connection</h3>
+        <div class="tf-note">// preview of the dashboard form you'll build in Part C — Steps 12–14. Runs a local format check only, doesn't contact Google.</div>
+        <div class="tf-grid">
+          <div class="tf-field"><label>GMAIL ADDRESS</label><input type="email" id="tf-email" placeholder="you@gmail.com"></div>
+          <div class="tf-field"><label>APP PASSWORD (16 CHARACTERS)</label><input type="password" id="tf-pass" placeholder="16-character App Password — never your Gmail password"></div>
+          <div class="tf-field"><label>IMAP HOST</label><input type="text" id="tf-imap" value="imap.gmail.com"></div>
+          <div class="tf-field"><label>SMTP HOST</label><input type="text" id="tf-smtp" value="smtp.gmail.com"></div>
+        </div>
+        <div class="tf-actions">
+          <button id="testConnBtn">Test Connection</button>
+          <span id="testResult"></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="content" id="content">
+
+      <div class="part-banner setup-b">Part A — Environment &amp; PostgreSQL <span class="desc">get the database running before Django needs it</span></div>
+
+      <section class="step setup" id="step-0">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 0 — Terminal: workspace + installs</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash"># First check the tools are installed
+python3 --version
+node --version
+npm --version
+psql --version
+
+mkdir mailhub &amp;&amp; cd mailhub
+mkdir django_app &amp;&amp; cd django_app
+python -m venv venv
+source venv/bin/activate
+
+pip install django djangorestframework psycopg2-binary
+pip install python-decouple cryptography apscheduler django-cors-headers</code></pre>
+        </div>
+        <p>Six packages, six jobs: <code>django</code> the framework, <code>djangorestframework</code> the API layer the React dashboard talks to, <code>psycopg2-binary</code> the PostgreSQL driver, <code>python-decouple</code> reads secrets from a <code>.env</code> file, <code>cryptography</code> encrypts the stored App Password, <code>apscheduler</code> runs the inbox check on a timer, <code>django-cors-headers</code> lets the React dev server (a different port) call this API without the browser blocking it.</p>
+      </section>
+
+      <section class="step setup" id="step-1">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 1 — Install PostgreSQL (if it isn't already)</h2>
+        <p>Check first — you may already have it:</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">psql --version</code></pre>
+        </div>
+        <p>If that prints a version, skip to Step 2. If it says "command not found," install it for your OS:</p>
+
+        <p><strong>Windows:</strong></p>
+        <ol>
+          <li>Download the installer from <a href="https://www.postgresql.org/download/windows/" target="_blank" rel="noopener" style="color:var(--in);">postgresql.org/download/windows</a> and run it.</li>
+          <li>The installer asks you to set a password for the default <code>postgres</code> superuser — pick one and remember it, you'll need it in Step 4.</li>
+          <li>Leave the default port <code>5432</code> as-is.</li>
+          <li>When it finishes, open "SQL Shell (psql)" from the Start menu to confirm it connects.</li>
+        </ol>
+
+        <p><strong>macOS (Homebrew):</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">brew install postgresql@16
+brew services start postgresql@16</code></pre>
+        </div>
+
+        <p><strong>Ubuntu / Debian Linux:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql</code></pre>
+        </div>
+        <div class="terminal-check"><strong>Confirm it's running:</strong> <code>psql --version</code> should now print a version number, on any OS.</div>
+      </section>
+
+      <section class="step setup" id="step-2">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 2 — Terminal: create the database and a user for it</h2>
+        <p>Open a Postgres shell as the superuser — on macOS/Linux this is usually <code>psql postgres</code>; on Windows, use "SQL Shell (psql)" and press Enter through the prompts until it asks for the password you set in Step 1.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>psql</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-sql">CREATE DATABASE mailhub_db;
+CREATE USER mailhub_user WITH PASSWORD 'choose-a-password-here';
+ALTER DATABASE mailhub_db OWNER TO mailhub_user;
+\c mailhub_db
+ALTER SCHEMA public OWNER TO mailhub_user;
+GRANT USAGE, CREATE ON SCHEMA public TO mailhub_user;
+\q</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why a dedicated mailhub_user instead of using the postgres superuser</span>
+          <p>Django needs permission to create its tables inside the <code>public</code> schema. The schema lines above prevent the common <code>permission denied for schema public</code> migration error. The dedicated user still only owns this one practice database, not the entire Postgres server.</p>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-3">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 3 — Terminal: create the Django project</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">django-admin startproject mailhub_project .</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-4">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 4 — Create .env, then wire settings.py to it</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>django_app/.env</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-ini">SECRET_KEY=django-insecure-change-this-in-real-deployments
+DEBUG=True
+
+DB_NAME=mailhub_db
+DB_USER=mailhub_user
+DB_PASSWORD=choose-a-password-here
+DB_HOST=localhost
+DB_PORT=5432
+
+FERNET_KEY=</code></pre>
+        </div>
+        <p><strong>Generate the FERNET_KEY</strong> (used in Step 8 to encrypt the stored App Password) and paste it in:</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"</code></pre>
+        </div>
+        <p><strong>Update <code>mailhub_project/settings.py</code>:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailhub_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from decouple import config
+
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+    }
+}
+
+FERNET_KEY = config('FERNET_KEY')</code></pre>
+        </div>
+        <p><strong>Add this final-dashboard setting too:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailhub_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python"># The React build lands here in Step 26.
+MAILHUB_DASHBOARD_DIR = BASE_DIR / 'dashboard_dist'</code></pre>
+        </div>
+        <div class="security-note"><strong>Never commit .env.</strong> Add it to <code>.gitignore</code> right now, before it's forgotten. It holds your database password, your Django secret key, and the encryption key protecting every stored App Password — all three become worthless the moment they're actually secret to no one.</div>
+        <p><strong>Add to INSTALLED_APPS:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailhub_project/settings.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',      # &lt;- added
+    'corsheaders',          # &lt;- added
+    'mailer',                # &lt;- added, built in Step 6
+]
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',   # &lt;- added, must sit near the top
+    'django.middleware.security.SecurityMiddleware',
+    # ...rest unchanged
+]</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-5">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 5 — Terminal: migrate, confirm Postgres actually works</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py migrate</code></pre>
+        </div>
+        <div class="terminal-check"><strong>What success looks like:</strong> a list of "Applying ..." lines for Django's built-in tables, no <code>psycopg2.OperationalError</code>. If you see a connection error, double-check Step 2's username/password match Step 4's <code>.env</code> exactly, and that Postgres is actually running (<code>brew services list</code> on Mac, <code>systemctl status postgresql</code> on Linux, Services app on Windows).</div>
+      </section>
+
+      <div class="part-banner setup-b">Part B — Storing the Email Connection Securely <span class="desc">one encrypted row per connected account</span></div>
+
+      <section class="step setup" id="step-6">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 6 — Terminal: create the mailer app</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py startapp mailer</code></pre>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-7">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 7 — Open mailer/models.py — EmailAccount</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/models.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.db import models
+from django.contrib.auth.models import User
+
+class EmailAccount(models.Model):
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_account')
+    email_address = models.EmailField()
+    encrypted_app_password = models.BinaryField()
+
+    imap_host = models.CharField(max_length=100, default='imap.gmail.com')
+    imap_port = models.IntegerField(default=993)
+    smtp_host = models.CharField(max_length=100, default='smtp.gmail.com')
+    smtp_port = models.IntegerField(default=587)
+
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email_address</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why encrypted_app_password is BinaryField, not CharField</span>
+          <p>Fernet encryption (Step 8) produces raw encrypted bytes, not text — storing bytes in a <code>CharField</code> would force an awkward text encoding step for no benefit. <code>BinaryField</code> stores exactly what <code>Fernet.encrypt()</code> hands back, with no conversion in between to get subtly wrong.</p>
+        </div>
+        <div class="security-note"><strong>What never appears in this model, on purpose:</strong> a plain-text password field. The raw App Password only ever exists in memory for the few milliseconds it takes to encrypt it (Step 8) — it's never written to disk unencrypted, not even briefly, not even in a field meant to be temporary.</div>
+      </section>
+
+      <section class="step setup" id="step-8">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 8 — Create mailer/crypto.py (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/crypto.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from cryptography.fernet import Fernet
+from django.conf import settings
+
+def _fernet():
+    return Fernet(settings.FERNET_KEY.encode())
+
+def encrypt_password(plain_text_password):
+    return _fernet().encrypt(plain_text_password.encode())
+
+def decrypt_password(encrypted_bytes):
+    return _fernet().decrypt(bytes(encrypted_bytes)).decode()</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why this lives in its own file instead of inline in models.py or views.py</span>
+          <p>Every place that ever needs to store or read the App Password — Step 12's save endpoint, Step 15's send function, Step 18's inbox poller — imports these same two functions. If the encryption method ever changes, there's exactly one file to update, and no risk of one call site quietly using a different (weaker) approach than the others.</p>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-9">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 9 — Terminal: migrate, then open mailer/admin.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py makemigrations mailer
+python manage.py migrate
+python manage.py createsuperuser</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/admin.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.contrib import admin
+from .models import EmailAccount
+
+@admin.register(EmailAccount)
+class EmailAccountAdmin(admin.ModelAdmin):
+    list_display = ('email_address', 'owner', 'is_verified', 'created_at')
+    readonly_fields = ('encrypted_app_password',)</code></pre>
+        </div>
+        <p><code>encrypted_app_password</code> is read-only here for the same reason as MindNotes' <code>embedding</code> field — it's a value only ever written by application code (Step 12), never hand-typed by an admin.</p>
+      </section>
+
+      <section class="step setup" id="step-10">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 10 — Create mailer/serializers.py (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/serializers.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from rest_framework import serializers
+from .models import EmailAccount, IncomingEmail, Notification
+
+class EmailAccountSerializer(serializers.ModelSerializer):
+    app_password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = EmailAccount
+        fields = ['id', 'email_address', 'app_password', 'imap_host', 'imap_port',
+                  'smtp_host', 'smtp_port', 'is_verified', 'created_at']
+        read_only_fields = ['is_verified', 'created_at']</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why app_password is write_only=True and isn't a real model field</span>
+          <p>It's the plain-text password coming in from the React form (Step 24) — this serializer field exists purely to receive it. <code>write_only</code> guarantees it can never accidentally be serialized back out in an API response; the view (Step 12) reads it, encrypts it via <code>crypto.py</code>, and stores only the encrypted bytes on the actual model.</p>
+        </div>
+      </section>
+
+      <div class="part-banner setup-b">Part C — The Test-Connection Endpoint <span class="desc">verify before you ever save</span></div>
+
+      <section class="step setup" id="step-11">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 11 — Create mailer/connection_test.py (new file)</h2>
+        <p>This is the backend for the "Test Connection" form shown at the top of this page. It logs into both SMTP and IMAP with the given credentials and reports exactly which one failed, if either did — never saving anything.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/connection_test.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import smtplib
+import imaplib
+
+def test_smtp(email_address, app_password, smtp_host, smtp_port):
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=6) as server:
+            server.starttls()
+            server.login(email_address, app_password)
+        return True, None
+    except smtplib.SMTPAuthenticationError:
+        return False, 'SMTP login rejected — check the email address and App Password.'
+    except Exception as exc:
+        return False, f'Could not reach SMTP server: {exc}'
+
+def test_imap(email_address, app_password, imap_host, imap_port):
+    try:
+        connection = imaplib.IMAP4_SSL(imap_host, imap_port, timeout=6)
+        connection.login(email_address, app_password)
+        connection.logout()
+        return True, None
+    except imaplib.IMAP4.error:
+        return False, 'IMAP login rejected — is IMAP enabled in Gmail settings?'
+    except Exception as exc:
+        return False, f'Could not reach IMAP server: {exc}'
+
+def test_connection(email_address, app_password, imap_host, imap_port, smtp_host, smtp_port):
+    smtp_ok, smtp_error = test_smtp(email_address, app_password, smtp_host, smtp_port)
+    imap_ok, imap_error = test_imap(email_address, app_password, imap_host, imap_port)
+    return {
+        'smtp_ok': smtp_ok, 'smtp_error': smtp_error,
+        'imap_ok': imap_ok, 'imap_error': imap_error,
+        'success': smtp_ok and imap_ok,
+    }</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why SMTP and IMAP are tested separately instead of stopping at the first failure</span>
+          <p>They fail for different reasons — a wrong password breaks both, but IMAP specifically failing while SMTP succeeds almost always means Step 3 of the external setup (enabling IMAP in Gmail) was skipped. Reporting both independently turns a vague "connection failed" into a specific, actionable next step for whoever's staring at the form.</p>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-12">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 12 — Open mailer/views.py — test + save the account</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.middleware.csrf import get_token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .connection_test import test_connection
+from .crypto import encrypt_password
+from .models import EmailAccount
+from .serializers import EmailAccountSerializer
+
+@api_view(['GET'])
+@permission_classes([])
+def csrf_view(request):
+    return Response({'csrfToken': get_token(request)})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def test_connection_view(request):
+    data = request.data
+    result = test_connection(
+        data.get('email_address'), data.get('app_password'),
+        data.get('imap_host', 'imap.gmail.com'), int(data.get('imap_port', 993)),
+        data.get('smtp_host', 'smtp.gmail.com'), int(data.get('smtp_port', 587)),
+    )
+    return Response(result)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def connect_account_view(request):
+    data = request.data
+    result = test_connection(
+        data.get('email_address'), data.get('app_password'),
+        data.get('imap_host', 'imap.gmail.com'), int(data.get('imap_port', 993)),
+        data.get('smtp_host', 'smtp.gmail.com'), int(data.get('smtp_port', 587)),
+    )
+    if not result['success']:
+        return Response(result, status=400)
+
+    account, _ = EmailAccount.objects.update_or_create(
+        owner=request.user,
+        defaults={
+            'email_address': data.get('email_address'),
+            'encrypted_app_password': encrypt_password(data.get('app_password')),
+            'imap_host': data.get('imap_host', 'imap.gmail.com'),
+            'imap_port': int(data.get('imap_port', 993)),
+            'smtp_host': data.get('smtp_host', 'smtp.gmail.com'),
+            'smtp_port': int(data.get('smtp_port', 587)),
+            'is_verified': True,
+        },
+    )
+    return Response(EmailAccountSerializer(account).data, status=201)</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why connect_account_view re-tests the connection instead of trusting a prior test_connection_view call</span>
+          <p>The two calls could be seconds or minutes apart, and network requests from the browser can be replayed, retried, or intercepted — the save endpoint has to be safe to call on its own, verifying for itself, rather than trusting that "the test must have passed already" based on what the client claims.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why update_or_create keyed on owner, not a fresh row every time</span>
+          <p><code>EmailAccount</code> is a <code>OneToOneField</code> to <code>User</code> (Step 7) — one connected account per user, by design. Re-testing and re-saving replaces the existing row rather than accumulating duplicates, which matters if someone generates a new App Password later and needs to update it.</p>
+        </div>
+      </section>
+
+      <section class="step setup" id="step-13">
+        <div class="step-head"><span class="step-badge">SETUP</span></div>
+        <h2>Step 13 — Create mailer/urls.py, then reserve Django's root URL for the dashboard</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('csrf/', views.csrf_view, name='csrf'),
+    path('test-connection/', views.test_connection_view, name='test_connection'),
+    path('connect-account/', views.connect_account_view, name='connect_account'),
+]</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailhub_project/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.contrib import admin
+from django.urls import path, include, re_path
+from . import views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('mailer.urls')),
+    re_path(r'^assets/(?P&lt;path&gt;.*)$', views.dashboard_asset),
+    re_path(r'^.*$', views.dashboard),
+]</code></pre>
+        </div>
+        <p><strong>Create <code>mailhub_project/views.py</code></strong>. These two small views serve Vite's built files safely and make the app available at the one root URL.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailhub_project/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from django.conf import settings
+from django.http import FileResponse, Http404
+
+def dashboard(request):
+    index = settings.MAILHUB_DASHBOARD_DIR / 'index.html'
+    if not index.exists():
+        raise Http404('Dashboard has not been built. Run npm run build in dashboard/.')
+    return FileResponse(index.open('rb'), content_type='text/html')
+
+def dashboard_asset(request, path):
+    asset = (settings.MAILHUB_DASHBOARD_DIR / 'assets' / path).resolve()
+    assets_root = (settings.MAILHUB_DASHBOARD_DIR / 'assets').resolve()
+    if assets_root not in asset.parents or not asset.is_file():
+        raise Http404('Asset not found')
+    return FileResponse(asset.open('rb'))</code></pre>
+        </div>
+        <div class="callout"><span class="why">One URL means no CORS lesson</span><p>Because React and Django share <code>http://127.0.0.1:8000</code> in the finished app, the browser does not need a cross-origin exception. Keep <code>django-cors-headers</code> only if you also choose to run Vite separately during UI-only development.</p></div>
+      </section>
+
+      <div class="part-banner out-b">Part D — Outbound Email <span class="desc">dashboard → Django → Gmail's SMTP server</span></div>
+
+      <section class="step out" id="step-14">
+        <div class="step-head"><span class="step-badge">OUTBOUND</span></div>
+        <h2>Step 14 — Open mailer/models.py again — OutgoingEmail</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/models.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">class OutgoingEmail(models.Model):
+    STATUS_CHOICES = [('pending', 'Pending'), ('sent', 'Sent'), ('failed', 'Failed')]
+
+    account = models.ForeignKey(EmailAccount, on_delete=models.CASCADE, related_name='outgoing_emails')
+    to_address = models.EmailField()
+    subject = models.CharField(max_length=200)
+    body = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    error_message = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']</code></pre>
+        </div>
+        <p>Run the migration before moving on:</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py makemigrations mailer
+python manage.py migrate</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why every send attempt becomes a row, even ones that fail</span>
+          <p>Same reasoning as ChatSpace storing messages regardless of delivery: an <code>OutgoingEmail</code> row is the app's own record of "we tried to send this," independent of whether Gmail's SMTP server cooperated. The dashboard's outbox view (Step 25) can show a failed send with its exact error, instead of the attempt just vanishing.</p>
+        </div>
+      </section>
+
+      <section class="step out" id="step-15">
+        <div class="step-head"><span class="step-badge">OUTBOUND</span></div>
+        <h2>Step 15 — Create mailer/mailer_service.py (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/mailer_service.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import smtplib
+from email.mime.text import MIMEText
+from django.utils import timezone
+from .crypto import decrypt_password
+
+def send_email(outgoing_email):
+    account = outgoing_email.account
+    app_password = decrypt_password(account.encrypted_app_password)
+
+    message = MIMEText(outgoing_email.body)
+    message['Subject'] = outgoing_email.subject
+    message['From'] = account.email_address
+    message['To'] = outgoing_email.to_address
+
+    try:
+        with smtplib.SMTP(account.smtp_host, account.smtp_port, timeout=10) as server:
+            server.starttls()
+            server.login(account.email_address, app_password)
+            server.sendmail(account.email_address, [outgoing_email.to_address], message.as_string())
+
+        outgoing_email.status = 'sent'
+        outgoing_email.sent_at = timezone.now()
+    except Exception as exc:
+        outgoing_email.status = 'failed'
+        outgoing_email.error_message = str(exc)
+
+    outgoing_email.save()
+    return outgoing_email</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why the except clause updates and saves the row instead of letting the exception propagate</span>
+          <p>Same defensive boundary as every earlier project's "the core save must survive an external failure" rule. A bad send shouldn't crash the view calling this function — it should land as a <code>status='failed'</code> row with a readable <code>error_message</code>, which the dashboard can display, rather than a raw 500 error the user can't act on.</p>
+        </div>
+      </section>
+
+      <section class="step out" id="step-16">
+        <div class="step-head"><span class="step-badge">OUTBOUND</span></div>
+        <h2>Step 16 — Open mailer/views.py once more — SendEmailView</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from .models import OutgoingEmail
+from .mailer_service import send_email
+from .notifications import notify   # built in Step 20
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_email_view(request):
+    account = request.user.email_account
+    outgoing = OutgoingEmail.objects.create(
+        account=account,
+        to_address=request.data.get('to_address'),
+        subject=request.data.get('subject'),
+        body=request.data.get('body'),
+    )
+    send_email(outgoing)
+
+    if outgoing.status == 'sent':
+        notify(request.user, 'sent', f'Email sent to {outgoing.to_address}')
+    else:
+        notify(request.user, 'error', f'Failed to send to {outgoing.to_address}: {outgoing.error_message}')
+
+    return Response({'id': outgoing.id, 'status': outgoing.status}, status=201)</code></pre>
+        </div>
+        <p><strong>Add the route:</strong></p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">path('send-email/', views.send_email_view, name='send_email'),</code></pre>
+        </div>
+        <p><em>(This view imports <code>notify</code> from Step 20 — if you're following in order, that file doesn't exist yet. Come back and uncomment/add this import once Part F is built, or build Part F first if you'd rather wire notifications before outbound calls them.)</em></p>
+      </section>
+
+      <div class="part-banner in-b">Part E — Inbound Email <span class="desc">Django checks Gmail on a timer, without anyone asking</span></div>
+
+      <section class="step in" id="step-17">
+        <div class="step-head"><span class="step-badge">INBOUND</span></div>
+        <h2>Step 17 — Open mailer/models.py again — IncomingEmail</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/models.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">class IncomingEmail(models.Model):
+    account = models.ForeignKey(EmailAccount, on_delete=models.CASCADE, related_name='incoming_emails')
+    from_address = models.EmailField()
+    subject = models.CharField(max_length=200)
+    body = models.TextField()
+    message_id = models.CharField(max_length=255, unique=True)
+    received_at = models.DateTimeField()
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-received_at']</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py makemigrations mailer
+python manage.py migrate</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why message_id is unique, and where it comes from</span>
+          <p>Every email has a globally unique <code>Message-ID</code> header, generated by the server that sent it — reading and storing it is what lets Step 18's poller run repeatedly (every 2 minutes, forever) without ever creating duplicate rows for the same email it's already seen and saved.</p>
+        </div>
+      </section>
+
+      <section class="step in" id="step-18">
+        <div class="step-head"><span class="step-badge">INBOUND</span></div>
+        <h2>Step 18 — Create mailer/inbox_poller.py (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/inbox_poller.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import imaplib
+import email as email_lib
+from email.utils import parsedate_to_datetime
+from django.utils import timezone
+from .crypto import decrypt_password
+from .models import EmailAccount, IncomingEmail
+from .notifications import notify
+
+def poll_inbox(account: EmailAccount):
+    app_password = decrypt_password(account.encrypted_app_password)
+
+    connection = imaplib.IMAP4_SSL(account.imap_host, account.imap_port, timeout=10)
+    connection.login(account.email_address, app_password)
+    connection.select('INBOX')
+
+    status, message_numbers = connection.search(None, 'UNSEEN')
+    new_count = 0
+
+    for number in message_numbers[0].split():
+        status, raw_data = connection.fetch(number, '(RFC822)')
+        parsed = email_lib.message_from_bytes(raw_data[0][1])
+
+        message_id = parsed.get('Message-ID', f'no-id-{number.decode()}')
+        if IncomingEmail.objects.filter(message_id=message_id).exists():
+            continue
+
+        received = parsedate_to_datetime(parsed.get('Date')) if parsed.get('Date') else timezone.now()
+
+        incoming = IncomingEmail.objects.create(
+            account=account,
+            from_address=parsed.get('From', 'unknown'),
+            subject=parsed.get('Subject', '(no subject)'),
+            body=_extract_body(parsed),
+            message_id=message_id,
+            received_at=received,
+        )
+        notify(account.owner, 'received', f'New email from {incoming.from_address}: {incoming.subject}')
+        new_count += 1
+
+    connection.logout()
+    return new_count
+
+def _extract_body(parsed_message):
+    if parsed_message.is_multipart():
+        for part in parsed_message.walk():
+            if part.get_content_type() == 'text/plain':
+                return part.get_payload(decode=True).decode(errors='replace')
+        return ''
+    return parsed_message.get_payload(decode=True).decode(errors='replace')</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why the loop checks IncomingEmail.objects.filter(message_id=...).exists() before saving</span>
+          <p>IMAP's <code>UNSEEN</code> search reflects Gmail's own read/unread flag — but this poller never marks anything as read on Gmail's side, so the same unread emails would appear in every single poll if this check weren't here. The uniqueness check from Step 17 is what actually makes this function safe to call every two minutes forever.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why _extract_body only looks for text/plain</span>
+          <p>Most emails are sent as multipart with both an HTML and a plain-text version bundled together. Grabbing the plain-text part keeps stored bodies simple and safe to display directly in the dashboard, without needing to sanitize arbitrary HTML from strangers' emails first — that sanitization is a real problem worth solving deliberately later, not accidentally skipped now.</p>
+        </div>
+      </section>
+
+      <section class="step in" id="step-19">
+        <div class="step-head"><span class="step-badge">INBOUND</span></div>
+        <h2>Step 19 — Create mailer/scheduler.py, wire it into apps.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/scheduler.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from apscheduler.schedulers.background import BackgroundScheduler
+from .models import EmailAccount
+from .inbox_poller import poll_inbox
+
+def poll_all_inboxes():
+    for account in EmailAccount.objects.filter(is_verified=True):
+        try:
+            poll_inbox(account)
+        except Exception as exc:
+            print(f'Inbox poll failed for {account.email_address}: {exc}')
+
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(poll_all_inboxes, 'interval', minutes=2, id='poll_inboxes')
+    scheduler.start()
+    return scheduler</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/apps.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">import os
+from django.apps import AppConfig
+
+class MailerConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'mailer'
+
+    def ready(self):
+        if os.environ.get('RUN_MAIN') == 'true':
+            from .scheduler import start_scheduler
+            start_scheduler()</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why poll_all_inboxes swallows exceptions per-account instead of letting one failure stop the loop</span>
+          <p>One user's Gmail being temporarily unreachable, or their App Password having been revoked, shouldn't stop every other connected user's inbox from being checked in the same scheduled run — the same "one failure shouldn't take down an unrelated feature" boundary as the outbound send path.</p>
+        </div>
+        <div class="callout">
+          <span class="why">Why the RUN_MAIN check, specifically</span>
+          <p>Django's development server (<code>runserver</code>) actually starts your app <strong>twice</strong> — once to watch for file changes (the auto-reloader) and once to actually serve requests. Without this check, the scheduler would start twice too, and the inbox would get polled every minute instead of every two, doubling every notification. <code>RUN_MAIN</code> is an environment variable Django itself sets only in the real server process, not the reloader-watcher one.</p>
+        </div>
+      </section>
+
+      <div class="part-banner in-b">Part F — Notifications <span class="desc">turning "something happened" into something the dashboard can show</span></div>
+
+      <section class="step in" id="step-20">
+        <div class="step-head"><span class="step-badge">INBOUND</span></div>
+        <h2>Step 20 — Open mailer/models.py once more — Notification</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/models.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">class Notification(models.Model):
+    KIND_CHOICES = [('sent', 'Sent'), ('received', 'Received'), ('error', 'Error')]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES)
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']</code></pre>
+        </div>
+        <p><strong>Create mailer/notifications.py</strong> — the single function every other file (Step 16, Step 18) calls to create one:</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/notifications.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from .models import Notification
+
+def notify(user, kind, message):
+    return Notification.objects.create(user=user, kind=kind, message=message)</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">python manage.py makemigrations mailer
+python manage.py migrate</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why notify() is a one-line wrapper instead of just calling Notification.objects.create() directly everywhere</span>
+          <p>It's a small thing now, but it's the same "one place to change later" principle as <code>crypto.py</code>. If notifications later need to also push over a WebSocket, or fan out to email-about-email (careful there), or get deduplicated, there's exactly one function to change — not three call sites to hunt down and update identically.</p>
+        </div>
+      </section>
+
+      <section class="step in" id="step-21">
+        <div class="step-head"><span class="step-badge">INBOUND</span></div>
+        <h2>Step 21 — Open mailer/views.py — list + mark-read, then wire urls.py</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/views.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">from .models import Notification, IncomingEmail
+from .serializers import NotificationSerializer, IncomingEmailSerializer   # add both to serializers.py
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def notifications_view(request):
+    notifications = Notification.objects.filter(user=request.user, is_read=False)[:20]
+    return Response(NotificationSerializer(notifications, many=True).data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_read_view(request, notification_id):
+    Notification.objects.filter(id=notification_id, user=request.user).update(is_read=True)
+    return Response(status=204)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def inbox_view(request):
+    emails = IncomingEmail.objects.filter(account__owner=request.user)[:50]
+    return Response(IncomingEmailSerializer(emails, many=True).data)</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/urls.py</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">path('notifications/', views.notifications_view, name='notifications'),
+path('notifications/&lt;int:notification_id&gt;/read/', views.mark_read_view, name='mark_read'),
+path('inbox/', views.inbox_view, name='inbox'),
+path('inbox/&lt;int:email_id&gt;/read/', views.mark_email_read_view, name='mark_email_read'),
+path('account/', views.account_view, name='account'),
+path('sent/', views.sent_view, name='sent'),</code></pre>
+        </div>
+        <p><code>NotificationSerializer</code> and <code>IncomingEmailSerializer</code> follow the exact same plain-<code>ModelSerializer</code> pattern as <code>EmailAccountSerializer</code> from Step 10 — list the fields the dashboard needs, no write-only tricks required since neither is ever submitted by a form.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/serializers.py — add these final serializers</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">class IncomingEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncomingEmail
+        fields = ['id', 'from_address', 'subject', 'body', 'received_at', 'is_read']
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'kind', 'message', 'created_at']</code></pre>
+        </div>
+      </section>
+
+      <div class="part-banner verify-b">Part G — The React Dashboard <span class="desc">the only part of this project a browser actually renders</span></div>
+
+      <section class="step verify" id="step-22">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 22 — Terminal: create the React app</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">cd ..                    # back out to mailhub/
+npm create vite@latest dashboard -- --template react
+cd dashboard
+npm install
+npm install axios</code></pre>
+        </div>
+      </section>
+
+      <section class="step verify" id="step-23">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 23 — Create src/api.js (new file)</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>dashboard/src/api.js</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-javascript">import axios from 'axios';
+
+const api = axios.create({
+    baseURL: '/api/',
+    withCredentials: true,
+    xsrfCookieName: 'csrftoken',
+    xsrfHeaderName: 'X-CSRFToken',
+});
+
+export const primeCsrf = () => api.get('csrf/');
+export default api;</code></pre>
+        </div>
+        <p>Use a relative <code>/api/</code> URL, not <code>http://127.0.0.1:8000/api/</code>. That makes the dashboard work whether you run locally or deploy later, because the browser calls the same site that served it. Every component imports this one instance rather than calling <code>axios</code> directly.</p>
+      </section>
+
+      <section class="step verify" id="step-24">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 24 — Create src/components/ConnectEmailForm.jsx</h2>
+        <p>This is the working version of the "preview" form shown at the top of this page — same fields, now actually calling Django.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>dashboard/src/components/ConnectEmailForm.jsx</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-javascript">import { useState } from 'react';
+import api, { primeCsrf } from '../api';
+
+export default function ConnectEmailForm({ onConnected }) {
+    const [form, setForm] = useState({
+        email_address: '', app_password: '',
+        imap_host: 'imap.gmail.com', imap_port: 993,
+        smtp_host: 'smtp.gmail.com', smtp_port: 587,
+    });
+    const [status, setStatus] = useState(null);   // null | 'testing' | 'ok' | 'error'
+    const [errorDetail, setErrorDetail] = useState('');
+
+    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+    const handleTest = async () => {
+        setStatus('testing');
+        try {
+            await primeCsrf();
+            const response = await api.post('connect-account/', form);
+            setStatus('ok');
+            onConnected(response.data);
+        } catch (err) {
+            setStatus('error');
+            const data = err.response?.data;
+            setErrorDetail(data ? (data.smtp_error || data.imap_error || 'Connection failed.') : 'Network error.');
+        }
+    };
+
+    return (
+        &lt;div className="connect-form"&gt;
+            &lt;input name="email_address" placeholder="you@gmail.com" onChange={handleChange} /&gt;
+            &lt;input name="app_password" type="password" placeholder="App Password" onChange={handleChange} /&gt;
+            &lt;button onClick={handleTest} disabled={status === 'testing'}&gt;
+                {status === 'testing' ? 'Testing...' : 'Connect Account'}
+            &lt;/button&gt;
+            {status === 'ok' &amp;&amp; &lt;p className="ok"&gt;Connected successfully.&lt;/p&gt;}
+            {status === 'error' &amp;&amp; &lt;p className="error"&gt;{errorDetail}&lt;/p&gt;}
+        &lt;/div&gt;
+    );
+}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why this calls connect-account/ directly instead of test-connection/ first</span>
+          <p>Step 12's <code>connect_account_view</code> already re-tests before saving — calling <code>test-connection/</code> first and then <code>connect-account/</code> again would just test the same credentials twice for no benefit. One call, one round trip, same guarantee.</p>
+        </div>
+      </section>
+
+      <section class="step verify" id="step-25">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 25 — Create src/components/Dashboard.jsx</h2>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>dashboard/src/components/Dashboard.jsx</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-javascript">import { useState, useEffect } from 'react';
+import api, { primeCsrf } from '../api';
+
+export default function Dashboard() {
+    const [notifications, setNotifications] = useState([]);
+    const [inbox, setInbox] = useState([]);
+    const [composeTo, setComposeTo] = useState('');
+    const [composeSubject, setComposeSubject] = useState('');
+    const [composeBody, setComposeBody] = useState('');
+    const [sending, setSending] = useState(false);
+
+    useEffect(() => {
+        const loadAll = () => {
+            api.get('notifications/').then(res => setNotifications(res.data));
+            api.get('inbox/').then(res => setInbox(res.data));
+        };
+        primeCsrf();
+        loadAll();
+        const interval = setInterval(loadAll, 15000);   // poll every 15s
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleSend = async () => {
+        setSending(true);
+        await api.post('send-email/', { to_address: composeTo, subject: composeSubject, body: composeBody });
+        setComposeTo(''); setComposeSubject(''); setComposeBody('');
+        setSending(false);
+    };
+
+    return (
+        &lt;div className="dashboard"&gt;
+            &lt;header&gt;
+                &lt;h1&gt;MailHub&lt;/h1&gt;
+                &lt;span className="badge"&gt;🔔 {notifications.length}&lt;/span&gt;
+            &lt;/header&gt;
+
+            &lt;section className="compose"&gt;
+                &lt;h2&gt;Compose&lt;/h2&gt;
+                &lt;input placeholder="To" value={composeTo} onChange={e =&gt; setComposeTo(e.target.value)} /&gt;
+                &lt;input placeholder="Subject" value={composeSubject} onChange={e =&gt; setComposeSubject(e.target.value)} /&gt;
+                &lt;textarea placeholder="Body" value={composeBody} onChange={e =&gt; setComposeBody(e.target.value)} /&gt;
+                &lt;button onClick={handleSend} disabled={sending}&gt;{sending ? 'Sending...' : 'Send'}&lt;/button&gt;
+            &lt;/section&gt;
+
+            &lt;section className="inbox"&gt;
+                &lt;h2&gt;Inbox&lt;/h2&gt;
+                &lt;ul&gt;
+                    {inbox.map(email =&gt; (
+                        &lt;li key={email.id}&gt;&lt;strong&gt;{email.from_address}&lt;/strong&gt; — {email.subject}&lt;/li&gt;
+                    ))}
+                &lt;/ul&gt;
+            &lt;/section&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+        </div>
+        <div class="callout">
+          <span class="why">Why setInterval polling instead of a WebSocket, for notifications this time</span>
+          <p>ChatSpace needed Channels because a chat message has to arrive within a second to feel real. A new-email notification arriving within 15 seconds of the 2-minute background poll (Step 19) is functionally instant by comparison — reaching for WebSocket infrastructure here would solve a responsiveness problem this app doesn't actually have. Simple polling is the right-sized tool for this specific latency requirement, not a lesser one.</p>
+        </div>
+      </section>
+
+      <section class="step verify" id="final-app">
+        <div class="step-head"><span class="step-badge">FINAL FILE</span></div>
+        <h2>Assemble the dashboard in src/App.jsx</h2>
+        <p>Vite's starter <code>src/main.jsx</code> already renders <code>App</code>. Replace <code>src/App.jsx</code> with this small assembly file so the account-connect screen becomes the inbox/compose dashboard after a successful connection.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>dashboard/src/App.jsx</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-javascript">import { useState } from 'react';
+import ConnectEmailForm from './components/ConnectEmailForm';
+import Dashboard from './components/Dashboard';
+
+export default function App() {
+    const [account, setAccount] = useState(null);
+
+    return (
+        &lt;main className="mailhub-app"&gt;
+            &lt;header&gt;
+                &lt;strong&gt;MailHub&lt;/strong&gt;
+                &lt;span&gt;{account ? account.email_address : 'Connect an inbox'}&lt;/span&gt;
+            &lt;/header&gt;
+            {account
+                ? &lt;Dashboard /&gt;
+                : &lt;ConnectEmailForm onConnected={setAccount} /&gt;}
+        &lt;/main&gt;
+    );
+}</code></pre>
+        </div>
+        <div class="callout"><span class="why">What makes this the same product</span><p>The frontend connects an account, sends through the same <code>send-email/</code> endpoint, reads the same <code>inbox/</code> endpoint, and displays the same notification data. Students can style <code>src/index.css</code> differently without changing MailHub's architecture or behavior.</p></div>
+      </section>
+
+      <section class="step verify" id="finish">
+        <div class="step-head"><span class="step-badge">FINISH</span></div>
+        <h2>Step 25++ — Finish the dashboard features</h2>
+        <p>These small additions make the practice project usable after the first successful connection. They do not introduce a new service or database table.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>mailer/views.py — add these views</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-python">@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def account_view(request):
+    try:
+        return Response(EmailAccountSerializer(request.user.email_account).data)
+    except EmailAccount.DoesNotExist:
+        return Response({'detail': 'No email account connected.'}, status=404)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sent_view(request):
+    messages = OutgoingEmail.objects.filter(account__owner=request.user)[:50]
+    return Response(OutgoingEmailSerializer(messages, many=True).data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_email_read_view(request, email_id):
+    updated = IncomingEmail.objects.filter(
+        id=email_id, account__owner=request.user
+    ).update(is_read=True)
+    if not updated:
+        return Response({'detail': 'Email not found.'}, status=404)
+    return Response({'id': email_id, 'is_read': True})</code></pre>
+        </div>
+        <div class="callout"><span class="why">React checklist</span><p>When <code>App</code> starts, request <code>account/</code>. If it returns an account, store it in state and skip the connect form. In your normal refresh function, request <code>inbox/</code>, <code>sent/</code>, and <code>notifications/</code>. When an inbox row is clicked, show its full body and post to <code>inbox/{id}/read/</code>. Add a Sent tab showing recipient, subject, status, and any <code>error_message</code>.</p></div>
+        <div class="terminal-check"><strong>No migration is needed here.</strong> Rebuild React with <code>npm run build</code> after changing the dashboard.</div>
+      </section>
+
+      <div class="part-banner verify-b">Part H — Build, Serve &amp; Verify <span class="desc">one URL, one product</span></div>
+
+      <section class="step verify" id="step-26">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 26 — Build the dashboard, then let Django serve it</h2>
+        <p>During development, Vite is useful. For the finished junior project, build React into Django's project folder and serve the dashboard and API from one address. PostgreSQL remains a background service; Django is the only web server you need to start.</p>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>dashboard/vite.config.js</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-javascript">import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  build: { outDir: '../django_app/dashboard_dist', emptyOutDir: true },
+});</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="filebar"><span><i class="fb-accent"></i>terminal</span><button class="copybtn">Copy</button></div>
+          <pre><code class="language-bash">cd mailhub/dashboard
+npm run build
+
+cd ../django_app
+source ../venv/bin/activate
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver</code></pre>
+        </div>
+        <div class="terminal-check"><strong>Open one address:</strong> visit <code>http://127.0.0.1:8000/</code> for the dashboard, <code>/api/</code> for API routes, and <code>/admin/</code> to log in. Confirm the scheduler started in Django's terminal output.</div>
+      </section>
+
+      <section class="step verify" id="step-27">
+        <div class="step-head"><span class="step-badge">VERIFY</span></div>
+        <h2>Step 27 — Test the full flow</h2>
+        <ol>
+          <li>Log into <code>http://127.0.0.1:8000/admin/</code> first. The dashboard uses that Django session to authorize API requests.</li>
+          <li>Open <code>http://127.0.0.1:8000/</code>, then use the Connect Account form with your real Gmail address and the App Password from the external setup panel.</li>
+          <li>Compose and send a test email to yourself. Check <code>OutgoingEmail</code> in <code>/admin/</code> — status should flip to <code>sent</code>, and the actual email should land in your inbox within seconds.</li>
+          <li>Wait up to 2 minutes (the scheduler's interval from Step 19), then refresh the dashboard — the email should appear in the Inbox list, and the notification badge count should increase.</li>
+          <li>Turn off wifi briefly, try sending again — confirm the app doesn't crash, and check <code>error_message</code> on the resulting <code>OutgoingEmail</code> row in <code>/admin/</code>.</li>
+        </ol>
+        <div class="callout">
+          <span class="why">If the connection test keeps failing</span>
+          <p>Read the specific error first: Step 11 separates SMTP and IMAP failures on purpose. Then confirm: 2-Step Verification is enabled; you used a freshly generated 16-character App Password rather than your normal Gmail password; and you pasted it fully (spaces are okay, but no missing characters). If the App Password option is missing, the account may be a work/school account, Advanced Protection account, or a 2-Step setup that only uses security keys. For a personal Gmail account, IMAP is normally already enabled; Workspace accounts may need an administrator to allow it.</p>
+        </div>
+      </section>
+
+      <section class="step verify" id="tree">
+        <div class="step-head"><span class="step-badge">REFERENCE</span></div>
+        <h2>Final project tree</h2>
+        <div class="tree-block">mailhub/
+├── django_app/
+│   ├── manage.py
+│   ├── .env                              <span class="tag">(Step 4 — never committed)</span>
+│   ├── mailhub_project/
+│   │   ├── settings.py                      <span class="tag">(Steps 4, 13)</span>
+│   │   ├── urls.py                             <span class="tag">(API + dashboard routes)</span>
+│   │   └── views.py                            <span class="tag">(serves the built dashboard)</span>
+│   ├── dashboard_dist/                         <span class="tag">(created by npm run build)</span>
+│   └── mailer/
+│       ├── models.py                              <span class="tag">(Steps 7, 14, 17, 20)</span>
+│       ├── crypto.py                                 <span class="tag">(Step 8)</span>
+│       ├── admin.py                                     <span class="tag">(Step 9)</span>
+│       ├── serializers.py                                 <span class="tag">(Step 10, extended in 21)</span>
+│       ├── connection_test.py                                <span class="tag">(Step 11)</span>
+│       ├── views.py                                              <span class="tag">(Steps 12, 16, 21)</span>
+│       ├── urls.py                                                  <span class="tag">(Steps 13, 16, 21)</span>
+│       ├── mailer_service.py                                          <span class="tag">(Step 15)</span>
+│       ├── inbox_poller.py                                                <span class="tag">(Step 18)</span>
+│       ├── scheduler.py                                                      <span class="tag">(Step 19)</span>
+│       ├── apps.py                                                              <span class="tag">(Step 19)</span>
+│       └── notifications.py                                                        <span class="tag">(Step 20)</span>
+└── dashboard/
+    ├── vite.config.js                          <span class="tag">(builds into django_app/dashboard_dist)</span>
+    └── src/
+        ├── api.js                          <span class="tag">(Step 23)</span>
+        └── components/
+            ├── ConnectEmailForm.jsx            <span class="tag">(Step 24)</span>
+            └── Dashboard.jsx                       <span class="tag">(Step 25)</span></div>
+      </section>
+
+      <section class="pattern-section" id="pattern">
+        <div class="eyebrow">Closing thesis</div>
+        <h2>The pattern worth remembering</h2>
+        <p>Outbound and inbound feel like one feature — "email" — but they're triggered by opposite things, and that difference shapes almost every file in this project.</p>
+        <div class="pattern-halves">
+          <div class="pattern-half out-h">
+            <h3>Outbound is request-driven</h3>
+            <p>A person clicks Send. Django runs, does the work, and returns a result in the same request/response cycle every other view in this series has used — nothing new architecturally, just SMTP instead of a database write.</p>
+          </div>
+          <div class="pattern-half in-h">
+            <h3>Inbound is time-driven</h3>
+            <p>Nobody clicks anything to make new mail arrive. Something has to run <em>without</em> a request triggering it — that's the entire reason APScheduler exists in this project, and it's a genuinely different shape of problem than any view function solves.</p>
+          </div>
+        </div>
+        <p style="margin-top:22px;">Every credential-handling decision in Part B and C — encrypting before storage, re-verifying before saving, never returning the password in an API response — exists because this project asks a user to hand over real account access. That deserves more care than a username and a throwaway password ever did in the earlier projects in this series, and the extra files here are what that care actually looks like in code.</p>
+      </section>
+
+    </div>
+
+
+    <footer>MailHub walkthrough · built for junior devs · Part A (environment + Postgres) → Part B (secure storage) → Part C (connection test) → Part D (outbound) → Part E (inbound) → Part F (notifications) → Part G (React dashboard) → Part H (one Django-served URL) — read in order.</footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+<script>
+hljs.highlightAll();
+
+document.querySelectorAll('.codeblock').forEach(block=>{
+  const btn = block.querySelector('.copybtn');
+  const code = block.querySelector('code');
+  if(!btn || !code) return;
+  btn.addEventListener('click', ()=>{
+    navigator.clipboard.writeText(code.innerText).then(()=>{
+      const orig = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(()=>{ btn.textContent = orig; }, 1400);
+    });
+  });
+});
+
+const progress = document.getElementById('progress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = h.scrollTop;
+  const max = h.scrollHeight - h.clientHeight;
+  progress.style.width = (max > 0 ? (scrolled/max)*100 : 0) + '%';
+}
+document.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+const sidebar = document.getElementById('sidebar');
+const navToggle = document.getElementById('navToggle');
+if(navToggle){
+  navToggle.addEventListener('click', ()=> sidebar.classList.toggle('open'));
+}
+document.querySelectorAll('.navitem').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    if(window.innerWidth <= 980) sidebar.classList.remove('open');
+  });
+});
+
+const navItems = Array.from(document.querySelectorAll('.navitem'));
+const sections = navItems.map(item=> document.querySelector(item.getAttribute('href'))).filter(Boolean);
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const idx = sections.indexOf(entry.target);
+    if(idx === -1) return;
+    if(entry.isIntersecting){
+      navItems.forEach(n=>n.classList.remove('active'));
+      navItems[idx].classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+sections.forEach(sec=> io.observe(sec));
+
+/* Test Connection preview form — local format check only, does not contact Google */
+const testBtn = document.getElementById('testConnBtn');
+const testResult = document.getElementById('testResult');
+if(testBtn){
+  testBtn.addEventListener('click', ()=>{
+    const email = document.getElementById('tf-email').value.trim();
+    const pass = document.getElementById('tf-pass').value.trim();
+    testResult.className = '';
+    testResult.textContent = '';
+
+    if(!email || !pass){
+      testResult.textContent = '✕ Fill in both the email address and App Password.';
+      testResult.className = 'fail';
+      return;
+    }
+    if(!/^[^\s@]+@gmail\.com$/i.test(email)){
+      testResult.textContent = '✕ Expecting a @gmail.com address for this setup.';
+      testResult.className = 'fail';
+      return;
+    }
+    const compact = pass.replace(/\s/g, '');
+    if(compact.length !== 16){
+      testResult.textContent = '✕ App Passwords are 16 characters — this one is ' + compact.length + '.';
+      testResult.className = 'fail';
+      return;
+    }
+
+    testBtn.disabled = true;
+    testBtn.textContent = 'Checking format...';
+    setTimeout(()=>{
+      testBtn.disabled = false;
+      testBtn.textContent = 'Test Connection';
+      testResult.textContent = '✓ Format looks right. This becomes a real login check once Part C is built.';
+      testResult.className = 'ok';
+    }, 700);
+  });
+}
+</script>
+</body>
+</html>
