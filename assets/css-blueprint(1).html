@@ -1016,4 +1016,1017 @@ footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px sol
       </div>
 
       <!-- ---- STACK LAB 2/5 — grid-row, single item ---- -->
-      <div class
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Grid Stacking · Lab 2/5</span><h3>grid-row — the same idea, the other axis</h3></div>
+        <p class="minilab-desc">Same line-numbering, applied to rows instead of columns. This grid has 3 row tracks so you can see a single item span two of them.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-stack-solo-row"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="stack-parent" id="stack-solo-row-parent" style="grid-template-rows:repeat(3, 60px);">
+                  <div class="stack-child stack-1" id="stack-solo-row-item">item</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="stack-solo-row-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- STACK LAB 3/5 — two items overlapping ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Grid Stacking · Lab 3/5</span><h3>Two items, overlapping cells</h3></div>
+        <p class="minilab-desc">Now a second item shares cells with the first. With no <code>z-index</code> set on either one, the browser falls back to <strong style="color:var(--ink);">source order</strong> — whichever item comes later in the HTML paints on top. Change the overlap amount and notice the pink item (later in the HTML) always wins, regardless of how much they overlap.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-stack-overlap"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="stack-parent" id="stack-overlap-parent">
+                  <div class="stack-child stack-1" id="stack-overlap-1">1st in HTML</div>
+                  <div class="stack-child stack-2" id="stack-overlap-2">2nd in HTML</div>
+                </div>
+              </div>
+            </div>
+            <div class="stage-readout" id="stack-overlap-readout">—</div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="stack-overlap-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- STACK LAB 4/5 — z-index ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Grid Stacking · Lab 4/5</span><h3>z-index — overriding the default stacking order</h3></div>
+        <p class="minilab-desc">Both items now fully overlap. Without <code>z-index</code>, the pink item (later in HTML) would always win. Give the blue item a <strong style="color:var(--ink);">higher</strong> z-index and it jumps on top, regardless of source order.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-stack-zindex"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="stack-parent" id="stack-zindex-parent">
+                  <div class="stack-child stack-1" id="stack-zindex-1">blue (1st)</div>
+                  <div class="stack-child stack-2" id="stack-zindex-2">pink (2nd)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="stack-zindex-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- STACK LAB 5/5 — opacity reveals underneath ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Grid Stacking · Lab 5/5</span><h3>opacity — revealing what's underneath</h3></div>
+        <p class="minilab-desc">The blue item is now locked on top with <code>z-index</code>. Turn down its <code>opacity</code> and the pink item underneath becomes visible through it — a common way to build hover/reveal effects without extra markup.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-stack-opacity"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="stack-parent" id="stack-opacity-parent">
+                  <div class="stack-child stack-2" id="stack-opacity-below">underneath</div>
+                  <div class="stack-child stack-1" id="stack-opacity-top">on top</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="stack-opacity-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- STACK CAPSTONE ---- -->
+      <div class="minilab" style="border-bottom:none;padding-bottom:0;">
+        <div class="minilab-head"><span class="minilab-tag" style="color:var(--cyan);background:var(--cyan-soft);">Capstone</span><h3>Put it all together — two fully independent items</h3></div>
+        <p class="minilab-desc">Every control from the labs above, on both items at once: placement, z-index, and opacity, independently.</p>
+        <div class="module-grid">
+          <div>
+            <div class="controls" id="ctrl-stack-1"></div>
+            <div class="controls" id="ctrl-stack-2" style="margin-top:14px;"></div>
+          </div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="stack-parent" id="stack-parent">
+                  <div class="stack-child stack-1" id="stack-child-1">child-1</div>
+                  <div class="stack-child stack-2" id="stack-child-2">child-2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="stack-css"></pre>
+        </div>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Let two items share cells with overlapping <code>grid-column</code>/<code>grid-row</code> ranges — no <code>position:relative</code> or manual <code>top</code>/<code>left</code> math needed.</li>
+          <li>Use <code>z-index</code> to control layering order once items overlap — grid positions them, <code>z-index</code> stacks them.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't reach for <code>position:absolute</code> out of habit for this — it needs a sized, positioned parent and loses the grid's automatic sizing.</li>
+          <li>Don't forget <code>opacity</code> below 1 on an overlapping child reveals the one underneath — useful for hover/reveal effects, surprising otherwise.</li>
+          <li>Don't assume source order always wins without <code>z-index</code> set — it does by default, but any explicit <code>z-index</code> (even <code>0</code> vs <code>auto</code> in some cases) can change that, so set it deliberately once you're stacking on purpose.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 06 BENTO GRIDS ============ -->
+    <section class="module" id="bento">
+      <div class="module-head"><span class="module-num">06</span><h2>Bento Grids</h2></div>
+      <p class="module-desc">The trendy asymmetric tile layout on modern landing pages is just <code>grid-template-areas</code> + <code>grid-area</code>, styled with gradient <code>background-color</code>s. Every named area must form a solid rectangle — no "L" or "T" shapes. The labs below build the technique up piece by piece: the string syntax, placing one tile, leaving gaps on purpose, spanning multiple cells, then mixing hand-placed hero tiles with auto-packed filler.</p>
+
+      <div class="lab-strip">
+        <span class="lab-badge">Lab 1/6 — grid-template-areas syntax</span>
+        <span class="lab-badge">Lab 2/6 — grid-area, one tile</span>
+        <span class="lab-badge">Lab 3/6 — empty cells with "."</span>
+        <span class="lab-badge">Lab 4/6 — spanning by repeating a name</span>
+        <span class="lab-badge">Lab 5/6 — auto-flow: dense filler tiles</span>
+        <span class="lab-badge">Lab 6/6 — grid-auto-rows for filler height</span>
+      </div>
+
+      <!-- ---- BENTO LAB 1/6 — grid-template-areas syntax ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Bento · Lab 1/6</span><h3>grid-template-areas — the string IS the shape</h3></div>
+        <p class="minilab-desc">Each quoted string is one row; each word in it is one cell. Repeat a name and that tile spans those cells — the layout is literally drawn in the CSS. Try each option and match it to the shape it produces.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento-syntax"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="bento-grid" id="bento-syntax-grid" style="grid-template-rows:repeat(2, 70px);">
+                  <div class="bento-tile" id="bento-syntax-a" style="grid-area:a;background:linear-gradient(135deg,#5fd3ff,#0a121e);">a</div>
+                  <div class="bento-tile" id="bento-syntax-b" style="grid-area:b;background:linear-gradient(135deg,#ffb454,#0a121e);">b</div>
+                  <div class="bento-tile" id="bento-syntax-c" style="grid-area:c;background:linear-gradient(135deg,#7fe0a7,#0a121e);">c</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-syntax-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- BENTO LAB 2/6 — grid-area, one tile ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Bento · Lab 2/6</span><h3>grid-area — placing a single tile by name</h3></div>
+        <p class="minilab-desc">The area map below has four named regions. Give the colored tile a <code>grid-area</code> value and it jumps straight to that named region — the other three stay empty (dashed) since nothing claims them.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento-area"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="bento-grid" id="bento-area-grid" style="grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,70px);">
+                  <div class="bento-tile" id="bento-area-target" style="background:linear-gradient(135deg,#5fd3ff,#0a121e);">tile</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-area-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- BENTO LAB 3/6 — empty cells with "." ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Bento · Lab 3/6</span><h3>Empty cells — the "." placeholder</h3></div>
+        <p class="minilab-desc">A single dot in <code>grid-template-areas</code> means "leave this cell empty, on purpose." It's how you get an intentional gap in the middle of a layout without an empty <code>&lt;div&gt;</code> in your HTML.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento-empty"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="bento-grid" id="bento-empty-grid" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,70px);">
+                  <div class="bento-tile" style="grid-area:a;background:linear-gradient(135deg,#5fd3ff,#0a121e);">a</div>
+                  <div class="bento-tile" style="grid-area:b;background:linear-gradient(135deg,#ffb454,#0a121e);">b</div>
+                  <div class="bento-tile" style="grid-area:c;background:linear-gradient(135deg,#7fe0a7,#0a121e);">c</div>
+                  <div class="bento-tile" id="bento-empty-d" style="grid-area:d;background:linear-gradient(135deg,#ff7a90,#0a121e);">d</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-empty-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- BENTO LAB 4/6 — spanning by repeating a name ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Bento · Lab 4/6</span><h3>Spanning — repeat a name to cover more cells</h3></div>
+        <p class="minilab-desc">Write the same area name in two (or more) cells — even across rows — and that tile automatically spans all of them, as long as the shape it forms is a solid rectangle.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento-span"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="bento-grid" id="bento-span-grid" style="grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,70px);">
+                  <div class="bento-tile" id="bento-span-hero" style="grid-area:hero;background:linear-gradient(135deg,#5fd3ff,#0a121e);">hero (spans)</div>
+                  <div class="bento-tile" id="bento-span-b" style="grid-area:b;background:linear-gradient(135deg,#ffb454,#0a121e);">b</div>
+                  <div class="bento-tile" id="bento-span-c" style="grid-area:c;background:linear-gradient(135deg,#7fe0a7,#0a121e);">c</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-span-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- BENTO LAB 5/6 — auto-flow dense filler ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Bento · Lab 5/6</span><h3>Mixing named hero tiles with auto-placed filler</h3></div>
+        <p class="minilab-desc">The blue tile is hand-placed with <code>grid-area</code>; the small tiles after it have no placement at all — grid auto-places them into whatever's left. <code>grid-auto-flow:dense</code> back-fills gaps as it goes; plain <code>row</code> flow leaves them in strict source order, even if that skips a gap.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento-dense"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="bento-grid" id="bento-dense-grid" style="grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,60px);">
+                  <div class="bento-tile" style="grid-area:hero;background:linear-gradient(135deg,#5fd3ff,#0a121e);">hero</div>
+                  <div class="bento-tile" style="background:linear-gradient(135deg,#ffb454,#122036);">f1</div>
+                  <div class="bento-tile" style="background:linear-gradient(135deg,#7fe0a7,#122036);">f2</div>
+                  <div class="bento-tile" style="background:linear-gradient(135deg,#ff7a90,#122036);">f3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-dense-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- BENTO LAB 6/6 — grid-auto-rows ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Bento · Lab 6/6</span><h3>grid-auto-rows — keeping filler tiles a consistent height</h3></div>
+        <p class="minilab-desc">Those auto-placed filler tiles from the last lab land in "implicit" rows — ones not defined by <code>grid-template-rows</code>. <code>grid-auto-rows</code> sets how tall those implicit rows are, so filler tiles stay a consistent height instead of shrinking to fit their content.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento-autorows"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="bento-grid" id="bento-autorows-grid" style="grid-template-columns:repeat(4,1fr);grid-template-rows:70px;">
+                  <div class="bento-tile" style="grid-area:1/1/2/3;background:linear-gradient(135deg,#5fd3ff,#0a121e);">hero (explicit row)</div>
+                  <div class="bento-tile" style="background:linear-gradient(135deg,#ffb454,#122036);">filler</div>
+                  <div class="bento-tile" style="background:linear-gradient(135deg,#7fe0a7,#122036);">filler</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-autorows-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- BENTO CAPSTONE ---- -->
+      <div class="minilab" style="border-bottom:none;padding-bottom:0;">
+        <div class="minilab-head"><span class="minilab-tag" style="color:var(--cyan);background:var(--cyan-soft);">Capstone</span><h3>Put it all together — full bento layout</h3></div>
+        <p class="minilab-desc">A complete 5-tile layout using everything above: a named area map, spanning hero tiles, and a cohesive gradient palette.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-bento"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="bento-grid" id="bento-grid">
+                  <div class="bento-tile bt-a1" style="grid-area:a1;">a1</div>
+                  <div class="bento-tile bt-a2" style="grid-area:a2;">a2</div>
+                  <div class="bento-tile bt-a3" style="grid-area:a3;">a3</div>
+                  <div class="bento-tile bt-a4" style="grid-area:a4;">a4</div>
+                  <div class="bento-tile bt-a5" style="grid-area:a5;">a5</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="bento-css"></pre>
+        </div>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Pad every row string in <code>grid-template-areas</code> to the <strong>same number of column-cells</strong> — use <code>.</code> for an intentionally empty one.</li>
+          <li>Combine hand-placed hero tiles (named areas) with <code>grid-auto-flow:dense</code> for auto-packed filler tiles.</li>
+          <li>Set <code>grid-auto-rows</code> whenever filler tiles land in implicit rows, so they don't collapse to their content's height.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't hand-pick gradient colors that clash — most bento grids reuse 2–3 tones from one palette across every tile for cohesion.</li>
+          <li>Don't overuse <code>grid-template-areas</code> for layouts that change shape dynamically — line-number placement handles that better.</li>
+          <li>Don't repeat an area name in a shape that isn't a solid rectangle — browsers reject the whole declaration if the cells don't form one.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 07 SHADOW ============ -->
+    <section class="module" id="shadow">
+      <div class="module-head"><span class="module-num">07</span><h2>Box Shadow</h2></div>
+      <p class="module-desc"><code>box-shadow: offset-x offset-y blur spread color;</code> — add <code>inset</code> to flip it to the inside of the box, for a "pressed" look. The labs below isolate each part of that shorthand before combining them.</p>
+
+      <div class="lab-strip">
+        <span class="lab-badge">Lab 1/6 — offset-x &amp; offset-y</span>
+        <span class="lab-badge">Lab 2/6 — blur</span>
+        <span class="lab-badge">Lab 3/6 — spread</span>
+        <span class="lab-badge">Lab 4/6 — color &amp; opacity</span>
+        <span class="lab-badge">Lab 5/6 — inset</span>
+        <span class="lab-badge">Lab 6/6 — stacking shadows</span>
+      </div>
+
+      <!-- ---- SHADOW LAB 1/6 — offset ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Box Shadow · Lab 1/6</span><h3>offset-x &amp; offset-y — where the shadow falls</h3></div>
+        <p class="minilab-desc">The first two values just move the shadow — positive <code>offset-y</code> pushes it down (a light source from above), negative pulls it up. Blur and spread are held at fixed values here so only position changes.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow-offset"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="shadow-card" id="shadow-offset-card">card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-offset-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- SHADOW LAB 2/6 — blur ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Box Shadow · Lab 2/6</span><h3>blur — how soft the edge is</h3></div>
+        <p class="minilab-desc">The third value is blur radius: <code>0</code> gives a hard-edged shadow (like a flat cutout), and larger values fade it out gradually. Offset and spread are fixed here.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow-blur"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="shadow-card" id="shadow-blur-card">card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-blur-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- SHADOW LAB 3/6 — spread ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Box Shadow · Lab 3/6</span><h3>spread — growing or shrinking the shadow shape</h3></div>
+        <p class="minilab-desc">Spread expands (positive) or contracts (negative) the shadow's shape in every direction before blur softens the edge — independent of blur. It's the value most people forget exists.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow-spread"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="shadow-card" id="shadow-spread-card">card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-spread-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- SHADOW LAB 4/6 — color & opacity ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Box Shadow · Lab 4/6</span><h3>color &amp; opacity — realistic shadows are never solid black</h3></div>
+        <p class="minilab-desc">A shadow's color is almost always semi-transparent (<code>rgba()</code> with an alpha below 1) so it blends with whatever's underneath instead of sitting as a flat gray block. Try dropping the alpha value and watch the shadow get subtler.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow-color"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="shadow-card" id="shadow-color-card">card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-color-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- SHADOW LAB 5/6 — inset ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Box Shadow · Lab 5/6</span><h3>inset — flipping the shadow inside the box</h3></div>
+        <p class="minilab-desc">Add the keyword <code>inset</code> and the exact same shadow values render <em>inside</em> the box's border instead of outside it — the classic "pressed button" or "recessed input field" look.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow-inset"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="shadow-card" id="shadow-inset-card">card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-inset-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- SHADOW LAB 6/6 — stacking shadows ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Box Shadow · Lab 6/6</span><h3>Stacking shadows — the realistic "elevation" trick</h3></div>
+        <p class="minilab-desc"><code>box-shadow</code> accepts a comma-separated list. Most design systems combine a tight, dark, low-blur shadow (contact shadow, close to the box) with a soft, wide, lighter one (ambient shadow, further out) instead of one big shadow — it reads as more realistic depth.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow-stack"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="shadow-card" id="shadow-stack-card">card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-stack-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- SHADOW CAPSTONE ---- -->
+      <div class="minilab" style="border-bottom:none;padding-bottom:0;">
+        <div class="minilab-head"><span class="minilab-tag" style="color:var(--cyan);background:var(--cyan-soft);">Capstone</span><h3>Put it all together</h3></div>
+        <p class="minilab-desc">Every value from the labs above, combined in the full shorthand.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-shadow"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame"><div class="shadow-card" id="shadow-card">card</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="shadow-css"></pre>
+        </div>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Stack two shadows (tight dark one + soft wide one) for the realistic "elevation" look most design systems use.</li>
+          <li>Use <code>filter:drop-shadow()</code> instead when you need the shadow to follow a transparent PNG/SVG's actual shape.</li>
+          <li>Use a semi-transparent color (<code>rgba()</code>/<code>hsla()</code>) rather than solid black — real shadows blend with what's underneath.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't animate the blur/spread values directly on hover — it repaints and can jank. Animate a pre-shadowed pseudo-element's opacity instead.</li>
+          <li>Don't forget a negative <code>spread</code> is valid (shrinks the shadow smaller than the box) — negative <code>blur</code> is not.</li>
+          <li>Don't apply <code>inset</code> and expect the shadow to also show outside the box — it's one or the other per shadow layer, not both at once.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 06 OVERFLOW ============ -->
+    <section class="module" id="overflow">
+      <div class="module-head"><span class="module-num">08</span><h2>Overflow &amp; Image Crop</h2></div>
+      <p class="module-desc">Two labs here. First, text truncation — needs all three properties together: <code>white-space:nowrap</code>, <code>overflow:hidden</code>, <code>text-overflow:ellipsis</code>. Second, the classic <code>&lt;div class="box"&gt;&lt;img&gt;&lt;/div&gt;</code> crop pattern used for every card thumbnail on the web.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-overflow"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame"><div class="ov-box" id="ov-box">This is a long line of sample text used to demonstrate overflow behavior inside a fixed-size box.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="ov-css"></pre>
+      </div>
+
+      <h3 style="font-family:var(--display);font-size:1.05rem;margin:30px 0 4px;color:var(--ink);">The <code style="background:var(--bg-elevated);border:1px solid var(--line-strong);padding:1px 6px;border-radius:4px;">.box &gt; img</code> crop pattern</h3>
+      <p class="module-desc" style="margin-top:6px;">The image is oversized on purpose — <code>overflow:hidden</code> on the parent <code>.box</code> clips it, and <code>object-fit</code> on the <code>&lt;img&gt;</code> controls how it fills that box.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-imgcrop"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame">
+              <div class="crop-box" id="crop-box"><img id="crop-img" src="https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg" alt="Sample crop subject" onerror="imgFallback(this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs">
+          <button class="code-tab active" data-panel="crop-css-panel">style.css</button>
+          <button class="code-tab" data-panel="crop-html-panel">index.html</button>
+        </div>
+        <pre class="code-out" id="crop-css-panel"></pre>
+        <pre class="code-out" id="crop-html-panel" hidden></pre>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Use <code>overflow:hidden</code> on the <code>.box</code> parent to crop a child image to a fixed box, or to clip <code>border-radius</code> correctly.</li>
+          <li>Give the <code>&lt;img&gt;</code> <code>width:100%; height:100%; object-fit:cover</code> so it fills the box while keeping its aspect ratio, cropping any overflow.</li>
+          <li>Prefer <code>display:flow-root</code> over the old <code>overflow:hidden</code> float-containment hack — same effect, no accidental clipping.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't set <code>text-overflow:ellipsis</code> alone and expect it to work — without <code>overflow:hidden</code> + <code>white-space:nowrap</code> it silently does nothing.</li>
+          <li>Don't use <code>object-fit:contain</code> when you actually want a filled, cropped thumbnail — it letterboxes instead of cropping.</li>
+          <li>Don't wrap a dropdown/tooltip in a parent that has <code>overflow:hidden</code> — it will clip the dropdown even at <code>z-index:9999</code>.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 07 BACKGROUND ============ -->
+    <section class="module" id="background">
+      <div class="module-head"><span class="module-num">07</span><h2>Backgrounds</h2></div>
+      <p class="module-desc"><code>background-size:cover</code> fills the box and may crop; <code>contain</code> fits entirely inside and may letterbox. Gradients are just another <code>background-image</code> value.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-bg"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame"><div class="bg-box" id="bg-box"><span>label</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="bg-css"></pre>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Set a <code>background-color</code> fallback for whenever the image is slow, missing, or transparent.</li>
+          <li>Use <code>background-clip:text</code> + transparent text color for gradient headline text.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't use <code>background-attachment:fixed</code> heavily on mobile — support and performance are inconsistent.</li>
+          <li>Don't forget <code>position/size</code> must be written together with the <code>/</code> in the shorthand — order matters there specifically.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 08 TEXT ============ -->
+    <section class="module" id="text">
+      <div class="module-head"><span class="module-num">08</span><h2>Text Alignment &amp; Decoration</h2></div>
+      <p class="module-desc"><code>text-align</code> works on block containers; <code>text-decoration</code> is shorthand for line, color, style, and thickness.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-text"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame"><p class="text-p" id="text-p">Reference sheets teach recognition. Practicing with real, live controls teaches recall — the thing that actually sticks under pressure.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="text-css"></pre>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Set <code>text-underline-offset</code> on links so underlines don't collide with descenders like g, y, p.</li>
+          <li>Leave <code>text-decoration-skip-ink:auto</code> (the default) so underlines skip through letter descenders cleanly.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't use <code>text-align:justify</code> carelessly on narrow columns — it can create ugly "rivers" of whitespace.</li>
+          <li>Don't forget <code>text-align</code> needs a block-level container to have any effect.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 09 PSEUDO ============ -->
+    <section class="module" id="pseudo">
+      <div class="module-head"><span class="module-num">11</span><h2>Pseudo-elements</h2></div>
+      <p class="module-desc">Double-colon (<code>::</code>) styles a generated <em>part</em> of an element without adding extra markup — a bullet, a corner badge, selected text, placeholder text, a drop cap. Five real ones, all controllable below.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-pseudo"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame" style="flex-direction:column;align-items:stretch;gap:16px;">
+              <ul class="pseudo-list style-star" id="pseudo-list">
+                <li>Set up the project</li>
+                <li>Write the component</li>
+                <li>Ship it</li>
+              </ul>
+              <div class="pseudo-card" id="pseudo-card">Card <span class="pseudo-badge-label">(::after badge)</span></div>
+              <p class="pseudo-firstletter" id="pseudo-firstp">Drop caps use ::first-letter. Try selecting this sentence to see ::selection too.</p>
+              <input class="pseudo-input" id="pseudo-input" type="text" placeholder="::placeholder text lives here">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="pseudo-css"></pre>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Use <code>::marker</code> to style a list bullet/number directly, instead of hiding it and faking one with <code>::before</code>.</li>
+          <li>Use <code>::after</code> for small decorative additions (badges, icons, corner ribbons) that aren't real content — keeps markup clean.</li>
+          <li>Use <code>counter-reset</code> + <code>counter-increment</code> for auto-numbering that doesn't depend on <code>&lt;ol&gt;</code>.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't forget <code>content:""</code> is required on <code>::before</code>/<code>::after</code> — without it, nothing renders even if every other property is set.</li>
+          <li>Don't put real, meaningful content in <code>::before</code>/<code>::after</code> — generated content isn't selectable, copyable, or reliably read by screen readers.</li>
+          <li>Don't confuse pseudo-<em>elements</em> (<code>::before</code>, generated content) with pseudo-<em>classes</em> (<code>:hover</code>, a state) — single vs. double colon.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 12 CASCADE & CUSTOM PROPERTIES ============ -->
+    <section class="module" id="cascade">
+      <div class="module-head"><span class="module-num">12</span><h2>Cascade, Specificity &amp; Custom Properties</h2></div>
+      <p class="module-desc">When two rules target the same element, the more <strong style="color:var(--ink);">specific</strong> selector wins — not the one written last (unless they're tied). Pick a selector type for each competing rule below and watch which one actually takes effect.</p>
+
+      <div class="module-grid">
+        <div>
+          <div class="controls" id="ctrl-spec-a"></div>
+          <div class="controls" id="ctrl-spec-b" style="margin-top:14px;"></div>
+        </div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame"><div class="spec-box" id="spec-box">Which rule wins?</div></div>
+            <div class="stage-readout" id="spec-readout">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="spec-css"></pre>
+      </div>
+
+      <h3 style="font-family:var(--display);font-size:1.05rem;margin:30px 0 4px;color:var(--ink);">Custom properties (CSS variables)</h3>
+      <p class="module-desc" style="margin-top:6px;">Defined once on <code>:root</code>, read anywhere with <code>var(--name)</code> — and unlike Sass variables, they're live in the browser and can even be changed from JavaScript.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-customprops"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame"><div class="token-card" id="token-card">Card using <code>var(--space)</code>, <code>var(--radius)</code>, <code>var(--shadow)</code></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="tokens-css"></pre>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Reach for a class selector as your default — it's specific enough to override element defaults, without being as hard to override later as an ID.</li>
+          <li>Put shared values (spacing, radius, shadow, color) in <code>:root</code> custom properties instead of copy-pasting the same value across a stylesheet.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't reach for <code>!important</code> to "win" a specificity fight — it wins over <em>everything</em>, including future rules, and is hard to override again later except with another <code>!important</code>.</li>
+          <li>Don't style with IDs (<code>#header</code>) — high specificity makes them a pain to override from anywhere else, even a more sensible class rule.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 13 SEMANTIC ELEMENTS ============ -->
+    <section class="module" id="semantic">
+      <div class="module-head"><span class="module-num">13</span><h2>Semantic Elements</h2></div>
+      <p class="module-desc">Semantic tags (<code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code>) look identical to <code>&lt;div&gt;</code>s visually — the difference is entirely in the <strong style="color:var(--ink);">accessibility tree</strong>. Switch the toggle to see what a screen reader gets either way.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-semantic"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame" style="align-items:stretch;">
+              <div class="sem-stage" id="semantic-stage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">index.html</button></div>
+        <pre class="code-out" id="semantic-html"></pre>
+      </div>
+
+      <div id="semantic-a11y" style="margin-top:14px;"></div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Use exactly one <code>&lt;main&gt;</code> per page — it's the skip-to-content target for assistive tech.</li>
+          <li>Give a <code>&lt;section&gt;</code> a heading (<code>&lt;h2&gt;</code>+) to be meaningful; otherwise it's often better as a plain <code>&lt;div&gt;</code>.</li>
+          <li>Add <code>aria-label</code> when the visual design has no visible label a screen reader could use — e.g. multiple <code>&lt;nav&gt;</code> elements.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't wrap everything in <code>&lt;div&gt;</code>s purely out of habit — you lose landmark navigation for free, for zero visual cost to switch.</li>
+          <li>Don't use <code>&lt;article&gt;</code> for something that only makes sense inside its page (use it for content that could stand alone if republished, like a blog post or comment).</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- ============ 14 POSITION ============ -->
+    <section class="module" id="position">
+      <div class="module-head"><span class="module-num">14</span><h2>Position — static, relative, absolute, fixed, sticky</h2></div>
+      <p class="module-desc"><code>position</code> decides what an element's <code>top</code>/<code>right</code>/<code>bottom</code>/<code>left</code> offsets are measured <em>from</em>. <code>static</code> ignores them entirely. <code>relative</code> shifts the element from its own normal spot but leaves a hole behind. <code>absolute</code> jumps out of the flow and measures from its nearest ancestor that isn't <code>static</code> (falling back to the page). <code>fixed</code> does the same thing but always measures from the browser viewport, so it stays put even while you scroll. The photo below is a real <code>&lt;img&gt;</code>, not a placeholder box — watch exactly where it lands as you change the settings.</p>
+
+      <div class="module-grid">
+        <div>
+          <div class="controls" id="ctrl-pos-target"></div>
+          <div class="controls" id="ctrl-pos-ancestor" style="margin-top:14px;"></div>
+        </div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame" style="align-items:stretch;min-height:300px;">
+              <div class="pos-container" id="pos-container">
+                <p class="pos-flow">Normal-flow paragraph #1, above the target.</p>
+                <div class="pos-ghost">a plain sibling box (stays in flow)</div>
+                <div class="pos-target" id="pos-target">
+                  <img id="pos-img" src="https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg" alt="Demo avatar" onerror="imgFallback(this)">
+                  <span class="pos-tag" id="pos-tag">relative</span>
+                </div>
+                <p class="pos-flow">Normal-flow paragraph #2, below the target.</p>
+              </div>
+            </div>
+            <div class="stage-readout" id="pos-readout">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="pos-css"></pre>
+      </div>
+
+      <h3 style="font-family:var(--display);font-size:1.05rem;margin:30px 0 4px;color:var(--ink);">A real layout that needs it: badge + caption over a photo</h3>
+      <p class="module-desc" style="margin-top:6px;">This is the pattern behind almost every "sale" ribbon or image caption on the web: the card gets <code>position:relative</code> (so it becomes the "nearest positioned ancestor"), and the badge/caption get <code>position:absolute</code> so they lock to its corners instead of the whole page.</p>
+
+      <div class="module-grid">
+        <div class="controls" id="ctrl-pos-badge"></div>
+        <div>
+          <div class="stage">
+            <div class="stage-frame">
+              <div class="pos-badge-card" id="pos-badge-card">
+                <img id="pos-badge-img" src="https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg" alt="Demo product photo" onerror="imgFallback(this)">
+                <span class="pos-badge" id="pos-badge">-20%</span>
+                <span class="pos-caption" id="pos-caption">Caption pinned to the photo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-panel">
+        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+        <pre class="code-out" id="pos-badge-css"></pre>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Pair <code>position:absolute</code> children with a <code>position:relative</code> (or <code>sticky</code>/<code>fixed</code>) parent on purpose — that parent becomes the "containing block" the offsets are measured from.</li>
+          <li>Use <code>position:sticky</code> + a <code>top</code> value for section headers or table headers that should stick once they hit the top of their scroll area, then release when their parent scrolls away.</li>
+          <li>Reach for <code>relative</code> with no offsets just to create a positioning context for an absolute child, even if the relative element itself doesn't move.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't forget an unstyled ancestor chain means <code>absolute</code> falls all the way back to the <code>&lt;html&gt;</code> element — "why is my badge in the corner of the whole page" is almost always a missing <code>position:relative</code> on the parent.</li>
+          <li>Don't use <code>fixed</code> inside a parent that has a <code>transform</code>, <code>filter</code>, or <code>will-change</code> set — any of those quietly turn that parent into the fixed element's containing block, and it stops tracking the viewport.</li>
+          <li>Don't confuse <code>relative</code> with <code>absolute</code> — <code>relative</code> still reserves its original space in the layout (everything else stays put), <code>absolute</code> removes it from flow entirely (siblings collapse into the gap).</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <footer>Interactive companion to the CSS Mastery Guide. Every generated block is real, valid CSS — copy it straight into a stylesheet.</footer>
+  </main>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+<style id="pseudo-dynamic"></style>
+
+<script>
+/* ---------- helpers ---------- */
+function el(id){ return document.getElementById(id); }
+/* If a photo URL is blocked, slow, or dead, swap to a generated placeholder
+   so you always see *something* instead of a blank box. */
+function imgFallback(imgEl){
+  if(imgEl.dataset.fallenBack) return;
+  imgEl.dataset.fallenBack = '1';
+  const w = imgEl.naturalWidth || imgEl.width || 400;
+  const h = imgEl.naturalHeight || imgEl.height || 300;
+  imgEl.src = `https://placehold.co/${Math.max(w,80)}x${Math.max(h,80)}/122036/5fd3ff?text=image`;
+}
+function makeSelect(container, groupLabel, name, options, initial, onChange){
+  let group = container.querySelector('[data-group="'+groupLabel+'"]');
+  if(!group){
+    group = document.createElement('div');
+    group.className = 'ctrl-group';
+    group.dataset.group = groupLabel;
+    const h = document.createElement('div');
+    h.className = 'ctrl-group-label';
+    h.textContent = groupLabel;
+    group.appendChild(h);
+    container.appendChild(group);
+  }
+  const row = document.createElement('label');
+  row.className = 'ctrl-row';
+  const span = document.createElement('span');
+  span.className = 'ctrl-name';
+  span.textContent = name;
+  const select = document.createElement('select');
+  options.forEach(opt=>{
+    const o = document.createElement('option');
+    o.value = opt.v;
+    o.textContent = opt.l || opt.v;
+    if(opt.v === initial) o.selected = true;
+    select.appendChild(o);
+  });
+  select.addEventListener('change', ()=> onChange(select.value));
+  row.appendChild(span); row.appendChild(select);
+  group.appendChild(row);
+  return select;
+}
+function highlight(cssText){
+  return cssText
+    .replace(/([.#][\w-]+|\*)(\s*\{)/g, '<span class="sel">$1</span>$2')
+    .replace(/^(\s*)([a-z-]+)(:)/gm, '$1<span class="kw">$2</span>$3')
+    .replace(/(:\s*)([^;]+)(;)/g, '$1<span class="val">$2</span>$3');
+}
+function setCode(id, cssText){ el(id).innerHTML = highlight(cssText); }
+let toastTimer;
+function toast(){
+  const t = el('toast'); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 1000);
+}
+document.querySelectorAll('.code-panel').forEach(panel=>{
+  const tabsRow = panel.querySelector('.code-tabs');
+  const tabs = Array.from(panel.querySelectorAll('.code-tab'));
+  const panes = Array.from(panel.querySelectorAll('pre.code-out'));
+  tabs.forEach((tab, i)=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      panes.forEach(p=>p.hidden = true);
+      tab.classList.add('active');
+      const targetId = tab.dataset.panel;
+      const pane = targetId ? el(targetId) : panes[i];
+      if(pane) pane.hidden = false;
+    });
+  });
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn'; btn.textContent = 'Copy';
+  btn.addEventListener('click', ()=>{
+    const visible = panes.find(p=>!p.hidden) || panes[0];
+    navigator.clipboard.writeText(visible.innerText).then(toast);
+  });
+  tabsRow.appendChild(btn);
+});
+
+/* ---------- 00a margin lab 1/3 — uniform ---------- */
+(function(){
+  const target = el('margin-uniform-target');
+  const valueLabel = el('margin-uniform-value');
+  const gapTop = el('margin-gap-top');
+  const gapBottom = el('margin-gap-bottom');
+  const ctrl = el('ctrl-margin-uniform');
+  const state = { margin:'0px' };
+  function apply(){
+    target.style.margin = state.margin;
+    valueLabel.textContent = state.margin;
+    gapTop.textContent = 'gap: ' + state.margin;
+    gapBottom.textContent = 'gap: ' + state.margin;
+    setCode('margin-uniform-css',
+`.target {
+  margin: ${state.margin};
+}`);
+  }
+  makeSelect(ctrl, 'Target', 'margin', [
+    {v:'0px'},{v:'8px'},{v:'16px'},{v:'24px'},{v:'40px'},{v:'60px'}
+  ], state.margin, v=>{ state.margin=v; apply(); });
+  apply();
+})();
+
+/* ---------- 00b margin lab 2/3 — per-side ---------- */
+(function(){
+  const target = el('margin-sides-target');
+  const ctrl = el('ctrl-margin-sides');
+  const state = { top:'0px', right:'0px', bottom:'0px', left:'0px' };
+  function apply(){
+    target.style.marginTop = state.top;
+    target.style.marginRight = state.right;
+    target.style.marginBottom = state.bottom;
+    target.style.marginLeft = state.left;
+    setCode('margin-sides-css',
+`.target {
+  margin-top: ${state.top};
+  margin-right: ${state.right};
+  margin-bottom: ${state.bottom};
+  margin-left: ${state.left};
+}
+
+/* same thing, as one shorthand line (clockwise from the top) */
+.target {
+  margin: ${state.top} ${state.right} ${state.bottom} ${state.left};
+}`);
+  }
+  makeSelect(ctrl, 'Target', 'margin-top', [
+    {v:'0px'},{v:'20px'},{v:'40px'}
+  ], state.top, v=>{ state.top=v; apply(); });
+  makeSelect(ctrl, 'Target', 'margin-right', [
+    {v:'0px'},{v:'20px'},{v:'40px'}
+  ], state.right, v=>{ state.right=v; apply(); });
+  makeSelect(ctrl, 'Target', 'margin-bottom', [
+    {v:'0px'},{v:'20px'},{v:'40px'}
+  ], state.bottom, v=>{ state.bottom=v; apply(); });
+  makeSelect(ctrl, 'Target', 'margin-left', [
+    {v:'0px'},{v:'20px'},{v:'40px'}
+  ], state.left, v=>{ state.left=v; apply(); });
+  apply();
+})();
+
+/* ---------- 00c margin lab 3/3 — special values ---------- */
+(function(){
+  const target = el('margin-special-target');
+  const ctrl = el('ctrl-margin-special');
+  const readout = el('margin-special-readout');
+  const state = { mode:'auto', width:'110px' };
+  const NOTES = {
+    auto: 'margin: 0 auto — with a set width, the browser splits remaining horizontal space equally on both sides, centering the box.',
+    negative: 'margin-top: -20px — pulls the target upward, overlapping the container\'s header instead of leaving a gap.',
+    percent: 'margin-left: 20% — calculated from the CONTAINER\'s width (300px × 20% = 60px), not the target\'s own size.'
+  };
+  function apply(){
+    target.style.width = state.width;
+    if(state.mode === 'auto'){
+      target.style.margin = '0 auto';
+      target.style.display = 'block';
+    } else if(state.mode === 'negative'){
+      target.style.margin = '-20px 0 0 0';
+      target.style.display = 'block';
+    } else {
+      target.style.margin = '0 0 0 20%';
+      target.style.display = 'block';
+    }
+    readout.textContent = NOTES[state.mode];
+    const cssMap = { auto: '0 auto', negative: '-20px 0 0 0', percent: '0 0 0 20%' };
+    setCode('margin-special-css',
+`.container {
+  width: 300px; /* percentages below are relative to THIS width */
+}
+
+.target {
+  width: ${state.width};
+  margin: ${cssMap[state.mode]};
+}`);
+  }
+  makeSelect(ctrl, 'Target', 'margin value', [
+    {v:'auto', l:
