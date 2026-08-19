@@ -241,6 +241,43 @@ pre.code-out[hidden]{display:none;}
 .pos-badge-card .pos-badge{position:absolute;top:-10px;right:-10px;background:var(--dont);color:#2a0510;font-family:var(--mono);font-weight:700;font-size:.66rem;padding:4px 9px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.4);}
 .pos-badge-card .pos-caption{position:absolute;left:18px;right:18px;bottom:18px;background:rgba(10,18,30,.78);color:var(--ink);font-family:var(--mono);font-size:.66rem;padding:5px 8px;border-radius:6px;}
 
+/* ===== 00 single-element lab (margin / padding) ===== */
+.lab-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+.lab-badge{font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);background:var(--bg-card);border:1px solid var(--line-strong);padding:3px 10px;border-radius:999px;}
+.lab-badge.current{color:var(--cyan);border-color:var(--cyan);background:var(--cyan-soft);}
+.minilab{margin-bottom:34px;padding-bottom:30px;border-bottom:1px dashed var(--line-strong);}
+.minilab:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.minilab-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.minilab-tag{font-family:var(--mono);font-size:.68rem;color:var(--do);background:var(--do-soft);padding:2px 8px;border-radius:5px;}
+.minilab-head h3{font-family:var(--display);font-size:1.05rem;color:var(--ink);}
+.minilab-desc{color:var(--ink-dim);font-size:.86rem;margin:0 0 16px;max-width:680px;}
+.outputlab-label{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--do);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.outputlab-label::before{content:"🔬";font-size:.9rem;}
+
+.margin-row{display:flex;flex-direction:column;align-items:center;gap:0;font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);}
+.margin-sibling{width:180px;padding:10px;text-align:center;background:var(--bg-panel);border:1px dashed var(--line-strong);border-radius:6px;color:var(--ink-dim);}
+.margin-target{width:180px;padding:10px;text-align:center;background:var(--bg-elevated);border:2px solid var(--cyan);border-radius:6px;color:var(--cyan);font-weight:700;transition:all .15s;}
+.margin-gap-label{font-size:.62rem;color:var(--amber);padding:2px 0;min-height:14px;}
+
+.cross-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;place-items:center;gap:0;width:100%;min-height:220px;}
+.cross-n{grid-column:2;grid-row:1;}
+.cross-w{grid-column:1;grid-row:2;}
+.cross-target{grid-column:2;grid-row:2;width:120px;height:60px;background:var(--bg-elevated);border:2px solid var(--cyan);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;color:var(--cyan);font-family:var(--mono);font-size:.7rem;font-weight:700;transition:all .15s;}
+.cross-e{grid-column:3;grid-row:2;}
+.cross-s{grid-column:2;grid-row:3;}
+.cross-n,.cross-w,.cross-e,.cross-s{font-family:var(--mono);font-size:.64rem;color:var(--amber);text-align:center;}
+
+.special-container{width:300px;background:var(--bg-panel);border:1px dashed var(--line-strong);border-radius:8px;padding:0;position:relative;overflow:visible;}
+.special-header{background:var(--bg-elevated);color:var(--ink-dim);font-family:var(--mono);font-size:.66rem;padding:8px 12px;border-bottom:1px dashed var(--line-strong);border-radius:8px 8px 0 0;}
+.special-body{padding:14px;min-height:80px;}
+.special-target{width:110px;padding:10px;text-align:center;background:var(--bg-elevated);border:2px solid var(--amber);border-radius:6px;color:var(--amber);font-family:var(--mono);font-size:.68rem;font-weight:700;transition:all .15s;}
+
+.padding-box{width:220px;height:140px;background:var(--bg-elevated);border:2px solid var(--cyan);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;transition:all .15s;}
+.padding-box .padding-content{background:var(--bg-panel);border:1px dashed var(--do);color:var(--do);font-family:var(--mono);font-size:.68rem;padding:6px 10px;border-radius:4px;text-align:center;}
+.padding-ratio-box{width:280px;position:relative;background:var(--bg-elevated);border:2px solid var(--amber);border-radius:8px;overflow:hidden;}
+.padding-ratio-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--amber);font-family:var(--mono);font-size:.7rem;text-align:center;padding:8px;}
+
 /* footer */
 footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px solid var(--line-strong);color:var(--ink-faint);font-size:.8rem;}
 @media(max-width:960px){footer{padding:22px 20px 0;}}
@@ -257,6 +294,7 @@ footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px sol
   <nav class="sidebar" id="sidebar">
     <div class="brand">CSS Blueprint</div>
     <div class="brand-sub">Interactive lab · for juniors</div>
+    <a class="nav-link" href="#single-element"><span class="num">00</span>Single-Element Lab</a>
     <a class="nav-link" href="#box-model"><span class="num">01</span>Box Model</a>
     <a class="nav-link" href="#display"><span class="num">02</span>Display Types</a>
     <a class="nav-link" href="#flexbox"><span class="num">03</span>Flexbox</a>
@@ -280,6 +318,193 @@ footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px sol
       <p class="lede">Every module below is a self-contained lab: pick values from the dropdowns, watch the <strong>live element change</strong> on the right, and read the exact CSS (and HTML) it produced underneath. Each one also lists what to <strong>do</strong> and what <strong>breaks things</strong>, straight from real production gotchas.</p>
       <div class="hero-note"><strong>How to use this:</strong> modules are independent — jump to any topic from the sidebar. Nothing here needs a build tool; every rule you see generated is copy-paste-able straight into a real stylesheet.</div>
     </header>
+
+    <!-- ============ 00 SINGLE-ELEMENT LAB ============ -->
+    <section class="module" id="single-element">
+      <div class="module-head"><span class="module-num">00</span><h2>Single-Element Lab — start here</h2></div>
+      <p class="module-desc">Before combining properties into full layouts, it helps to isolate <strong style="color:var(--ink);">one property on one element</strong> and watch it work on its own. Each mini-lab below builds on the last: first a single uniform value, then four independent per-side values, then the special values that trip people up. Watch the <span style="color:var(--do);">🔬 Output Lab</span> area closely — that's the part of the page actually reacting to your changes.</p>
+
+      <div class="lab-strip">
+        <span class="lab-badge">Margin · Lab 1/3 — uniform</span>
+        <span class="lab-badge">Margin · Lab 2/3 — per-side</span>
+        <span class="lab-badge">Margin · Lab 3/3 — special values</span>
+        <span class="lab-badge">Padding · Lab 1/3 — uniform</span>
+        <span class="lab-badge">Padding · Lab 2/3 — per-side</span>
+        <span class="lab-badge">Padding · Lab 3/3 — special values</span>
+      </div>
+
+      <!-- ---- MARGIN LAB 1/3 ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Margin · Lab 1/3</span><h3>Uniform margin — one value, every side</h3></div>
+        <p class="minilab-desc">A single <code>margin</code> value applies to all four sides equally. Margin pushes <em>other elements</em> away — it doesn't grow the target box itself, it grows the empty space around it. Watch both siblings move away from the target equally as you increase the value.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-margin-uniform"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame" style="flex-direction:column;">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="margin-row">
+                  <div class="margin-sibling">sibling above</div>
+                  <div class="margin-gap-label" id="margin-gap-top">gap: 0px</div>
+                  <div class="margin-target" id="margin-uniform-target">target (margin: <span id="margin-uniform-value">0</span>)</div>
+                  <div class="margin-gap-label" id="margin-gap-bottom">gap: 0px</div>
+                  <div class="margin-sibling">sibling below</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="margin-uniform-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- MARGIN LAB 2/3 ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Margin · Lab 2/3</span><h3>Per-side margin — four independent values</h3></div>
+        <p class="minilab-desc">Set each side separately with <code>margin-top</code>/<code>-right</code>/<code>-bottom</code>/<code>-left</code>, or combine them into the shorthand <code>margin: top right bottom left;</code> — that's the "clockwise from the top" order CSS always uses for 4-value shorthands. Change one side below and only its matching neighbor reacts.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-margin-sides"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="cross-wrap">
+                  <div class="cross-n">↑ margin-top</div>
+                  <div class="cross-w">← margin-left</div>
+                  <div class="cross-target" id="margin-sides-target">target</div>
+                  <div class="cross-e">margin-right →</div>
+                  <div class="cross-s">↓ margin-bottom</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="margin-sides-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- MARGIN LAB 3/3 ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Margin · Lab 3/3</span><h3>Special values — auto, negative, percentage</h3></div>
+        <p class="minilab-desc"><code>margin: auto</code> on a block element with a set width centers it horizontally. A <strong style="color:var(--ink);">negative</strong> margin pulls the element (and can overlap a neighbor) instead of pushing it away. A <strong style="color:var(--ink);">percentage</strong> margin — on any side, including top/bottom — is always calculated from the <em>container's width</em>, never its height or the element's own size.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-margin-special"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame" style="align-items:flex-start;">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="special-container">
+                  <div class="special-header">.container (300px wide)</div>
+                  <div class="special-body">
+                    <div class="special-target" id="margin-special-target">target</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="stage-readout" id="margin-special-readout">—</div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="margin-special-css"></pre>
+        </div>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Use <code>margin: auto</code> to horizontally center a block element that has an explicit <code>width</code>.</li>
+          <li>Reach for a negative margin deliberately, when you want one element to visually overlap a specific neighbor.</li>
+          <li>Remember vertical margins between block siblings <strong>collapse</strong> to the larger one — they don't add together.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't expect a percentage <code>margin-top</code>/<code>margin-bottom</code> to relate to the element's height — it's always a percentage of the <em>container's width</em>.</li>
+          <li>Don't use margin when you actually want to grow the box itself — that's padding's job, not margin's.</li>
+        </ul></div>
+      </div>
+
+      <!-- ---- PADDING LAB 1/3 ---- -->
+      <div class="minilab" style="margin-top:44px;">
+        <div class="minilab-head"><span class="minilab-tag">Padding · Lab 1/3</span><h3>Uniform padding — one value, every side</h3></div>
+        <p class="minilab-desc">Padding is the cushion <em>inside</em> the border, between the border and the content. Unlike margin, it doesn't push siblings away — with the default <code>box-sizing:content-box</code> it makes the rendered box itself bigger. Watch the size readout grow as padding increases.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-padding-uniform"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="padding-box" id="padding-uniform-box"><div class="padding-content">100×60 content</div></div>
+              </div>
+              <div class="stage-readout" id="padding-uniform-readout">Rendered size: —</div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="padding-uniform-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- PADDING LAB 2/3 ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Padding · Lab 2/3</span><h3>Per-side padding — four independent values</h3></div>
+        <p class="minilab-desc">Same idea as margin's per-side controls, but padding pushes the <em>content inside</em> the box instead of the neighbors outside it. In a fixed-size box, growing one side's padding visibly shoves the centered content toward the opposite side.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-padding-sides"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="padding-box" id="padding-sides-box" style="justify-content:flex-start;align-items:flex-start;"><div class="padding-content">content</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="padding-sides-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- PADDING LAB 3/3 ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Padding · Lab 3/3</span><h3>Special values — percentage, em, and the aspect-ratio trick</h3></div>
+        <p class="minilab-desc">A <strong style="color:var(--ink);">percentage</strong> padding — on every side, top/bottom included — is calculated from the container's <em>width</em>. An <strong style="color:var(--ink);">em</strong> padding scales with the element's own <code>font-size</code>. And the classic trick: a <code>padding-bottom</code> percentage on an empty box was the pre-<code>aspect-ratio</code> way to force a fixed width/height ratio (like 56.25% for 16:9 video embeds).</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-padding-special"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame" style="flex-direction:column;">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="padding-ratio-box" id="padding-ratio-box">
+                  <div class="padding-ratio-inner" id="padding-ratio-inner">padding-bottom: 56.25%</div>
+                </div>
+              </div>
+            </div>
+            <div class="stage-readout" id="padding-special-readout">—</div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="padding-special-css"></pre>
+        </div>
+      </div>
+
+      <div class="principles">
+        <div class="p-col do"><h3>Do</h3><ul>
+          <li>Use <code>box-sizing:border-box</code> (see Module 01) so padding doesn't silently grow your declared <code>width</code>.</li>
+          <li>Use a percentage <code>padding-bottom</code> trick — or better, the modern <code>aspect-ratio</code> property — to keep embeds at a fixed ratio.</li>
+          <li>Use <code>em</code> padding when you want a component's spacing to scale automatically with its own text size.</li>
+        </ul></div>
+        <div class="p-col dont"><h3>Don't</h3><ul>
+          <li>Don't forget percentage padding on <em>any</em> side is relative to the container's <strong>width</strong>, including <code>padding-top</code>/<code>padding-bottom</code> — a very common surprise.</li>
+          <li>Don't add padding to shove content away from a border when what you actually want is space between this box and its neighbor — that's margin's job.</li>
+        </ul></div>
+      </div>
+    </section>
 
     <!-- ============ 01 BOX MODEL ============ -->
     <section class="module" id="box-model">
@@ -352,37 +577,206 @@ footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px sol
 
     <!-- ============ 03 FLEXBOX ============ -->
     <section class="module" id="flexbox">
-      <div class="module-head"><span class="module-num">03</span><h2>Flexbox — Parent &amp; Child</h2></div>
-      <p class="module-desc">Parent properties arrange <em>all</em> children at once. <code>justify-*</code> always targets the main axis, <code>align-*</code> always targets the cross axis. Child B below has its own override controls — try <code>align-self</code> to see it break away from the rest.</p>
+      <div class="module-head"><span class="module-num">03</span><h2>Flexbox</h2></div>
+      <p class="module-desc">Flexbox is a <strong style="color:var(--ink);">two-piece system</strong>: nothing below works until the parent has <code>display:flex</code> — every other property here is inert without it. Once that's set, parent properties (<code>justify-*</code> for the main axis, <code>align-*</code> for the cross axis) arrange <em>all</em> children at once, and a handful of child properties (<code>flex-grow</code>, <code>align-self</code>, <code>order</code>) let one item break away from the group. The labs below build up in that order: turn flex on, isolate the two axis properties, then layer in wrapping, sizing, and reordering.</p>
 
-      <div class="module-grid">
-        <div>
-          <div class="controls" id="ctrl-flex-parent"></div>
-          <div class="controls" id="ctrl-flex-child" style="margin-top:14px;"></div>
+      <div class="lab-strip">
+        <span class="lab-badge">Lab 1/6 — display: flex</span>
+        <span class="lab-badge">Lab 2/6 — justify-content</span>
+        <span class="lab-badge">Lab 3/6 — align-items</span>
+        <span class="lab-badge">Lab 4/6 — flex-wrap &amp; align-content</span>
+        <span class="lab-badge">Lab 5/6 — child sizing</span>
+        <span class="lab-badge">Lab 6/6 — order</span>
+      </div>
+
+      <!-- ---- FLEX LAB 1/6 — display:flex ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Flexbox · Lab 1/6</span><h3>display: flex — the switch everything else depends on</h3></div>
+        <p class="minilab-desc">With plain <code>display:block</code>, children are just stacked divs — <code>flex-direction</code>, <code>justify-content</code>, all of it, silently does nothing. Flip the switch below to <code>flex</code> and the exact same children snap into a row.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-flex-switch"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="flex-parent" id="flex-switch-parent">
+                  <div class="flex-child">A</div>
+                  <div class="flex-child">B</div>
+                  <div class="flex-child">C</div>
+                </div>
+              </div>
+              <div class="stage-readout" id="flex-switch-readout">—</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <div class="stage">
-            <div class="axis-indicator" id="axis-indicator"></div>
-            <div class="stage-frame">
-              <div class="flex-parent" id="flex-parent">
-                <div class="flex-child" style="min-width:80px;">A</div>
-                <div class="flex-child b" id="flex-child-b" style="min-width:80px;">B (overrides)</div>
-                <div class="flex-child" style="min-width:80px;">C</div>
-                <div class="flex-child" style="min-width:80px;">D</div>
-                <div class="flex-child" style="min-width:80px;">E</div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="flex-switch-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- FLEX LAB 2/6 — justify-content solo ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Flexbox · Lab 2/6</span><h3>justify-content — main-axis alignment, alone</h3></div>
+        <p class="minilab-desc"><code>display:flex</code> is already on below — this lab isolates just <code>justify-content</code>, which positions items along the <strong style="color:var(--ink);">main axis</strong> (horizontal, in the default <code>row</code> direction).</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-justify-solo"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="flex-parent" id="justify-solo-parent">
+                  <div class="flex-child" style="min-width:60px;">A</div>
+                  <div class="flex-child" style="min-width:60px;">B</div>
+                  <div class="flex-child" style="min-width:60px;">C</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="justify-solo-css"></pre>
+        </div>
       </div>
 
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="flex-css"></pre>
+      <!-- ---- FLEX LAB 3/6 — align-items solo ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Flexbox · Lab 3/6</span><h3>align-items — cross-axis alignment, alone</h3></div>
+        <p class="minilab-desc">Same idea, the other axis: <code>align-items</code> positions items along the <strong style="color:var(--ink);">cross axis</strong> (vertical, in the default <code>row</code> direction). The three boxes below have different heights on purpose, so you can actually see each item move.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-align-solo"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="flex-parent" id="align-solo-parent" style="min-height:160px;">
+                  <div class="flex-child" style="min-width:60px;padding:8px 10px;">A</div>
+                  <div class="flex-child" style="min-width:60px;padding:26px 10px;">B (taller)</div>
+                  <div class="flex-child" style="min-width:60px;padding:14px 10px;">C</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="align-solo-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- FLEX LAB 4/6 — wrap + align-content ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Flexbox · Lab 4/6</span><h3>flex-wrap &amp; align-content — multiple lines</h3></div>
+        <p class="minilab-desc">By default all items are squeezed onto one line (<code>nowrap</code>). Switch to <code>wrap</code> and items too wide for the row drop onto new lines — only then does <code>align-content</code> do anything, since it positions the group of <em>lines</em>, not individual items.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-flex-wrap-lab"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="flex-parent" id="flex-wrap-parent" style="min-height:180px;">
+                  <div class="flex-child" style="min-width:90px;">1</div>
+                  <div class="flex-child" style="min-width:90px;">2</div>
+                  <div class="flex-child" style="min-width:90px;">3</div>
+                  <div class="flex-child" style="min-width:90px;">4</div>
+                  <div class="flex-child" style="min-width:90px;">5</div>
+                  <div class="flex-child" style="min-width:90px;">6</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="flex-wrap-lab-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- FLEX LAB 5/6 — child sizing ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Flexbox · Lab 5/6</span><h3>flex-grow, flex-shrink &amp; flex-basis — child sizing</h3></div>
+        <p class="minilab-desc">These three control how one child's <em>size</em> compares to its siblings, independent of alignment. <code>flex-basis</code> is the starting size before growing/shrinking; <code>flex-grow</code> is how eagerly it claims leftover space; <code>flex-shrink</code> is how eagerly it gives space up when there isn't enough. Change child B's values and watch it claim (or give up) space relative to A and C, which stay at <code>flex: 1 1 0</code>.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-flex-sizing"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="flex-parent" id="flex-sizing-parent">
+                  <div class="flex-child" style="flex:1 1 0;">A</div>
+                  <div class="flex-child b" id="flex-sizing-target" style="flex:1 1 0;">B</div>
+                  <div class="flex-child" style="flex:1 1 0;">C</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="flex-sizing-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- FLEX LAB 6/6 — order ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Flexbox · Lab 6/6</span><h3>order — visual reordering without touching the HTML</h3></div>
+        <p class="minilab-desc">Every flex item defaults to <code>order:0</code> and displays in source order. Give one item a different <code>order</code> value and it moves purely visually — screen readers and keyboard tab order still follow the original HTML, which is why <code>order</code> should only be used for cosmetic reshuffling, not to fix a real content-order problem.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-flex-order"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="flex-parent" id="flex-order-parent">
+                  <div class="flex-child" style="min-width:60px;">1st in HTML</div>
+                  <div class="flex-child b" id="flex-order-target" style="min-width:60px;">2nd in HTML</div>
+                  <div class="flex-child" style="min-width:60px;">3rd in HTML</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="flex-order-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- FLEX CAPSTONE — everything together ---- -->
+      <div class="minilab" style="border-bottom:none;padding-bottom:0;">
+        <div class="minilab-head"><span class="minilab-tag" style="color:var(--cyan);background:var(--cyan-soft);">Capstone</span><h3>Put it all together — Parent &amp; Child</h3></div>
+        <p class="minilab-desc">Now every control from the labs above, live at once. Child B has its own override panel — try <code>align-self</code> to see it break away from whatever <code>align-items</code> is doing to everyone else.</p>
+        <div class="module-grid">
+          <div>
+            <div class="controls" id="ctrl-flex-parent"></div>
+            <div class="controls" id="ctrl-flex-child" style="margin-top:14px;"></div>
+          </div>
+          <div>
+            <div class="stage">
+              <div class="axis-indicator" id="axis-indicator"></div>
+              <div class="stage-frame">
+                <div class="flex-parent" id="flex-parent">
+                  <div class="flex-child" style="min-width:80px;">A</div>
+                  <div class="flex-child b" id="flex-child-b" style="min-width:80px;">B (overrides)</div>
+                  <div class="flex-child" style="min-width:80px;">C</div>
+                  <div class="flex-child" style="min-width:80px;">D</div>
+                  <div class="flex-child" style="min-width:80px;">E</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="flex-css"></pre>
+        </div>
       </div>
 
       <div class="principles">
         <div class="p-col do"><h3>Do</h3><ul>
+          <li>Set <code>display:flex</code> (or <code>inline-flex</code>) first — every other flex property is a no-op without it.</li>
           <li>Use <code>gap</code> for spacing between flex items instead of margin hacks.</li>
           <li>Use <code>align-self</code> on one item when everything else should follow <code>align-items</code>.</li>
           <li>Remember <code>align-items:stretch</code> is the <em>default</em> — children with no set height already stretch to fill the cross axis.</li>
@@ -390,50 +784,197 @@ footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px sol
         <div class="p-col dont"><h3>Don't</h3><ul>
           <li>Don't reach for <code>align-content</code> expecting it to do anything with <code>flex-wrap:nowrap</code> — it only affects multiple wrapped lines.</li>
           <li>Don't confuse <code>flex-basis:0%</code> (equal columns, ignores content) with <code>auto</code> (content-weighted columns) — this is why <code>flex:1</code> and <code>flex:1 1 auto</code> render differently.</li>
+          <li>Don't use <code>order</code> to fix content that's in the wrong place in the HTML — it only changes visual order, not reading or tab order.</li>
         </ul></div>
       </div>
     </section>
 
     <!-- ============ 04 GRID ============ -->
     <section class="module" id="grid">
-      <div class="module-head"><span class="module-num">04</span><h2>CSS Grid — Parent &amp; Child</h2></div>
-      <p class="module-desc"><code>grid-template-columns</code>/<code>-rows</code> define the explicit tracks. Add more items than the template holds and Git— sorry, <strong style="color:var(--ink);">Grid</strong> — creates <code>grid-auto-rows</code>/<code>-columns</code> "implicit" tracks to hold the overflow. <code>justify-items</code>/<code>align-items</code> position everything inside its cell by default; any single item can override with <code>justify-self</code>/<code>align-self</code> — a concept Flexbox doesn't have.</p>
+      <div class="module-head"><span class="module-num">04</span><h2>CSS Grid</h2></div>
+      <p class="module-desc">Like Flexbox, nothing below works until the parent has <code>display:grid</code>. From there, <code>grid-template-columns</code>/<code>-rows</code> define the explicit tracks; <code>gap</code> spaces them; <code>justify-items</code>/<code>align-items</code> position everything inside its cell by default, and any single item can override with <code>justify-self</code>/<code>align-self</code> — a concept Flexbox doesn't have. The labs below isolate each piece before combining them all.</p>
 
-      <div class="module-grid">
-        <div>
-          <div class="controls" id="ctrl-grid-parent"></div>
-          <div class="controls" id="ctrl-grid-child" style="margin-top:14px;"></div>
-        </div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame">
-              <div class="grid-parent" id="grid-parent">
-                <div class="grid-item i1" id="grid-item-1">1 (spans)</div>
-                <div class="grid-item i2" id="grid-item-2">2 (self-align)</div>
-                <div class="grid-item">3</div>
-                <div class="grid-item">4</div>
-                <div class="grid-item">5</div>
-                <div class="grid-item">6</div>
+      <div class="lab-strip">
+        <span class="lab-badge">Lab 1/5 — display: grid</span>
+        <span class="lab-badge">Lab 2/5 — grid-template-columns</span>
+        <span class="lab-badge">Lab 3/5 — grid-template-rows</span>
+        <span class="lab-badge">Lab 4/5 — gap</span>
+        <span class="lab-badge">Lab 5/5 — justify-items &amp; align-items</span>
+      </div>
+
+      <!-- ---- GRID LAB 1/5 — display:grid ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">CSS Grid · Lab 1/5</span><h3>display: grid — the switch everything else depends on</h3></div>
+        <p class="minilab-desc">With plain <code>display:block</code>, these are just stacked divs — none of grid's placement properties do anything. Flip it to <code>grid</code> and the same six children snap into a track-based layout.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-grid-switch"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="grid-parent" id="grid-switch-parent">
+                  <div class="grid-item">1</div>
+                  <div class="grid-item">2</div>
+                  <div class="grid-item">3</div>
+                  <div class="grid-item">4</div>
+                </div>
               </div>
+              <div class="stage-readout" id="grid-switch-readout">—</div>
             </div>
-            <div class="stage-readout" id="grid-readout">—</div>
           </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="grid-switch-css"></pre>
         </div>
       </div>
 
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="grid-css"></pre>
+      <!-- ---- GRID LAB 2/5 — grid-template-columns solo ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">CSS Grid · Lab 2/5</span><h3>grid-template-columns — defining tracks</h3></div>
+        <p class="minilab-desc"><code>display:grid</code> is already on below. This isolates just <code>grid-template-columns</code> — the list of column track sizes. <code>fr</code> is a flexible share of leftover space; fixed units like <code>px</code> never change; <code>repeat()</code> avoids writing the same value out by hand.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-grid-cols-solo"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="grid-parent" id="grid-cols-solo-parent">
+                  <div class="grid-item">1</div>
+                  <div class="grid-item">2</div>
+                  <div class="grid-item">3</div>
+                  <div class="grid-item">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="grid-cols-solo-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- GRID LAB 3/5 — grid-template-rows solo ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">CSS Grid · Lab 3/5</span><h3>grid-template-rows — the same idea, the other axis</h3></div>
+        <p class="minilab-desc">Same track-sizing syntax, applied to rows. Unlike columns (which usually fill the container's width), rows commonly need an explicit height — <code>auto</code> just means "as tall as the content needs."</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-grid-rows-solo"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="grid-parent" id="grid-rows-solo-parent" style="grid-template-columns:repeat(2,1fr);">
+                  <div class="grid-item">1</div>
+                  <div class="grid-item">2</div>
+                  <div class="grid-item">3</div>
+                  <div class="grid-item">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="grid-rows-solo-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- GRID LAB 4/5 — gap solo ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">CSS Grid · Lab 4/5</span><h3>gap — spacing between tracks</h3></div>
+        <p class="minilab-desc"><code>gap</code> is shorthand for <code>row-gap column-gap</code> — space <em>between</em> cells only, never around the outer edge. That's the key difference from margin: no matter how large the gap, the grid never grows padding on its own boundary.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-grid-gap-solo"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="grid-parent" id="grid-gap-solo-parent">
+                  <div class="grid-item">1</div>
+                  <div class="grid-item">2</div>
+                  <div class="grid-item">3</div>
+                  <div class="grid-item">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="grid-gap-solo-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- GRID LAB 5/5 — justify-items & align-items solo ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">CSS Grid · Lab 5/5</span><h3>justify-items &amp; align-items — positioning content inside each cell</h3></div>
+        <p class="minilab-desc">Every cell is bigger than its content by default (<code>stretch</code>). <code>justify-items</code> positions content horizontally within its cell; <code>align-items</code> positions it vertically. These apply to <em>every</em> item at once — the capstone below shows the per-item override with <code>justify-self</code>/<code>align-self</code>.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-grid-align-solo"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="grid-parent" id="grid-align-solo-parent" style="grid-template-columns:repeat(2,1fr);min-height:170px;">
+                  <div class="grid-item" style="min-height:40px;min-width:40px;">1</div>
+                  <div class="grid-item" style="min-height:40px;min-width:40px;">2</div>
+                  <div class="grid-item" style="min-height:40px;min-width:40px;">3</div>
+                  <div class="grid-item" style="min-height:40px;min-width:40px;">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="grid-align-solo-css"></pre>
+        </div>
+      </div>
+
+      <!-- ---- GRID CAPSTONE — everything together ---- -->
+      <div class="minilab" style="border-bottom:none;padding-bottom:0;">
+        <div class="minilab-head"><span class="minilab-tag" style="color:var(--cyan);background:var(--cyan-soft);">Capstone</span><h3>Put it all together — Parent &amp; Child</h3></div>
+        <p class="minilab-desc">Every control from the labs above, live at once, plus what happens when items overflow the template — <code>grid-auto-rows</code>/<code>grid-auto-flow</code> create "implicit" tracks to hold them — and the per-item overrides <code>justify-self</code>/<code>align-self</code>.</p>
+        <div class="module-grid">
+          <div>
+            <div class="controls" id="ctrl-grid-parent"></div>
+            <div class="controls" id="ctrl-grid-child" style="margin-top:14px;"></div>
+          </div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="grid-parent" id="grid-parent">
+                  <div class="grid-item i1" id="grid-item-1">1 (spans)</div>
+                  <div class="grid-item i2" id="grid-item-2">2 (self-align)</div>
+                  <div class="grid-item">3</div>
+                  <div class="grid-item">4</div>
+                  <div class="grid-item">5</div>
+                  <div class="grid-item">6</div>
+                </div>
+              </div>
+              <div class="stage-readout" id="grid-readout">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="grid-css"></pre>
+        </div>
       </div>
 
       <div class="principles">
         <div class="p-col do"><h3>Do</h3><ul>
+          <li>Set <code>display:grid</code> first — every other grid property is a no-op without it.</li>
           <li>Use <code>repeat(auto-fit, minmax(160px,1fr))</code> for a responsive grid with zero media queries — try it in the dropdown above.</li>
           <li>Set <code>grid-auto-rows</code> explicitly when items can overflow your template — otherwise implicit rows default to <code>auto</code> and can look inconsistent in height.</li>
         </ul></div>
         <div class="p-col dont"><h3>Don't</h3><ul>
           <li>Don't confuse <code>auto-fill</code> (keeps empty tracks, leaves gaps) with <code>auto-fit</code> (collapses empty tracks, items stretch) — compare them directly with the <code>grid-template-columns</code> dropdown.</li>
           <li>Don't forget <code>dense</code> packing (in <code>grid-auto-flow</code>) can visually reorder items away from source/DOM order — an accessibility trade-off, not a free win.</li>
+          <li>Don't reach for margin to space out grid cells — <code>gap</code> handles it without adding space around the grid's own outer edge.</li>
         </ul></div>
       </div>
     </section>
@@ -441,1468 +982,38 @@ footer{max-width:900px;margin:60px auto 0;padding:22px 40px 0;border-top:1px sol
     <!-- ============ 05 GRID STACKING ============ -->
     <section class="module" id="grid-stacking">
       <div class="module-head"><span class="module-num">05</span><h2>Grid Stacking</h2></div>
-      <p class="module-desc">Grid items can deliberately occupy the <strong style="color:var(--ink);">same cell(s)</strong> — this is how you layer a badge over a card, or a caption over an image, without <code>position:absolute</code>. Give two children overlapping <code>grid-column</code>/<code>grid-row</code> ranges and control which one sits on top with <code>z-index</code>.</p>
+      <p class="module-desc">Grid items can deliberately occupy the <strong style="color:var(--ink);">same cell(s)</strong> — this is how you layer a badge over a card, or a caption over an image, without <code>position:absolute</code>. The labs below build up in stages: place one item with line numbers, then a second item overlapping it, then control who's on top with <code>z-index</code>, then reveal what's underneath with <code>opacity</code>.</p>
 
-      <div class="module-grid">
-        <div>
-          <div class="controls" id="ctrl-stack-1"></div>
-          <div class="controls" id="ctrl-stack-2" style="margin-top:14px;"></div>
-        </div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame">
-              <div class="stack-parent" id="stack-parent">
-                <div class="stack-child stack-1" id="stack-child-1">child-1</div>
-                <div class="stack-child stack-2" id="stack-child-2">child-2</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="lab-strip">
+        <span class="lab-badge">Lab 1/5 — grid-column, one item</span>
+        <span class="lab-badge">Lab 2/5 — grid-row, one item</span>
+        <span class="lab-badge">Lab 3/5 — two items overlapping</span>
+        <span class="lab-badge">Lab 4/5 — z-index</span>
+        <span class="lab-badge">Lab 5/5 — opacity reveals underneath</span>
       </div>
 
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="stack-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Let two items share cells with overlapping <code>grid-column</code>/<code>grid-row</code> ranges — no <code>position:relative</code> or manual <code>top</code>/<code>left</code> math needed.</li>
-          <li>Use <code>z-index</code> to control layering order once items overlap — grid positions them, <code>z-index</code> stacks them.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't reach for <code>position:absolute</code> out of habit for this — it needs a sized, positioned parent and loses the grid's automatic sizing.</li>
-          <li>Don't forget <code>opacity</code> below 1 on an overlapping child reveals the one underneath — useful for hover/reveal effects, surprising otherwise.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 06 BENTO GRIDS ============ -->
-    <section class="module" id="bento">
-      <div class="module-head"><span class="module-num">06</span><h2>Bento Grids</h2></div>
-      <p class="module-desc">The trendy asymmetric tile layout on modern landing pages is just <code>grid-template-areas</code> + <code>grid-area</code>, styled with gradient <code>background-color</code>s. Every named area must form a solid rectangle — no "L" or "T" shapes.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-bento"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame">
-              <div class="bento-grid" id="bento-grid">
-                <div class="bento-tile bt-a1" style="grid-area:a1;">a1</div>
-                <div class="bento-tile bt-a2" style="grid-area:a2;">a2</div>
-                <div class="bento-tile bt-a3" style="grid-area:a3;">a3</div>
-                <div class="bento-tile bt-a4" style="grid-area:a4;">a4</div>
-                <div class="bento-tile bt-a5" style="grid-area:a5;">a5</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="bento-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Pad every row string in <code>grid-template-areas</code> to the <strong>same number of column-cells</strong> — use <code>.</code> for an intentionally empty one.</li>
-          <li>Combine hand-placed hero tiles (named areas) with <code>grid-auto-flow:dense</code> for auto-packed filler tiles.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't hand-pick gradient colors that clash — most bento grids reuse 2–3 tones from one palette across every tile for cohesion.</li>
-          <li>Don't overuse <code>grid-template-areas</code> for layouts that change shape dynamically — line-number placement handles that better.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 07 SHADOW ============ -->
-    <section class="module" id="shadow">
-      <div class="module-head"><span class="module-num">07</span><h2>Box Shadow</h2></div>
-      <p class="module-desc"><code>box-shadow: offset-x offset-y blur spread color;</code> — add <code>inset</code> to flip it to the inside of the box, for a "pressed" look.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-shadow"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame"><div class="shadow-card" id="shadow-card">card</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="shadow-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Stack two shadows (tight dark one + soft wide one) for the realistic "elevation" look most design systems use.</li>
-          <li>Use <code>filter:drop-shadow()</code> instead when you need the shadow to follow a transparent PNG/SVG's actual shape.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't animate the blur/spread values directly on hover — it repaints and can jank. Animate a pre-shadowed pseudo-element's opacity instead.</li>
-          <li>Don't forget a negative <code>spread</code> is valid (shrinks the shadow smaller than the box) — negative <code>blur</code> is not.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 06 OVERFLOW ============ -->
-    <section class="module" id="overflow">
-      <div class="module-head"><span class="module-num">08</span><h2>Overflow &amp; Image Crop</h2></div>
-      <p class="module-desc">Two labs here. First, text truncation — needs all three properties together: <code>white-space:nowrap</code>, <code>overflow:hidden</code>, <code>text-overflow:ellipsis</code>. Second, the classic <code>&lt;div class="box"&gt;&lt;img&gt;&lt;/div&gt;</code> crop pattern used for every card thumbnail on the web.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-overflow"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame"><div class="ov-box" id="ov-box">This is a long line of sample text used to demonstrate overflow behavior inside a fixed-size box.</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="ov-css"></pre>
-      </div>
-
-      <h3 style="font-family:var(--display);font-size:1.05rem;margin:30px 0 4px;color:var(--ink);">The <code style="background:var(--bg-elevated);border:1px solid var(--line-strong);padding:1px 6px;border-radius:4px;">.box &gt; img</code> crop pattern</h3>
-      <p class="module-desc" style="margin-top:6px;">The image is oversized on purpose — <code>overflow:hidden</code> on the parent <code>.box</code> clips it, and <code>object-fit</code> on the <code>&lt;img&gt;</code> controls how it fills that box.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-imgcrop"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame">
-              <div class="crop-box" id="crop-box"><img id="crop-img" src="https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg" alt="Sample crop subject" onerror="imgFallback(this)"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs">
-          <button class="code-tab active" data-panel="crop-css-panel">style.css</button>
-          <button class="code-tab" data-panel="crop-html-panel">index.html</button>
-        </div>
-        <pre class="code-out" id="crop-css-panel"></pre>
-        <pre class="code-out" id="crop-html-panel" hidden></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Use <code>overflow:hidden</code> on the <code>.box</code> parent to crop a child image to a fixed box, or to clip <code>border-radius</code> correctly.</li>
-          <li>Give the <code>&lt;img&gt;</code> <code>width:100%; height:100%; object-fit:cover</code> so it fills the box while keeping its aspect ratio, cropping any overflow.</li>
-          <li>Prefer <code>display:flow-root</code> over the old <code>overflow:hidden</code> float-containment hack — same effect, no accidental clipping.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't set <code>text-overflow:ellipsis</code> alone and expect it to work — without <code>overflow:hidden</code> + <code>white-space:nowrap</code> it silently does nothing.</li>
-          <li>Don't use <code>object-fit:contain</code> when you actually want a filled, cropped thumbnail — it letterboxes instead of cropping.</li>
-          <li>Don't wrap a dropdown/tooltip in a parent that has <code>overflow:hidden</code> — it will clip the dropdown even at <code>z-index:9999</code>.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 07 BACKGROUND ============ -->
-    <section class="module" id="background">
-      <div class="module-head"><span class="module-num">07</span><h2>Backgrounds</h2></div>
-      <p class="module-desc"><code>background-size:cover</code> fills the box and may crop; <code>contain</code> fits entirely inside and may letterbox. Gradients are just another <code>background-image</code> value.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-bg"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame"><div class="bg-box" id="bg-box"><span>label</span></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="bg-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Set a <code>background-color</code> fallback for whenever the image is slow, missing, or transparent.</li>
-          <li>Use <code>background-clip:text</code> + transparent text color for gradient headline text.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't use <code>background-attachment:fixed</code> heavily on mobile — support and performance are inconsistent.</li>
-          <li>Don't forget <code>position/size</code> must be written together with the <code>/</code> in the shorthand — order matters there specifically.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 08 TEXT ============ -->
-    <section class="module" id="text">
-      <div class="module-head"><span class="module-num">08</span><h2>Text Alignment &amp; Decoration</h2></div>
-      <p class="module-desc"><code>text-align</code> works on block containers; <code>text-decoration</code> is shorthand for line, color, style, and thickness.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-text"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame"><p class="text-p" id="text-p">Reference sheets teach recognition. Practicing with real, live controls teaches recall — the thing that actually sticks under pressure.</p></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="text-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Set <code>text-underline-offset</code> on links so underlines don't collide with descenders like g, y, p.</li>
-          <li>Leave <code>text-decoration-skip-ink:auto</code> (the default) so underlines skip through letter descenders cleanly.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't use <code>text-align:justify</code> carelessly on narrow columns — it can create ugly "rivers" of whitespace.</li>
-          <li>Don't forget <code>text-align</code> needs a block-level container to have any effect.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 09 PSEUDO ============ -->
-    <section class="module" id="pseudo">
-      <div class="module-head"><span class="module-num">11</span><h2>Pseudo-elements</h2></div>
-      <p class="module-desc">Double-colon (<code>::</code>) styles a generated <em>part</em> of an element without adding extra markup — a bullet, a corner badge, selected text, placeholder text, a drop cap. Five real ones, all controllable below.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-pseudo"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame" style="flex-direction:column;align-items:stretch;gap:16px;">
-              <ul class="pseudo-list style-star" id="pseudo-list">
-                <li>Set up the project</li>
-                <li>Write the component</li>
-                <li>Ship it</li>
-              </ul>
-              <div class="pseudo-card" id="pseudo-card">Card <span class="pseudo-badge-label">(::after badge)</span></div>
-              <p class="pseudo-firstletter" id="pseudo-firstp">Drop caps use ::first-letter. Try selecting this sentence to see ::selection too.</p>
-              <input class="pseudo-input" id="pseudo-input" type="text" placeholder="::placeholder text lives here">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="pseudo-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Use <code>::marker</code> to style a list bullet/number directly, instead of hiding it and faking one with <code>::before</code>.</li>
-          <li>Use <code>::after</code> for small decorative additions (badges, icons, corner ribbons) that aren't real content — keeps markup clean.</li>
-          <li>Use <code>counter-reset</code> + <code>counter-increment</code> for auto-numbering that doesn't depend on <code>&lt;ol&gt;</code>.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't forget <code>content:""</code> is required on <code>::before</code>/<code>::after</code> — without it, nothing renders even if every other property is set.</li>
-          <li>Don't put real, meaningful content in <code>::before</code>/<code>::after</code> — generated content isn't selectable, copyable, or reliably read by screen readers.</li>
-          <li>Don't confuse pseudo-<em>elements</em> (<code>::before</code>, generated content) with pseudo-<em>classes</em> (<code>:hover</code>, a state) — single vs. double colon.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 12 CASCADE & CUSTOM PROPERTIES ============ -->
-    <section class="module" id="cascade">
-      <div class="module-head"><span class="module-num">12</span><h2>Cascade, Specificity &amp; Custom Properties</h2></div>
-      <p class="module-desc">When two rules target the same element, the more <strong style="color:var(--ink);">specific</strong> selector wins — not the one written last (unless they're tied). Pick a selector type for each competing rule below and watch which one actually takes effect.</p>
-
-      <div class="module-grid">
-        <div>
-          <div class="controls" id="ctrl-spec-a"></div>
-          <div class="controls" id="ctrl-spec-b" style="margin-top:14px;"></div>
-        </div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame"><div class="spec-box" id="spec-box">Which rule wins?</div></div>
-            <div class="stage-readout" id="spec-readout">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="spec-css"></pre>
-      </div>
-
-      <h3 style="font-family:var(--display);font-size:1.05rem;margin:30px 0 4px;color:var(--ink);">Custom properties (CSS variables)</h3>
-      <p class="module-desc" style="margin-top:6px;">Defined once on <code>:root</code>, read anywhere with <code>var(--name)</code> — and unlike Sass variables, they're live in the browser and can even be changed from JavaScript.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-customprops"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame"><div class="token-card" id="token-card">Card using <code>var(--space)</code>, <code>var(--radius)</code>, <code>var(--shadow)</code></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="tokens-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Reach for a class selector as your default — it's specific enough to override element defaults, without being as hard to override later as an ID.</li>
-          <li>Put shared values (spacing, radius, shadow, color) in <code>:root</code> custom properties instead of copy-pasting the same value across a stylesheet.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't reach for <code>!important</code> to "win" a specificity fight — it wins over <em>everything</em>, including future rules, and is hard to override again later except with another <code>!important</code>.</li>
-          <li>Don't style with IDs (<code>#header</code>) — high specificity makes them a pain to override from anywhere else, even a more sensible class rule.</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 13 SEMANTIC ELEMENTS ============ -->
-    <section class="module" id="semantic">
-      <div class="module-head"><span class="module-num">13</span><h2>Semantic Elements</h2></div>
-      <p class="module-desc">Semantic tags (<code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code>) look identical to <code>&lt;div&gt;</code>s visually — the difference is entirely in the <strong style="color:var(--ink);">accessibility tree</strong>. Switch the toggle to see what a screen reader gets either way.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-semantic"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame" style="align-items:stretch;">
-              <div class="sem-stage" id="semantic-stage"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">index.html</button></div>
-        <pre class="code-out" id="semantic-html"></pre>
-      </div>
-
-      <div id="semantic-a11y" style="margin-top:14px;"></div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Use exactly one <code>&lt;main&gt;</code> per page — it's the skip-to-content target for assistive tech.</li>
-          <li>Give a <code>&lt;section&gt;</code> a heading (<code>&lt;h2&gt;</code>+) to be meaningful; otherwise it's often better as a plain <code>&lt;div&gt;</code>.</li>
-          <li>Add <code>aria-label</code> when the visual design has no visible label a screen reader could use — e.g. multiple <code>&lt;nav&gt;</code> elements.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't wrap everything in <code>&lt;div&gt;</code>s purely out of habit — you lose landmark navigation for free, for zero visual cost to switch.</li>
-          <li>Don't use <code>&lt;article&gt;</code> for something that only makes sense inside its page (use it for content that could stand alone if republished, like a blog post or comment).</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <!-- ============ 14 POSITION ============ -->
-    <section class="module" id="position">
-      <div class="module-head"><span class="module-num">14</span><h2>Position — static, relative, absolute, fixed, sticky</h2></div>
-      <p class="module-desc"><code>position</code> decides what an element's <code>top</code>/<code>right</code>/<code>bottom</code>/<code>left</code> offsets are measured <em>from</em>. <code>static</code> ignores them entirely. <code>relative</code> shifts the element from its own normal spot but leaves a hole behind. <code>absolute</code> jumps out of the flow and measures from its nearest ancestor that isn't <code>static</code> (falling back to the page). <code>fixed</code> does the same thing but always measures from the browser viewport, so it stays put even while you scroll. The photo below is a real <code>&lt;img&gt;</code>, not a placeholder box — watch exactly where it lands as you change the settings.</p>
-
-      <div class="module-grid">
-        <div>
-          <div class="controls" id="ctrl-pos-target"></div>
-          <div class="controls" id="ctrl-pos-ancestor" style="margin-top:14px;"></div>
-        </div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame" style="align-items:stretch;min-height:300px;">
-              <div class="pos-container" id="pos-container">
-                <p class="pos-flow">Normal-flow paragraph #1, above the target.</p>
-                <div class="pos-ghost">a plain sibling box (stays in flow)</div>
-                <div class="pos-target" id="pos-target">
-                  <img id="pos-img" src="https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg" alt="Demo avatar" onerror="imgFallback(this)">
-                  <span class="pos-tag" id="pos-tag">relative</span>
+      <!-- ---- STACK LAB 1/5 — grid-column, single item ---- -->
+      <div class="minilab">
+        <div class="minilab-head"><span class="minilab-tag">Grid Stacking · Lab 1/5</span><h3>grid-column — placing one item by line number</h3></div>
+        <p class="minilab-desc">Grid lines are numbered starting at 1, not the cells between them. <code>grid-column: 1 / 3</code> means "start at line 1, end at line 3" — spanning two column tracks. Nothing overlaps yet; this is just about getting comfortable with line-number placement before we stack a second item on top.</p>
+        <div class="module-grid">
+          <div class="controls" id="ctrl-stack-solo-col"></div>
+          <div>
+            <div class="stage">
+              <div class="stage-frame">
+                <div class="outputlab-label">Output Lab</div>
+                <div class="stack-parent" id="stack-solo-col-parent">
+                  <div class="stack-child stack-1" id="stack-solo-col-item">item</div>
                 </div>
-                <p class="pos-flow">Normal-flow paragraph #2, below the target.</p>
-              </div>
-            </div>
-            <div class="stage-readout" id="pos-readout">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="pos-css"></pre>
-      </div>
-
-      <h3 style="font-family:var(--display);font-size:1.05rem;margin:30px 0 4px;color:var(--ink);">A real layout that needs it: badge + caption over a photo</h3>
-      <p class="module-desc" style="margin-top:6px;">This is the pattern behind almost every "sale" ribbon or image caption on the web: the card gets <code>position:relative</code> (so it becomes the "nearest positioned ancestor"), and the badge/caption get <code>position:absolute</code> so they lock to its corners instead of the whole page.</p>
-
-      <div class="module-grid">
-        <div class="controls" id="ctrl-pos-badge"></div>
-        <div>
-          <div class="stage">
-            <div class="stage-frame">
-              <div class="pos-badge-card" id="pos-badge-card">
-                <img id="pos-badge-img" src="https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg" alt="Demo product photo" onerror="imgFallback(this)">
-                <span class="pos-badge" id="pos-badge">-20%</span>
-                <span class="pos-caption" id="pos-caption">Caption pinned to the photo</span>
               </div>
             </div>
           </div>
         </div>
+        <div class="code-panel">
+          <div class="code-tabs"><button class="code-tab active">style.css</button></div>
+          <pre class="code-out" id="stack-solo-col-css"></pre>
+        </div>
       </div>
 
-      <div class="code-panel">
-        <div class="code-tabs"><button class="code-tab active">style.css</button></div>
-        <pre class="code-out" id="pos-badge-css"></pre>
-      </div>
-
-      <div class="principles">
-        <div class="p-col do"><h3>Do</h3><ul>
-          <li>Pair <code>position:absolute</code> children with a <code>position:relative</code> (or <code>sticky</code>/<code>fixed</code>) parent on purpose — that parent becomes the "containing block" the offsets are measured from.</li>
-          <li>Use <code>position:sticky</code> + a <code>top</code> value for section headers or table headers that should stick once they hit the top of their scroll area, then release when their parent scrolls away.</li>
-          <li>Reach for <code>relative</code> with no offsets just to create a positioning context for an absolute child, even if the relative element itself doesn't move.</li>
-        </ul></div>
-        <div class="p-col dont"><h3>Don't</h3><ul>
-          <li>Don't forget an unstyled ancestor chain means <code>absolute</code> falls all the way back to the <code>&lt;html&gt;</code> element — "why is my badge in the corner of the whole page" is almost always a missing <code>position:relative</code> on the parent.</li>
-          <li>Don't use <code>fixed</code> inside a parent that has a <code>transform</code>, <code>filter</code>, or <code>will-change</code> set — any of those quietly turn that parent into the fixed element's containing block, and it stops tracking the viewport.</li>
-          <li>Don't confuse <code>relative</code> with <code>absolute</code> — <code>relative</code> still reserves its original space in the layout (everything else stays put), <code>absolute</code> removes it from flow entirely (siblings collapse into the gap).</li>
-        </ul></div>
-      </div>
-    </section>
-
-    <footer>Interactive companion to the CSS Mastery Guide. Every generated block is real, valid CSS — copy it straight into a stylesheet.</footer>
-  </main>
-</div>
-
-<div class="toast" id="toast">Copied</div>
-<style id="pseudo-dynamic"></style>
-
-<script>
-/* ---------- helpers ---------- */
-function el(id){ return document.getElementById(id); }
-/* If a photo URL is blocked, slow, or dead, swap to a generated placeholder
-   so you always see *something* instead of a blank box. */
-function imgFallback(imgEl){
-  if(imgEl.dataset.fallenBack) return;
-  imgEl.dataset.fallenBack = '1';
-  const w = imgEl.naturalWidth || imgEl.width || 400;
-  const h = imgEl.naturalHeight || imgEl.height || 300;
-  imgEl.src = `https://placehold.co/${Math.max(w,80)}x${Math.max(h,80)}/122036/5fd3ff?text=image`;
-}
-function makeSelect(container, groupLabel, name, options, initial, onChange){
-  let group = container.querySelector('[data-group="'+groupLabel+'"]');
-  if(!group){
-    group = document.createElement('div');
-    group.className = 'ctrl-group';
-    group.dataset.group = groupLabel;
-    const h = document.createElement('div');
-    h.className = 'ctrl-group-label';
-    h.textContent = groupLabel;
-    group.appendChild(h);
-    container.appendChild(group);
-  }
-  const row = document.createElement('label');
-  row.className = 'ctrl-row';
-  const span = document.createElement('span');
-  span.className = 'ctrl-name';
-  span.textContent = name;
-  const select = document.createElement('select');
-  options.forEach(opt=>{
-    const o = document.createElement('option');
-    o.value = opt.v;
-    o.textContent = opt.l || opt.v;
-    if(opt.v === initial) o.selected = true;
-    select.appendChild(o);
-  });
-  select.addEventListener('change', ()=> onChange(select.value));
-  row.appendChild(span); row.appendChild(select);
-  group.appendChild(row);
-  return select;
-}
-function highlight(cssText){
-  return cssText
-    .replace(/([.#][\w-]+|\*)(\s*\{)/g, '<span class="sel">$1</span>$2')
-    .replace(/^(\s*)([a-z-]+)(:)/gm, '$1<span class="kw">$2</span>$3')
-    .replace(/(:\s*)([^;]+)(;)/g, '$1<span class="val">$2</span>$3');
-}
-function setCode(id, cssText){ el(id).innerHTML = highlight(cssText); }
-let toastTimer;
-function toast(){
-  const t = el('toast'); t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 1000);
-}
-document.querySelectorAll('.code-panel').forEach(panel=>{
-  const tabsRow = panel.querySelector('.code-tabs');
-  const tabs = Array.from(panel.querySelectorAll('.code-tab'));
-  const panes = Array.from(panel.querySelectorAll('pre.code-out'));
-  tabs.forEach((tab, i)=>{
-    tab.addEventListener('click', ()=>{
-      tabs.forEach(t=>t.classList.remove('active'));
-      panes.forEach(p=>p.hidden = true);
-      tab.classList.add('active');
-      const targetId = tab.dataset.panel;
-      const pane = targetId ? el(targetId) : panes[i];
-      if(pane) pane.hidden = false;
-    });
-  });
-  const btn = document.createElement('button');
-  btn.className = 'copy-btn'; btn.textContent = 'Copy';
-  btn.addEventListener('click', ()=>{
-    const visible = panes.find(p=>!p.hidden) || panes[0];
-    navigator.clipboard.writeText(visible.innerText).then(toast);
-  });
-  tabsRow.appendChild(btn);
-});
-
-/* ---------- 01 box model ---------- */
-(function(){
-  const box = el('bm-box');
-  const ctrl = el('ctrl-boxmodel');
-  const state = { boxSizing:'border-box', width:'220px', height:'110px', padding:'16px', border:'1px solid #5fd3ff', radius:'6px', margin:'16px' };
-  function apply(){
-    box.style.boxSizing = state.boxSizing;
-    box.style.width = state.width;
-    box.style.height = state.height;
-    box.style.padding = state.padding;
-    box.style.border = state.border;
-    box.style.borderRadius = state.radius;
-    box.style.margin = state.margin;
-    requestAnimationFrame(()=>{
-      const r = box.getBoundingClientRect();
-      el('bm-readout').textContent = 'Rendered size: ' + Math.round(r.width) + ' × ' + Math.round(r.height) + 'px  (box-sizing: ' + state.boxSizing + ')';
-    });
-    setCode('bm-css',
-`.box {
-  box-sizing: ${state.boxSizing};
-  width: ${state.width};
-  height: ${state.height};
-  padding: ${state.padding};
-  border: ${state.border};
-  border-radius: ${state.radius};
-  margin: ${state.margin};
-}`);
-  }
-  makeSelect(ctrl, 'Parent', 'box-sizing', [
-    {v:'border-box', l:'border-box (recommended)'}, {v:'content-box', l:'content-box (default)'}
-  ], state.boxSizing, v=>{ state.boxSizing=v; apply(); });
-  makeSelect(ctrl, 'Parent', 'width', [
-    {v:'160px'},{v:'220px'},{v:'300px'},{v:'fit-content'}
-  ], state.width, v=>{ state.width=v; apply(); });
-  makeSelect(ctrl, 'Parent', 'height', [
-    {v:'80px'},{v:'110px'},{v:'160px'},{v:'auto'}
-  ], state.height, v=>{ state.height=v; apply(); });
-  makeSelect(ctrl, 'Parent', 'padding', [
-    {v:'8px'},{v:'16px'},{v:'24px'},{v:'40px'}
-  ], state.padding, v=>{ state.padding=v; apply(); });
-  makeSelect(ctrl, 'Parent', 'border', [
-    {v:'1px solid #5fd3ff', l:'1px solid'},{v:'4px dashed #ffb454', l:'4px dashed'},{v:'0', l:'none'},{v:'6px solid #ff7a90', l:'6px solid (thick)'}
-  ], state.border, v=>{ state.border=v; apply(); });
-  makeSelect(ctrl, 'Parent', 'border-radius', [
-    {v:'0'},{v:'6px'},{v:'16px'},{v:'50%'}
-  ], state.radius, v=>{ state.radius=v; apply(); });
-  makeSelect(ctrl, 'Parent', 'margin', [
-    {v:'0'},{v:'8px'},{v:'16px'},{v:'40px'}
-  ], state.margin, v=>{ state.margin=v; apply(); });
-  apply();
-})();
-
-/* ---------- 02 display ---------- */
-(function(){
-  const chip = el('disp-target');
-  const ctrl = el('ctrl-display');
-  const state = { display:'inline-block', width:'auto', height:'auto', visibility:'visible' };
-  function apply(){
-    chip.style.display = state.display;
-    chip.style.width = state.width;
-    chip.style.height = state.height;
-    chip.style.visibility = state.visibility;
-    el('disp-readout').textContent = state.display === 'none'
-      ? 'display:none — element removed from layout, no space reserved.'
-      : state.visibility === 'hidden'
-        ? 'visibility:hidden — invisible, but its space is still reserved.'
-        : 'Visible and in normal flow.';
-    setCode('disp-css',
-`.target {
-  display: ${state.display};
-  width: ${state.width};
-  height: ${state.height};
-  visibility: ${state.visibility};
-}`);
-  }
-  makeSelect(ctrl, 'Target chip', 'display', [
-    {v:'inline'},{v:'inline-block'},{v:'block'},{v:'none'}
-  ], state.display, v=>{ state.display=v; apply(); });
-  makeSelect(ctrl, 'Target chip', 'width', [
-    {v:'auto'},{v:'140px'},{v:'220px'}
-  ], state.width, v=>{ state.width=v; apply(); });
-  makeSelect(ctrl, 'Target chip', 'height', [
-    {v:'auto'},{v:'50px'},{v:'80px'}
-  ], state.height, v=>{ state.height=v; apply(); });
-  makeSelect(ctrl, 'Target chip', 'visibility', [
-    {v:'visible'},{v:'hidden'}
-  ], state.visibility, v=>{ state.visibility=v; apply(); });
-  apply();
-})();
-
-/* ---------- 03 flexbox ---------- */
-(function(){
-  const parent = el('flex-parent');
-  const childB = el('flex-child-b');
-  const ctrlP = el('ctrl-flex-parent');
-  const ctrlC = el('ctrl-flex-child');
-  const axisBox = el('axis-indicator');
-  const state = { direction:'row', justify:'flex-start', align:'stretch', wrap:'wrap', alignContent:'space-between', gap:'10px', selfAlign:'auto', grow:'0', shrink:'1' };
-  function renderAxis(){
-    const isRow = state.direction === 'row' || state.direction === 'row-reverse';
-    const mainLabel = 'main axis (justify-*)';
-    const crossLabel = 'cross axis (align-*)';
-    const svg = isRow
-      ? `<svg viewBox="0 0 320 100" width="320" height="100">
-          <line x1="20" y1="50" x2="230" y2="50" stroke="var(--cyan)" stroke-width="2"/>
-          <polygon points="230,50 220,45 220,55" fill="var(--cyan)"/>
-          <text x="125" y="38" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--cyan)">${mainLabel}${state.direction==='row-reverse' ? ' (reversed)' : ''}</text>
-          <line x1="270" y1="15" x2="270" y2="85" stroke="var(--amber)" stroke-width="2"/>
-          <polygon points="270,85 265,75 275,75" fill="var(--amber)"/>
-          <text x="270" y="98" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--amber)">cross</text>
-        </svg>`
-      : `<svg viewBox="0 0 200 130" width="200" height="130">
-          <line x1="45" y1="115" x2="45" y2="20" stroke="var(--cyan)" stroke-width="2"/>
-          <polygon points="45,20 40,30 50,30" fill="var(--cyan)"/>
-          <text x="45" y="12" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--cyan)">main${state.direction==='column-reverse' ? ' (rev)' : ''}</text>
-          <line x1="80" y1="70" x2="185" y2="70" stroke="var(--amber)" stroke-width="2"/>
-          <polygon points="185,70 175,65 175,75" fill="var(--amber)"/>
-          <text x="175" y="55" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--amber)">cross axis (align-*)</text>
-        </svg>`;
-    axisBox.innerHTML = svg;
-  }
-  function apply(){
-    parent.style.flexDirection = state.direction;
-    parent.style.justifyContent = state.justify;
-    parent.style.alignItems = state.align;
-    parent.style.flexWrap = state.wrap;
-    parent.style.alignContent = state.alignContent;
-    parent.style.gap = state.gap;
-    childB.style.alignSelf = state.selfAlign;
-    childB.style.flexGrow = state.grow;
-    childB.style.flexShrink = state.shrink;
-    renderAxis();
-    setCode('flex-css',
-`.flex-parent {
-  display: flex;
-  flex-direction: ${state.direction};
-  justify-content: ${state.justify};
-  align-items: ${state.align};
-  flex-wrap: ${state.wrap};
-  align-content: ${state.alignContent}; /* only visible with flex-wrap: wrap + multiple lines */
-  gap: ${state.gap};
-}
-
-.child-b {
-  align-self: ${state.selfAlign};
-  flex-grow: ${state.grow};
-  flex-shrink: ${state.shrink};
-}`);
-  }
-  makeSelect(ctrlP, 'Parent (.flex-parent)', 'flex-direction', [
-    {v:'row'},{v:'row-reverse'},{v:'column'},{v:'column-reverse'}
-  ], state.direction, v=>{ state.direction=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.flex-parent)', 'justify-content', [
-    {v:'flex-start'},{v:'center'},{v:'flex-end'},{v:'space-between'},{v:'space-around'},{v:'space-evenly'}
-  ], state.justify, v=>{ state.justify=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.flex-parent)', 'align-items', [
-    {v:'stretch'},{v:'flex-start'},{v:'center'},{v:'flex-end'},{v:'baseline'}
-  ], state.align, v=>{ state.align=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.flex-parent)', 'flex-wrap', [
-    {v:'nowrap'},{v:'wrap'},{v:'wrap-reverse'}
-  ], state.wrap, v=>{ state.wrap=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.flex-parent)', 'align-content', [
-    {v:'flex-start'},{v:'center'},{v:'flex-end'},{v:'space-between'},{v:'space-around'},{v:'stretch'}
-  ], state.alignContent, v=>{ state.alignContent=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.flex-parent)', 'gap', [
-    {v:'0'},{v:'10px'},{v:'24px'}
-  ], state.gap, v=>{ state.gap=v; apply(); });
-  makeSelect(ctrlC, 'Child B override', 'align-self', [
-    {v:'auto'},{v:'flex-start'},{v:'center'},{v:'flex-end'},{v:'stretch'}
-  ], state.selfAlign, v=>{ state.selfAlign=v; apply(); });
-  makeSelect(ctrlC, 'Child B override', 'flex-grow', [
-    {v:'0'},{v:'1'},{v:'2'}
-  ], state.grow, v=>{ state.grow=v; apply(); });
-  makeSelect(ctrlC, 'Child B override', 'flex-shrink', [
-    {v:'0'},{v:'1'},{v:'2'}
-  ], state.shrink, v=>{ state.shrink=v; apply(); });
-  apply();
-})();
-
-/* ---------- 04 grid ---------- */
-(function(){
-  const parent = el('grid-parent');
-  const item1 = el('grid-item-1');
-  const item2 = el('grid-item-2');
-  const ctrlP = el('ctrl-grid-parent');
-  const ctrlC = el('ctrl-grid-child');
-  const state = {
-    columns:'repeat(4, 1fr)',
-    rows:'auto',
-    gap:'10px', justifyItems:'stretch', alignItems:'stretch',
-    autoFlow:'row', autoRows:'auto',
-    span:'span 1', justifySelf:'stretch', alignSelf:'stretch'
-  };
-  function apply(){
-    parent.style.gridTemplateColumns = state.columns;
-    parent.style.gridTemplateRows = state.rows;
-    parent.style.gap = state.gap;
-    parent.style.justifyItems = state.justifyItems;
-    parent.style.alignItems = state.alignItems;
-    parent.style.gridAutoFlow = state.autoFlow;
-    parent.style.gridAutoRows = state.autoRows;
-    item1.style.gridColumn = state.span;
-    item2.style.justifySelf = state.justifySelf;
-    item2.style.alignSelf = state.alignSelf;
-    const note = state.columns.includes('auto-fill')
-      ? '/* auto-fill: keeps empty tracks, items stay their set size */'
-      : state.columns.includes('auto-fit')
-        ? '/* auto-fit: collapses empty tracks, items stretch to fill the row */'
-        : '';
-    setCode('grid-css',
-`.grid-parent {
-  display: grid;
-  grid-template-columns: ${state.columns};${note ? '  ' + note : ''}
-  grid-template-rows: ${state.rows};
-  grid-auto-flow: ${state.autoFlow};
-  grid-auto-rows: ${state.autoRows};
-  gap: ${state.gap};
-  justify-items: ${state.justifyItems};
-  align-items: ${state.alignItems};
-}
-
-.item-1 { grid-column: ${state.span}; }
-.item-2 {
-  justify-self: ${state.justifySelf};
-  align-self: ${state.alignSelf};
-}`);
-  }
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'grid-template-columns', [
-    {v:'repeat(4, 1fr)', l:'repeat(4, 1fr)'},
-    {v:'1fr 2fr 1fr 1fr', l:'1fr 2fr 1fr 1fr'},
-    {v:'repeat(3, 90px)', l:'repeat(3, 90px)'},
-    {v:'repeat(auto-fill, 90px)', l:'auto-fill, 90px'},
-    {v:'repeat(auto-fit, minmax(90px, 1fr))', l:'auto-fit, minmax(90px,1fr)'}
-  ], state.columns, v=>{ state.columns=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'grid-template-rows', [
-    {v:'auto'},{v:'80px 80px 80px'},{v:'1fr 1fr'}
-  ], state.rows, v=>{ state.rows=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'gap', [
-    {v:'0'},{v:'10px'},{v:'20px'}
-  ], state.gap, v=>{ state.gap=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'justify-items', [
-    {v:'stretch'},{v:'start'},{v:'center'},{v:'end'}
-  ], state.justifyItems, v=>{ state.justifyItems=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'align-items', [
-    {v:'stretch'},{v:'start'},{v:'center'},{v:'end'}
-  ], state.alignItems, v=>{ state.alignItems=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'grid-auto-flow', [
-    {v:'row'},{v:'column'},{v:'row dense'},{v:'column dense'}
-  ], state.autoFlow, v=>{ state.autoFlow=v; apply(); });
-  makeSelect(ctrlP, 'Parent (.grid-parent)', 'grid-auto-rows', [
-    {v:'auto'},{v:'70px'},{v:'100px'}
-  ], state.autoRows, v=>{ state.autoRows=v; apply(); });
-  makeSelect(ctrlC, 'Item 1 override', 'grid-column', [
-    {v:'span 1'},{v:'span 2'},{v:'span 3'}
-  ], state.span, v=>{ state.span=v; apply(); });
-  makeSelect(ctrlC, 'Item 2 override', 'justify-self', [
-    {v:'stretch'},{v:'start'},{v:'center'},{v:'end'}
-  ], state.justifySelf, v=>{ state.justifySelf=v; apply(); });
-  makeSelect(ctrlC, 'Item 2 override', 'align-self', [
-    {v:'stretch'},{v:'start'},{v:'center'},{v:'end'}
-  ], state.alignSelf, v=>{ state.alignSelf=v; apply(); });
-  apply();
-})();
-
-/* ---------- 05 grid stacking ---------- */
-(function(){
-  const c1 = el('stack-child-1');
-  const c2 = el('stack-child-2');
-  const ctrl1 = el('ctrl-stack-1');
-  const ctrl2 = el('ctrl-stack-2');
-  const state = {
-    col1:'1 / 3', row1:'1 / 2', z1:'1',
-    col2:'2 / 4', row2:'1 / 2', z2:'2', opacity2:'0.5'
-  };
-  function apply(){
-    c1.style.gridColumn = state.col1;
-    c1.style.gridRow = state.row1;
-    c1.style.zIndex = state.z1;
-    c2.style.gridColumn = state.col2;
-    c2.style.gridRow = state.row2;
-    c2.style.zIndex = state.z2;
-    c2.style.opacity = state.opacity2;
-    setCode('stack-css',
-`.stack-parent {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 90px);
-  gap: 0;
-}
-
-.child-1 {
-  background-color: #5fd3ff;
-  grid-column: ${state.col1};
-  grid-row: ${state.row1};
-  z-index: ${state.z1};
-}
-
-.child-2 {
-  background-color: #ff7a90;
-  grid-column: ${state.col2};
-  grid-row: ${state.row2};
-  z-index: ${state.z2};
-  opacity: ${state.opacity2};
-}`);
-  }
-  makeSelect(ctrl1, 'child-1 (blue)', 'grid-column', [
-    {v:'1 / 3'},{v:'1 / 2'},{v:'2 / 4'}
-  ], state.col1, v=>{ state.col1=v; apply(); });
-  makeSelect(ctrl1, 'child-1 (blue)', 'grid-row', [
-    {v:'1 / 2'},{v:'1 / 3'}
-  ], state.row1, v=>{ state.row1=v; apply(); });
-  makeSelect(ctrl1, 'child-1 (blue)', 'z-index', [
-    {v:'1'},{v:'2'},{v:'3'}
-  ], state.z1, v=>{ state.z1=v; apply(); });
-  makeSelect(ctrl2, 'child-2 (pink)', 'grid-column', [
-    {v:'2 / 4'},{v:'1 / 3'},{v:'3 / 5'}
-  ], state.col2, v=>{ state.col2=v; apply(); });
-  makeSelect(ctrl2, 'child-2 (pink)', 'grid-row', [
-    {v:'1 / 2'},{v:'1 / 3'}
-  ], state.row2, v=>{ state.row2=v; apply(); });
-  makeSelect(ctrl2, 'child-2 (pink)', 'z-index', [
-    {v:'2'},{v:'1'},{v:'3'}
-  ], state.z2, v=>{ state.z2=v; apply(); });
-  makeSelect(ctrl2, 'child-2 (pink)', 'opacity', [
-    {v:'1'},{v:'0.7'},{v:'0.5'},{v:'0.3'}
-  ], state.opacity2, v=>{ state.opacity2=v; apply(); });
-  apply();
-})();
-
-/* ---------- 06 bento grids ---------- */
-(function(){
-  const grid = el('bento-grid');
-  const ctrl = el('ctrl-bento');
-  const LAYOUTS = {
-    classic: '"a1 a1 a2 a3"\n    "a1 a1 a4 a4"\n    "a5 a5 a4 a4"',
-    banner:  '"a1 a2 a2 a2"\n    "a1 a3 a4 a5"\n    "a1 a3 a4 a5"',
-    stacked: '"a1 a1 a1 a1"\n    "a2 a3 a4 a5"'
-  };
-  const PALETTES = {
-    ocean: ['linear-gradient(135deg,#5fd3ff,#0a121e)','linear-gradient(135deg,#3aa0d8,#0a121e)','linear-gradient(135deg,#7fe0a7,#0a121e)','linear-gradient(135deg,#5fd3ff,#122036)','linear-gradient(135deg,#3aa0d8,#122036)'],
-    sunset: ['linear-gradient(135deg,#ffb454,#0a121e)','linear-gradient(135deg,#ff7a90,#0a121e)','linear-gradient(135deg,#ffb454,#122036)','linear-gradient(135deg,#ff9d5c,#0a121e)','linear-gradient(135deg,#ff7a90,#122036)'],
-    mono:   ['linear-gradient(135deg,#2a3f5a,#0a121e)','linear-gradient(135deg,#1c2c42,#0a121e)','linear-gradient(135deg,#334a68,#0a121e)','linear-gradient(135deg,#2a3f5a,#122036)','linear-gradient(135deg,#1c2c42,#122036)']
-  };
-  const state = { layout:'classic', palette:'ocean', gap:'10px' };
-  function apply(){
-    grid.style.gridTemplateAreas = LAYOUTS[state.layout];
-    grid.style.gap = state.gap;
-    const colors = PALETTES[state.palette];
-    ['a1','a2','a3','a4','a5'].forEach((a,i)=>{
-      const tile = grid.querySelector('.bt-'+a);
-      if(tile) tile.style.background = colors[i];
-    });
-    setCode('bento-css',
-`.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(3, 90px);
-  gap: ${state.gap};
-  grid-template-areas:
-    ${LAYOUTS[state.layout]};
-}
-
-.tile-a1 { grid-area: a1; background: ${colors[0]}; }
-.tile-a2 { grid-area: a2; background: ${colors[1]}; }
-.tile-a3 { grid-area: a3; background: ${colors[2]}; }
-.tile-a4 { grid-area: a4; background: ${colors[3]}; }
-.tile-a5 { grid-area: a5; background: ${colors[4]}; }`);
-  }
-  makeSelect(ctrl, 'Layout', 'grid-template-areas', [
-    {v:'classic', l:'classic (big hero)'},{v:'banner', l:'wide top banner'},{v:'stacked', l:'full-width header'}
-  ], state.layout, v=>{ state.layout=v; apply(); });
-  makeSelect(ctrl, 'Style', 'gradient palette', [
-    {v:'ocean', l:'ocean (cyan/green)'},{v:'sunset', l:'sunset (amber/pink)'},{v:'mono', l:'monochrome navy'}
-  ], state.palette, v=>{ state.palette=v; apply(); });
-  makeSelect(ctrl, 'Style', 'gap', [
-    {v:'6px'},{v:'10px'},{v:'18px'}
-  ], state.gap, v=>{ state.gap=v; apply(); });
-  apply();
-})();
-
-/* ---------- 07 shadow ---------- */
-(function(){
-  const card = el('shadow-card');
-  const ctrl = el('ctrl-shadow');
-  const state = { x:'0px', y:'4px', blur:'12px', spread:'0px', color:'rgba(0,0,0,0.35)', inset:'' };
-  function apply(){
-    const shadow = `${state.inset}${state.x} ${state.y} ${state.blur} ${state.spread} ${state.color}`.trim();
-    card.style.boxShadow = shadow;
-    setCode('shadow-css',
-`.card {
-  box-shadow: ${shadow};
-}`);
-  }
-  makeSelect(ctrl, 'box-shadow', 'offset-x', [{v:'-6px'},{v:'0px'},{v:'6px'}], state.x, v=>{ state.x=v; apply(); });
-  makeSelect(ctrl, 'box-shadow', 'offset-y', [{v:'0px'},{v:'4px'},{v:'10px'}], state.y, v=>{ state.y=v; apply(); });
-  makeSelect(ctrl, 'box-shadow', 'blur', [{v:'0px'},{v:'12px'},{v:'28px'}], state.blur, v=>{ state.blur=v; apply(); });
-  makeSelect(ctrl, 'box-shadow', 'spread', [{v:'-4px'},{v:'0px'},{v:'6px'}], state.spread, v=>{ state.spread=v; apply(); });
-  makeSelect(ctrl, 'box-shadow', 'color', [
-    {v:'rgba(0,0,0,0.35)', l:'dark 35%'},{v:'rgba(95,211,255,0.45)', l:'cyan 45%'},{v:'rgba(255,180,84,0.4)', l:'amber 40%'}
-  ], state.color, v=>{ state.color=v; apply(); });
-  makeSelect(ctrl, 'box-shadow', 'inset', [{v:'', l:'no'},{v:'inset ', l:'yes'}], state.inset, v=>{ state.inset=v; apply(); });
-  apply();
-})();
-
-/* ---------- 08 overflow ---------- */
-(function(){
-  const box = el('ov-box');
-  const ctrl = el('ctrl-overflow');
-  const state = { overflow:'visible', truncate:'off', width:'220px' };
-  function apply(){
-    box.style.width = state.width;
-    if(state.truncate === 'on'){
-      box.style.whiteSpace = 'nowrap';
-      box.style.overflow = 'hidden';
-      box.style.textOverflow = 'ellipsis';
-    } else {
-      box.style.whiteSpace = 'normal';
-      box.style.overflow = state.overflow;
-      box.style.textOverflow = 'clip';
-    }
-    setCode('ov-css', state.truncate === 'on'
-? `.box {
-  width: ${state.width};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}`
-: `.box {
-  width: ${state.width};
-  overflow: ${state.overflow};
-}`);
-  }
-  makeSelect(ctrl, 'Box', 'width', [{v:'160px'},{v:'220px'},{v:'320px'}], state.width, v=>{ state.width=v; apply(); });
-  makeSelect(ctrl, 'Box', 'overflow', [{v:'visible'},{v:'hidden'},{v:'scroll'},{v:'auto'}], state.overflow, v=>{ state.overflow=v; apply(); });
-  makeSelect(ctrl, 'Box', 'ellipsis truncation', [{v:'off'},{v:'on'}], state.truncate, v=>{ state.truncate=v; apply(); });
-  apply();
-})();
-
-/* ---------- 08b image crop (.box > img) ---------- */
-(function(){
-  const box = el('crop-box');
-  const img = el('crop-img');
-  const ctrl = el('ctrl-imgcrop');
-  const IMAGES = {
-    portrait: 'https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg',
-    landscape: 'https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg',
-    architecture: 'https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg'
-  };
-  const state = { src:'portrait', objectFit:'cover', objectPosition:'center', boxHeight:'160px' };
-  function apply(){
-    img.src = IMAGES[state.src];
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = state.objectFit;
-    img.style.objectPosition = state.objectPosition;
-    box.style.height = state.boxHeight;
-    setCode('crop-css-panel',
-`.box {
-  width: 220px;
-  height: ${state.boxHeight};
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.box img {
-  width: 100%;
-  height: 100%;
-  object-fit: ${state.objectFit};
-  object-position: ${state.objectPosition};
-}`);
-    el('crop-html-panel').textContent =
-`<div class="box">
-  <img src="${IMAGES[state.src]}" alt="...">
-</div>`;
-  }
-  makeSelect(ctrl, '<img> source', 'src url', [
-    {v:'portrait', l:'portrait photo'},{v:'landscape', l:'landscape photo'},{v:'architecture', l:'tall architecture photo'}
-  ], state.src, v=>{ state.src=v; apply(); });
-  makeSelect(ctrl, '<img>', 'object-fit', [
-    {v:'cover'},{v:'contain'},{v:'fill'},{v:'none'}
-  ], state.objectFit, v=>{ state.objectFit=v; apply(); });
-  makeSelect(ctrl, '<img>', 'object-position', [
-    {v:'center'},{v:'top'},{v:'bottom'},{v:'left'},{v:'right'}
-  ], state.objectPosition, v=>{ state.objectPosition=v; apply(); });
-  makeSelect(ctrl, '.box', 'height', [
-    {v:'120px'},{v:'160px'},{v:'220px'}
-  ], state.boxHeight, v=>{ state.boxHeight=v; apply(); });
-  apply();
-})();
-
-/* ---------- 09 background ---------- */
-(function(){
-  const box = el('bg-box');
-  const ctrl = el('ctrl-bg');
-  const PHOTOS = {
-    p1: 'https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg',
-    p2: 'https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg',
-    p3: 'https://res.cloudinary.com/dcpqnmdas/image/upload/v1780688733/products/Screenshot_20260602-162959_WhatsApp_xdhtgq.jpg'
-  };
-  const state = { type:'p1', size:'cover', position:'center', repeat:'no-repeat' };
-  function currentImage(){
-    if(state.type === 'linear') return 'linear-gradient(135deg, #5fd3ff, #ffb454)';
-    if(state.type === 'radial') return 'radial-gradient(circle at top left, #5fd3ff, #0a121e)';
-    return `url("${PHOTOS[state.type]}")`;
-  }
-  function apply(){
-    box.style.backgroundColor = '#122036';
-    box.style.backgroundImage = currentImage();
-    box.style.backgroundSize = state.size;
-    box.style.backgroundPosition = state.position;
-    box.style.backgroundRepeat = state.repeat;
-    setCode('bg-css',
-`.box {
-  background-color: #122036;
-  background-image: ${currentImage()};
-  background-size: ${state.size};
-  background-position: ${state.position};
-  background-repeat: ${state.repeat};
-}
-
-/* same result, single shorthand line */
-.box {
-  background: #122036 ${currentImage()} ${state.position} / ${state.size} ${state.repeat};
-}`);
-  }
-  makeSelect(ctrl, 'Box', 'background-image', [
-    {v:'p1', l:'photo url() — portrait'},
-    {v:'p2', l:'photo url() — landscape'},
-    {v:'p3', l:'photo url() — texture'},
-    {v:'linear', l:'linear-gradient()'},
-    {v:'radial', l:'radial-gradient()'}
-  ], state.type, v=>{ state.type=v; apply(); });
-  makeSelect(ctrl, 'Box', 'background-size', [{v:'cover'},{v:'contain'},{v:'100% 100%'}], state.size, v=>{ state.size=v; apply(); });
-  makeSelect(ctrl, 'Box', 'background-position', [{v:'center'},{v:'top left'},{v:'bottom right'}], state.position, v=>{ state.position=v; apply(); });
-  makeSelect(ctrl, 'Box', 'background-repeat', [{v:'no-repeat'},{v:'repeat'},{v:'repeat-x'}], state.repeat, v=>{ state.repeat=v; apply(); });
-  apply();
-})();
-
-/* ---------- 10 text ---------- */
-(function(){
-  const p = el('text-p');
-  const ctrl = el('ctrl-text');
-  const state = { align:'left', line:'none', style:'solid', offset:'0px' };
-  function apply(){
-    p.style.textAlign = state.align;
-    p.style.textDecorationLine = state.line;
-    p.style.textDecorationStyle = state.style;
-    p.style.textUnderlineOffset = state.offset;
-    setCode('text-css',
-`.text {
-  text-align: ${state.align};
-  text-decoration-line: ${state.line};
-  text-decoration-style: ${state.style};
-  text-underline-offset: ${state.offset};
-}`);
-  }
-  makeSelect(ctrl, 'Paragraph', 'text-align', [{v:'left'},{v:'center'},{v:'right'},{v:'justify'}], state.align, v=>{ state.align=v; apply(); });
-  makeSelect(ctrl, 'Paragraph', 'text-decoration-line', [{v:'none'},{v:'underline'},{v:'line-through'},{v:'overline'}], state.line, v=>{ state.line=v; apply(); });
-  makeSelect(ctrl, 'Paragraph', 'text-decoration-style', [{v:'solid'},{v:'dashed'},{v:'dotted'},{v:'wavy'}], state.style, v=>{ state.style=v; apply(); });
-  makeSelect(ctrl, 'Paragraph', 'text-underline-offset', [{v:'0px'},{v:'4px'},{v:'8px'}], state.offset, v=>{ state.offset=v; apply(); });
-  apply();
-})();
-
-/* ---------- 11 pseudo ---------- */
-(function(){
-  const list = el('pseudo-list');
-  const ctrl = el('ctrl-pseudo');
-  const dyn = el('pseudo-dynamic');
-  const state = {
-    markerStyle:'style-star', markerColor:'#ffb454',
-    badge:'on', badgeColor:'#7fe0a7',
-    firstLetter:'on', firstLetterColor:'#ffb454',
-    selectionColor:'#5fd3ff',
-    placeholderStyle:'italic'
-  };
-  function apply(){
-    list.className = 'pseudo-list ' + state.markerStyle;
-    list.style.setProperty('--pseudo-marker', state.markerColor);
-
-    const markerRule = state.markerStyle === 'style-numbered'
-      ? `.list { counter-reset: item; }
-.list li::before {
-  counter-increment: item;
-  content: counter(item) ". ";
-  color: ${state.markerColor};
-}`
-      : state.markerStyle === 'style-star'
-        ? `.list li::before {
-  content: "★ ";
-  color: ${state.markerColor};
-}`
-        : `.list li::before {
-  content: "— ";
-  color: ${state.markerColor};
-}`;
-
-    const badgeRule = state.badge === 'on'
-      ? `.card {
-  position: relative;
-}
-.card::after {
-  content: "NEW";
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: ${state.badgeColor};
-  color: #07130d;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 999px;
-}`
-      : `/* .card::after { display: none; } */`;
-
-    const firstLetterRule = state.firstLetter === 'on'
-      ? `.intro::first-letter {
-  font-size: 2.2em;
-  font-weight: 700;
-  color: ${state.firstLetterColor};
-  float: left;
-  line-height: 0.8;
-  margin-right: 4px;
-}`
-      : `/* ::first-letter off */`;
-
-    const selectionRule =
-`.intro::selection {
-  background: ${state.selectionColor};
-  color: #07130d;
-}`;
-
-    const placeholderRule =
-`.field::placeholder {
-  color: var(--ink-faint);
-  font-style: ${state.placeholderStyle};
-}`;
-
-    dyn.textContent = `
-#pseudo-card::after{ ${state.badge==='on' ? `content:"NEW";position:absolute;top:-8px;right:-8px;background:${state.badgeColor};color:#07130d;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;` : 'content:none;'} }
-#pseudo-firstp::first-letter{ ${state.firstLetter==='on' ? `font-size:2.2em;font-weight:700;color:${state.firstLetterColor};float:left;line-height:0.8;margin-right:4px;` : ''} }
-#pseudo-firstp::selection{ background:${state.selectionColor}; color:#07130d; }
-#pseudo-input::placeholder{ color:var(--ink-faint); font-style:${state.placeholderStyle}; }
-    `;
-
-    setCode('pseudo-css', [markerRule, badgeRule, firstLetterRule, selectionRule, placeholderRule].join('\n\n'));
-  }
-  makeSelect(ctrl, '::marker / ::before', 'marker style', [
-    {v:'style-bullet', l:'dash (fixed color)'},{v:'style-star', l:'star'},{v:'style-numbered', l:'counter numbers'}
-  ], state.markerStyle, v=>{ state.markerStyle=v; apply(); });
-  makeSelect(ctrl, '::marker / ::before', 'marker color', [
-    {v:'#ffb454', l:'amber'},{v:'#5fd3ff', l:'cyan'},{v:'#7fe0a7', l:'green'}
-  ], state.markerColor, v=>{ state.markerColor=v; apply(); });
-  makeSelect(ctrl, '::after (badge)', 'badge', [
-    {v:'on'},{v:'off'}
-  ], state.badge, v=>{ state.badge=v; apply(); });
-  makeSelect(ctrl, '::after (badge)', 'badge color', [
-    {v:'#7fe0a7', l:'green'},{v:'#ff7a90', l:'pink'},{v:'#ffb454', l:'amber'}
-  ], state.badgeColor, v=>{ state.badgeColor=v; apply(); });
-  makeSelect(ctrl, '::first-letter', 'drop cap', [
-    {v:'on'},{v:'off'}
-  ], state.firstLetter, v=>{ state.firstLetter=v; apply(); });
-  makeSelect(ctrl, '::first-letter', 'drop cap color', [
-    {v:'#ffb454', l:'amber'},{v:'#5fd3ff', l:'cyan'},{v:'#7fe0a7', l:'green'}
-  ], state.firstLetterColor, v=>{ state.firstLetterColor=v; apply(); });
-  makeSelect(ctrl, '::selection', 'highlight color', [
-    {v:'#5fd3ff', l:'cyan'},{v:'#ffb454', l:'amber'},{v:'#ff7a90', l:'pink'}
-  ], state.selectionColor, v=>{ state.selectionColor=v; apply(); });
-  makeSelect(ctrl, '::placeholder', 'font-style', [
-    {v:'italic'},{v:'normal'}
-  ], state.placeholderStyle, v=>{ state.placeholderStyle=v; apply(); });
-  apply();
-})();
-
-/* ---------- 12 cascade, specificity & custom properties ---------- */
-(function(){
-  const box = el('spec-box');
-  const readout = el('spec-readout');
-  const ctrlA = el('ctrl-spec-a');
-  const ctrlB = el('ctrl-spec-b');
-  const WEIGHT = { element:1, class:10, id:100, inline:1000 };
-  const SELECTOR = { element:'p', class:'.card-text', id:'#hero-text', inline:'style="..."' };
-  const state = {
-    aType:'class', aColor:'#5fd3ff', aImportant:'no',
-    bType:'id', bColor:'#ffb454', bImportant:'no'
-  };
-  function score(type, important){
-    return WEIGHT[type] + (important === 'yes' ? 100000 : 0);
-  }
-  function apply(){
-    const scoreA = score(state.aType, state.aImportant);
-    const scoreB = score(state.bType, state.bImportant);
-    let winner, winnerColor, tie = false;
-    if(scoreA === scoreB){ tie = true; winner = 'B (written later, ties go to source order)'; winnerColor = state.bColor; }
-    else if(scoreA > scoreB){ winner = 'A'; winnerColor = state.aColor; }
-    else { winner = 'B'; winnerColor = state.bColor; }
-    box.style.color = winnerColor;
-    box.textContent = 'Rule ' + winner + ' wins';
-    readout.textContent = `Rule A: ${SELECTOR[state.aType]}${state.aImportant==='yes' ? ' !important' : ''} → specificity ${scoreA}   |   Rule B: ${SELECTOR[state.bType]}${state.bImportant==='yes' ? ' !important' : ''} → specificity ${scoreB}` + (tie ? '   (tie — later rule in the file wins)' : '');
-    setCode('spec-css',
-`.spec-box { color: black; } /* baseline */
-
-${SELECTOR[state.aType]} {
-  color: ${state.aColor};${state.aImportant==='yes' ? ' !important;' : ''}
-}
-
-${SELECTOR[state.bType]} {
-  color: ${state.bColor};${state.bImportant==='yes' ? ' !important;' : ''}
-}
-
-/* winner: Rule ${winner} (specificity ${Math.max(scoreA,scoreB)}) */`);
-  }
-  makeSelect(ctrlA, 'Rule A', 'selector type', [
-    {v:'element', l:'element (p)'},{v:'class', l:'class (.card-text)'},{v:'id', l:'id (#hero-text)'},{v:'inline', l:'inline style'}
-  ], state.aType, v=>{ state.aType=v; apply(); });
-  makeSelect(ctrlA, 'Rule A', 'color', [
-    {v:'#5fd3ff', l:'cyan'},{v:'#7fe0a7', l:'green'},{v:'#ff7a90', l:'pink'}
-  ], state.aColor, v=>{ state.aColor=v; apply(); });
-  makeSelect(ctrlA, 'Rule A', '!important', [{v:'no'},{v:'yes'}], state.aImportant, v=>{ state.aImportant=v; apply(); });
-  makeSelect(ctrlB, 'Rule B', 'selector type', [
-    {v:'element', l:'element (p)'},{v:'class', l:'class (.card-text)'},{v:'id', l:'id (#hero-text)'},{v:'inline', l:'inline style'}
-  ], state.bType, v=>{ state.bType=v; apply(); });
-  makeSelect(ctrlB, 'Rule B', 'color', [
-    {v:'#ffb454', l:'amber'},{v:'#5fd3ff', l:'cyan'},{v:'#ff7a90', l:'pink'}
-  ], state.bColor, v=>{ state.bColor=v; apply(); });
-  makeSelect(ctrlB, 'Rule B', '!important', [{v:'no'},{v:'yes'}], state.bImportant, v=>{ state.bImportant=v; apply(); });
-  apply();
-})();
-
-/* ---------- 12b custom properties ---------- */
-(function(){
-  const card = el('token-card');
-  const ctrl = el('ctrl-customprops');
-  const state = { space:'16px', radius:'8px', shadowSize:'soft' };
-  const SHADOWS = {
-    soft: '0 2px 8px rgba(0,0,0,0.25)',
-    strong: '0 6px 20px rgba(0,0,0,0.45)',
-    none: 'none'
-  };
-  function apply(){
-    card.style.setProperty('--space', state.space);
-    card.style.setProperty('--radius', state.radius);
-    card.style.setProperty('--shadow', SHADOWS[state.shadowSize]);
-    card.style.padding = 'var(--space)';
-    card.style.borderRadius = 'var(--radius)';
-    card.style.boxShadow = 'var(--shadow)';
-    card.style.background = 'var(--bg-elevated)';
-    card.style.border = '1px solid var(--line-strong)';
-    setCode('tokens-css',
-`:root {
-  --space: ${state.space};
-  --radius: ${state.radius};
-  --shadow: ${SHADOWS[state.shadowSize]};
-}
-
-.card {
-  padding: var(--space);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}`);
-  }
-  makeSelect(ctrl, ':root', '--space', [{v:'8px'},{v:'16px'},{v:'28px'}], state.space, v=>{ state.space=v; apply(); });
-  makeSelect(ctrl, ':root', '--radius', [{v:'0px'},{v:'8px'},{v:'20px'}], state.radius, v=>{ state.radius=v; apply(); });
-  makeSelect(ctrl, ':root', '--shadow', [{v:'soft'},{v:'strong'},{v:'none'}], state.shadowSize, v=>{ state.shadowSize=v; apply(); });
-  apply();
-})();
-
-/* ---------- 13 semantic elements ---------- */
-(function(){
-  const stage = el('semantic-stage');
-  const ctrl = el('ctrl-semantic');
-  const state = { mode:'semantic' };
-  const SEMANTIC_HTML =
-`<body>
-  <header><nav aria-label="Primary">...</nav></header>
-  <main>
-    <article>
-      <h1>Title</h1>
-      <section aria-labelledby="s1">
-        <h2 id="s1">Subsection</h2>...
-      </section>
-    </article>
-    <aside>Related links</aside>
-  </main>
-  <footer>...</footer>
-</body>`;
-  const DIV_HTML =
-`<body>
-  <div class="header"><div class="nav">...</div></div>
-  <div class="main">
-    <div class="article">
-      <div class="h1">Title</div>
-      <div class="section">
-        <div class="h2">Subsection</div>...
-      </div>
-    </div>
-    <div class="sidebar">Related links</div>
-  </div>
-  <div class="footer">...</div>
-</body>`;
-  const SEMANTIC_TREE = ['banner (header)', 'navigation', 'main', 'article', 'region: Subsection', 'complementary (aside)', 'contentinfo (footer)'];
-  const DIV_TREE = ['(no landmarks — a screen reader hears one long unlabeled block)'];
-  function apply(){
-    stage.innerHTML = state.mode === 'semantic'
-      ? `<header class="sem-box sem-header">header + nav</header>
-         <main class="sem-box sem-main">
-           <div class="sem-box sem-article">article
-             <div class="sem-box sem-section">section</div>
-           </div>
-           <aside class="sem-box sem-aside">aside</aside>
-         </main>
-         <footer class="sem-box sem-footer">footer</footer>`
-      : `<div class="sem-box sem-header">div.header</div>
-         <div class="sem-box sem-main">
-           <div class="sem-box sem-article">div.article
-             <div class="sem-box sem-section">div.section</div>
-           </div>
-           <div class="sem-box sem-aside">div.sidebar</div>
-         </div>
-         <div class="sem-box sem-footer">div.footer</div>`;
-    setCode('semantic-html', state.mode === 'semantic' ? SEMANTIC_HTML : DIV_HTML);
-    const tree = state.mode === 'semantic' ? SEMANTIC_TREE : DIV_TREE;
-    el('semantic-a11y').innerHTML = '<div class="output-tag">Accessibility tree — landmarks a screen reader announces</div><pre class="output-body">' + tree.map(t=>'<span class="ok">✓</span> ' + t).join('\n') + '</pre>';
-  }
-  makeSelect(ctrl, 'Markup', 'style', [
-    {v:'semantic', l:'semantic tags'},{v:'divs', l:'div soup'}
-  ], state.mode, v=>{ state.mode=v; apply(); });
-  apply();
-})();
-
-/* ---------- 14 position (target + ancestor) ---------- */
-(function(){
-  const container = el('pos-container');
-  const target = el('pos-target');
-  const tag = el('pos-tag');
-  const ctrlT = el('ctrl-pos-target');
-  const ctrlA = el('ctrl-pos-ancestor');
-  const state = { position:'relative', top:'0px', left:'0px', z:'2', ancestor:'relative' };
-
-  const NOTES = {
-    static: 'static: top/left/z-index are ignored. The image sits exactly where normal document flow puts it.',
-    relative: 'relative: shifted from its own original spot by top/left — but that original spot stays reserved, so the paragraph below does NOT move up.',
-    absolute: 'absolute: pulled out of flow entirely — the paragraph below slides up to fill the gap. Positioned relative to the nearest non-static ancestor (the dashed container, if it is relative — otherwise the whole page).',
-    fixed: 'fixed: pulled out of flow, positioned relative to the browser viewport — it will stay in the same screen spot even if you scroll this page.',
-    sticky: 'sticky: behaves like relative until you scroll the container past its "top" threshold, then it behaves like fixed within that container.'
-  };
-
-  function apply(){
-    container.classList.toggle('is-static', state.ancestor === 'static');
-    target.style.position = state.position;
-    tag.textContent = state.position;
-    if(state.position === 'static'){
-      target.style.top = '';
-      target.style.left = '';
-    } else {
-      target.style.top = state.top;
-      target.style.left = state.left;
-    }
-    target.style.zIndex = state.z;
-
-    el('pos-readout').textContent = NOTES[state.position] + (state.position === 'absolute' ? '  Ancestor (.pos-container) is currently: position: ' + state.ancestor + '.' : '');
-
-    setCode('pos-css',
-`.pos-container {
-  position: ${state.ancestor}; /* the "containing block" for any absolute child */
-}
-
-.pos-target {
-  position: ${state.position};${state.position !== 'static' ? `
-  top: ${state.top};
-  left: ${state.left};` : ''}
-  z-index: ${state.z};
-}`);
-  }
-  makeSelect(ctrlT, 'Target image', 'position', [
-    {v:'static'},{v:'relative'},{v:'absolute'},{v:'fixed'},{v:'sticky'}
-  ], state.position, v=>{ state.position=v; apply(); });
-  makeSelect(ctrlT, 'Target image', 'top', [
-    {v:'0px'},{v:'20px'},{v:'-15px'}
-  ], state.top, v=>{ state.top=v; apply(); });
-  makeSelect(ctrlT, 'Target image', 'left', [
-    {v:'0px'},{v:'30px'},{v:'80px'}
-  ], state.left, v=>{ state.left=v; apply(); });
-  makeSelect(ctrlT, 'Target image', 'z-index', [
-    {v:'0'},{v:'2'},{v:'5'}
-  ], state.z, v=>{ state.z=v; apply(); });
-  makeSelect(ctrlA, 'Ancestor (.pos-container)', 'position', [
-    {v:'relative', l:'relative (contains absolute children)'},
-    {v:'static', l:'static (default — does NOT contain)'}
-  ], state.ancestor, v=>{ state.ancestor=v; apply(); });
-  apply();
-})();
-
-/* ---------- 14b position: badge + caption over a photo ---------- */
-(function(){
-  const card = el('pos-badge-card');
-  const badge = el('pos-badge');
-  const caption = el('pos-caption');
-  const ctrl = el('ctrl-pos-badge');
-  const state = { badgeCorner:'top-right', badgeColor:'#ff7a90', captionOn:'on' };
-  const CORNERS = {
-    'top-right': { top:'-10px', right:'-10px', bottom:'auto', left:'auto' },
-    'top-left': { top:'-10px', left:'-10px', bottom:'auto', right:'auto' },
-    'bottom-right': { bottom:'10px', right:'10px', top:'auto', left:'auto' }
-  };
-  function apply(){
-    const c = CORNERS[state.badgeCorner];
-    badge.style.top = c.top; badge.style.right = c.right; badge.style.bottom = c.bottom; badge.style.left = c.left;
-    badge.style.background = state.badgeColor;
-    caption.style.display = state.captionOn === 'on' ? 'block' : 'none';
-    setCode('pos-badge-css',
-`.card {
-  position: relative; /* becomes the containing block below */
-}
-
-.card .badge {
-  position: absolute;
-  top: ${c.top}; right: ${c.right}; bottom: ${c.bottom}; left: ${c.left};
-  background: ${state.badgeColor};
-}
-${state.captionOn === 'on' ? `
-.card .caption {
-  position: absolute;
-  left: 18px; right: 18px; bottom: 18px;
-  background: rgba(10,18,30,.78);
-}` : `
-/* .card .caption { display: none; } */`}`);
-  }
-  makeSelect(ctrl, 'Badge', 'corner', [
-    {v:'top-right', l:'top right'},{v:'top-left', l:'top left'},{v:'bottom-right', l:'bottom right'}
-  ], state.badgeCorner, v=>{ state.badgeCorner=v; apply(); });
-  makeSelect(ctrl, 'Badge', 'color', [
-    {v:'#ff7a90', l:'pink'},{v:'#7fe0a7', l:'green'},{v:'#ffb454', l:'amber'}
-  ], state.badgeColor, v=>{ state.badgeColor=v; apply(); });
-  makeSelect(ctrl, 'Caption', 'visible', [
-    {v:'on'},{v:'off'}
-  ], state.captionOn, v=>{ state.captionOn=v; apply(); });
-  apply();
-})();
-
-/* ---------- scrollspy ---------- */
-const navLinks = Array.from(document.querySelectorAll('.nav-link'));
-const targets = Array.from(document.querySelectorAll('.module'));
-const spy = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    const id = '#' + entry.target.id;
-    const link = navLinks.find(l=>l.getAttribute('href')===id);
-    if(!link) return;
-    if(entry.isIntersecting){
-      navLinks.forEach(l=>l.classList.remove('active'));
-      link.classList.add('active');
-    }
-  });
-}, { rootMargin:'-15% 0px -70% 0px', threshold:0 });
-targets.forEach(t=>spy.observe(t));
-</script>
-</body>
-</html>
+      <!-- ---- STACK LAB 2/5 — grid-row, single item ---- -->
+      <div class
