@@ -1,0 +1,2765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flutter From Zero — Basics, Project Structure &amp; UI/UX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+:root{
+  --bg:#0A1428;
+  --surface:#101C36;
+  --surface-2:#16223F;
+  --border:#243459;
+  --border-soft:#1B2846;
+  --text:#EAEEF7;
+  --text-dim:#8D9AC2;
+  --text-faint:#5A6690;
+  --setup:#8D9AC2;
+  --flutter:#13B9FD;
+  --flutter-soft:#0D2A42;
+  --dart:#0175C2;
+  --dart-soft:#0E2540;
+  --files:#FFB020;
+  --files-soft:#3A2B0D;
+  --uiux:#FF6B8B;
+  --uiux-soft:#3A1424;
+  --radius:10px;
+  --disp:'Plus Jakarta Sans', ui-sans-serif, sans-serif;
+  --sans:'Public Sans', system-ui, sans-serif;
+  --mono:'Roboto Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.62;font-size:16px;-webkit-font-smoothing:antialiased;}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+a{color:inherit;}
+::selection{background:var(--flutter-soft);color:var(--text);}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--setup),var(--flutter),var(--files),var(--uiux));
+  z-index:200;transition:width .1s linear;}
+
+#topbar{display:none;position:sticky;top:0;z-index:150;background:rgba(10,20,40,.95);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border-soft);padding:14px 18px;align-items:center;justify-content:space-between;}
+#topbar .brand{font-family:var(--disp);font-weight:700;font-size:14px;}
+#topbar .brand span{color:var(--flutter);}
+#navToggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px;cursor:pointer;}
+
+#shell{display:grid;grid-template-columns:284px 1fr;min-height:100vh;}
+#sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--border-soft);
+  background:var(--surface);padding:26px 0 60px;}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+.brandblock{padding:0 22px 20px;border-bottom:1px solid var(--border-soft);margin-bottom:8px;}
+.brandblock .brand{font-family:var(--disp);font-weight:800;font-size:18px;}
+.brandblock .brand span{color:var(--flutter);}
+.brandblock .sub{color:var(--text-dim);font-size:12.5px;margin-top:6px;}
+
+nav#steps{padding:6px 0 0 0;}
+.navitem{position:relative;display:flex;align-items:baseline;gap:10px;padding:8px 22px 8px 18px;
+  text-decoration:none;cursor:pointer;border-left:3px solid transparent;}
+.navitem.setup{border-left-color:var(--setup);}
+.navitem.flutter{border-left-color:var(--flutter);}
+.navitem.files{border-left-color:var(--files);}
+.navitem.uiux{border-left-color:var(--uiux);}
+.navitem .num{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);min-width:22px;}
+.navitem .label{font-size:13.5px;color:var(--text-dim);transition:color .15s;}
+.navitem:hover .label{color:var(--text);}
+.navitem.active{background:var(--surface-2);}
+.navitem.active .label{color:var(--text);font-weight:600;}
+
+main{padding:0;min-width:0;}
+.hero{padding:60px 54px 40px;border-bottom:1px solid var(--border-soft);
+  background:radial-gradient(ellipse 900px 380px at 12% -10%, rgba(19,185,253,.10), transparent 60%),
+             radial-gradient(ellipse 900px 380px at 88% -10%, rgba(255,107,139,.08), transparent 60%);}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--text-faint);text-transform:uppercase;
+  margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--text-faint);}
+h1.title{font-family:var(--disp);font-weight:800;font-size:clamp(26px,3.8vw,42px);line-height:1.18;letter-spacing:-.01em;max-width:840px;}
+h1.title .accent-flutter{color:var(--flutter);}
+h1.title .accent-uiux{color:var(--uiux);}
+.hero-sub{color:var(--text-dim);font-size:16.5px;margin-top:16px;max-width:680px;}
+.scope{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;max-width:960px;}
+.scope li{list-style:none;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:11px 13px;font-size:13.5px;color:var(--text-dim);display:flex;gap:9px;align-items:flex-start;}
+.scope li::before{content:"✓";color:var(--flutter);font-weight:700;flex:0 0 auto;}
+
+.diagram-wrap{margin-top:38px;background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:20px 22px 12px;}
+.diagram-cap{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.06em;text-transform:uppercase;
+  margin-top:8px;text-align:center;}
+svg{display:block;width:100%;height:auto;}
+
+.content{padding:10px 54px 130px;max-width:960px;}
+.part-banner{margin:60px 0 6px;padding:18px 22px;border-radius:10px;font-family:var(--disp);font-weight:700;
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+.part-banner .pnum{font-family:var(--mono);font-size:12px;color:var(--text-faint);}
+.part-banner .ptitle{font-size:19px;letter-spacing:-.01em;}
+.part-banner.setup-b{background:var(--surface-2);}
+.part-banner.setup-b .ptitle{color:#B9C4E8;}
+.part-banner.flutter-b{background:var(--flutter-soft);}
+.part-banner.flutter-b .ptitle{color:#7FDBFF;}
+.part-banner.files-b{background:var(--files-soft);}
+.part-banner.files-b .ptitle{color:#F5CB7E;}
+.part-banner.uiux-b{background:var(--uiux-soft);}
+.part-banner.uiux-b .ptitle{color:#FFA3B8;}
+.part-banner span.desc{font-family:var(--sans);font-weight:400;color:var(--text-dim);font-size:13.5px;width:100%;margin-top:2px;}
+
+/* primer component */
+.primer{margin:26px 0 40px;padding:22px 24px;border-radius:14px;background:var(--surface-2);
+  border:1px solid var(--border-soft);border-left:4px solid var(--flutter);}
+.primer-head{font-family:var(--disp);font-weight:700;color:var(--flutter);font-size:15px;margin-bottom:4px;
+  display:flex;align-items:center;gap:8px;}
+.primer-sub{font-size:13px;color:var(--text-dim);margin-bottom:16px;}
+.primer-list{list-style:none;counter-reset:primer;display:grid;gap:12px;}
+.primer-list li{counter-increment:primer;position:relative;padding-left:30px;font-size:13.8px;color:#C9D0E5;}
+.primer-list li::before{content:counter(primer);position:absolute;left:0;top:1px;width:20px;height:20px;
+  border-radius:50%;background:var(--flutter-soft);color:var(--flutter);font-family:var(--mono);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;}
+.primer-list li strong{color:var(--text);}
+.primer-list code{font-family:var(--mono);background:var(--bg);border:1px solid var(--border-soft);
+  padding:1px 6px;border-radius:5px;font-size:.92em;color:var(--flutter);}
+
+.demo{padding:34px 0;border-top:1px solid var(--border-soft);scroll-margin-top:20px;}
+.demo:first-of-type{border-top:none;}
+.demo-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.demo-num{font-family:var(--disp);font-weight:800;font-size:13px;width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.setup .demo-num{background:var(--surface-2);color:var(--setup);}
+.flutter .demo-num{background:var(--flutter-soft);color:var(--flutter);}
+.files .demo-num{background:var(--files-soft);color:var(--files);}
+.uiux .demo-num{background:var(--uiux-soft);color:var(--uiux);}
+.demo h4{font-family:var(--disp);font-size:17.5px;font-weight:700;}
+.demo p.desc{color:#C9D0E5;font-size:14.8px;margin:0 0 16px;}
+.demo p.desc strong{color:var(--text);}
+
+.demo-code{margin:0 0 14px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border-soft);}
+.demo-code pre{margin:0;padding:14px 16px;overflow-x:auto;background:#0a0f1c !important;font-size:12.6px;}
+.demo-code code{font-family:var(--mono) !important;}
+
+.demo-panel{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);padding:18px 20px;}
+.demo-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;}
+.demo-controls input[type="text"], .demo-controls input[type="number"], .demo-controls select{
+  background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);
+  font-family:var(--mono);font-size:12.8px;}
+.demo-controls input[type="range"]{accent-color:var(--flutter);}
+.demo-controls label{font-size:12px;color:var(--text-dim);font-family:var(--mono);display:flex;align-items:center;gap:6px;}
+.dbtn{background:var(--flutter);color:#04202E;border:none;border-radius:7px;padding:8px 16px;font-family:var(--disp);
+  font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;}
+.dbtn:hover{opacity:.88;}
+.dbtn.alt{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+.dbtn.active{background:var(--files);color:#2E1F04;}
+
+/* phone mockup */
+.phone{width:260px;background:#0d1424;border:3px solid #2A3A66;border-radius:28px;padding:10px;margin:0 auto;
+  box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.phone-notch{width:70px;height:14px;background:#0A1428;border-radius:0 0 10px 10px;margin:0 auto 6px;}
+.phone-screen{background:#fff;border-radius:16px;min-height:340px;overflow:hidden;color:#1a1a2e;position:relative;
+  display:flex;flex-direction:column;font-family:var(--sans);}
+.phone-appbar{background:var(--dart);color:#fff;padding:16px 14px 12px;font-weight:700;font-size:14px;}
+.phone-body{flex:1;padding:14px;}
+
+.widget-box{border:2px dashed rgba(19,185,253,.5);background:rgba(19,185,253,.06);border-radius:6px;
+  padding:8px 10px;font-family:var(--mono);font-size:10.5px;color:#0175C2;position:relative;}
+
+.demo-output{background:#0a0f1c;border:1px solid var(--border-soft);border-radius:8px;padding:12px 14px;
+  font-family:var(--mono);font-size:12.6px;color:#9FE0FF;min-height:36px;max-height:260px;overflow-y:auto;
+  white-space:pre-wrap;word-break:break-word;}
+.demo-output .line{margin:2px 0;}
+.demo-output .line.err{color:var(--uiux);}
+.demo-output .line.warn{color:var(--files);}
+.demo-output .line.muted{color:var(--text-faint);}
+.demo-output:empty::before{content:"// output will appear here";color:var(--text-faint);}
+
+/* file tree explorer */
+.tree{font-family:var(--mono);font-size:13px;line-height:2;}
+.tree-node{cursor:pointer;padding:3px 10px;border-radius:6px;display:flex;align-items:center;gap:8px;}
+.tree-node:hover{background:var(--surface-2);}
+.tree-node.active{background:var(--files-soft);color:var(--files);}
+.tree-indent{padding-left:22px;}
+.tree-desc{margin-top:14px;padding:14px 16px;background:var(--bg);border:1px solid var(--border-soft);border-radius:8px;
+  font-size:13.5px;color:#C9D0E5;min-height:40px;}
+.tree-desc strong{color:var(--files);}
+
+.callout{margin:18px 0;padding:15px 18px;border-radius:var(--radius);background:var(--surface);
+  border:1px solid var(--border-soft);border-left:3px solid var(--flutter);}
+.files .callout{border-left-color:var(--files);}
+.uiux .callout{border-left-color:var(--uiux);}
+.callout .why{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:7px;display:block;font-weight:700;}
+.callout p{margin:0;font-size:14px;color:#C9D0E5;}
+.callout p strong{color:var(--text);}
+.callout code, .demo p code, .demo li code{font-family:var(--mono);background:var(--surface-2);
+  border:1px solid var(--border-soft);padding:1px 6px;border-radius:5px;font-size:.86em;color:var(--flutter);}
+
+.finale{margin-top:70px;padding:48px;border-radius:18px;
+  background:linear-gradient(160deg, rgba(19,185,253,.10), rgba(255,107,139,.06));border:1px solid var(--flutter);}
+.finale .eyebrow{color:var(--flutter);}
+.finale h2{font-family:var(--disp);font-size:27px;margin-bottom:18px;color:#CFF3FF;}
+.finale p{font-size:15.6px;color:#DCE4F5;max-width:800px;margin-bottom:14px;}
+.finale ul{margin:18px 0 0 0;display:grid;gap:10px;}
+.finale ul li{list-style:none;background:var(--surface);border:1px solid var(--border-soft);border-left:3px solid var(--flutter);
+  border-radius:8px;padding:13px 16px;font-size:14.5px;color:#DCE4F5;}
+.finale ul li strong{color:var(--flutter);}
+
+.tree-block{background:#0a0f1c;border:1px solid var(--border-soft);border-radius:var(--radius);padding:20px 22px;
+  font-family:var(--mono);font-size:12.6px;color:var(--text-dim);overflow-x:auto;white-space:pre;line-height:1.75;}
+.tree-block .tag{color:var(--text-faint);font-style:italic;}
+
+footer{padding:40px 54px 80px;color:var(--text-faint);font-size:13px;font-family:var(--mono);}
+
+@media (max-width:980px){
+  #shell{grid-template-columns:1fr;}
+  #topbar{display:flex;}
+  #sidebar{position:fixed;left:0;top:57px;width:284px;max-width:82vw;height:calc(100vh - 57px);
+    transform:translateX(-100%);transition:transform .22s ease;z-index:140;box-shadow:20px 0 40px rgba(0,0,0,.4);}
+  #sidebar.open{transform:translateX(0);}
+  .hero{padding:38px 20px 28px;}
+  .content{padding:10px 20px 100px;}
+  footer{padding:30px 20px 60px;}
+  .finale{padding:24px;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="topbar">
+  <div class="brand">Flutter<span>Zero</span></div>
+  <button id="navToggle">☰ Parts</button>
+</div>
+
+<div id="shell">
+  <aside id="sidebar">
+    <div class="brandblock">
+      <div class="brand">Flutter<span>Zero</span></div>
+      <div class="sub">Basics · file system · UI/UX — from scratch</div>
+    </div>
+    <nav id="steps">
+      <a class="navitem setup" href="#part-0"><span class="num">00</span><span class="label">What Flutter Actually Is</span></a>
+      <a class="navitem setup" href="#part-1"><span class="num">01</span><span class="label">Dart Essentials for Flutter</span></a>
+      <a class="navitem files" href="#part-2"><span class="num">02</span><span class="label">The Project File System</span></a>
+      <a class="navitem flutter" href="#part-3"><span class="num">03</span><span class="label">Your First Widgets</span></a>
+      <a class="navitem flutter" href="#part-4"><span class="num">04</span><span class="label">Layout Widgets</span></a>
+      <a class="navitem flutter" href="#part-5"><span class="num">05</span><span class="label">State Management Basics</span></a>
+      <a class="navitem flutter" href="#part-6"><span class="num">06</span><span class="label">Navigation &amp; Screens</span></a>
+      <a class="navitem uiux" href="#part-7"><span class="num">07</span><span class="label">UI/UX Design Principles</span></a>
+      <a class="navitem uiux" href="#part-8"><span class="num">08</span><span class="label">Theming &amp; Styling</span></a>
+      <a class="navitem setup" href="#finale"><span class="num">＋</span><span class="label">The Mental Model, Named</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Real, visual, hands-on — every layout playground actually responds</div>
+      <h1 class="title">Learn <span class="accent-flutter">Flutter</span> from zero — widgets, the project itself, and <span class="accent-uiux">UI/UX</span> that doesn't look homemade</h1>
+      <p class="hero-sub">Flutter code can't run inside a browser page — so instead of pretending, every layout demo here is a live HTML/CSS mockup that behaves <em>exactly</em> like the real widget it's teaching: adjust a slider, and watch the layout respond the same way it would on a real phone. The Dart code sits right next to it, always.</p>
+
+      <ul class="scope">
+        <li>Starts from "what even is a widget" — nothing assumed</li>
+        <li>A real, clickable map of a Flutter project's folders and files</li>
+        <li>Layout playgrounds — Row, Column, Stack, Expanded — that actually move</li>
+        <li>UI/UX principles (spacing, contrast, touch targets) with live calculators</li>
+      </ul>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg" font-family="'Roboto Mono', monospace">
+          <defs>
+            <marker id="af" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#13B9FD"/></marker>
+          </defs>
+
+          <rect x="20" y="90" width="180" height="60" rx="10" fill="#0E2540" stroke="#0175C2"/>
+          <text x="110" y="115" fill="#7FDBFF" font-size="11" text-anchor="middle" font-weight="700">Your Dart code</text>
+          <text x="110" y="132" fill="#5A6690" font-size="9" text-anchor="middle">widgets, one codebase</text>
+
+          <line x1="200" y1="120" x2="270" y2="120" stroke="#13B9FD" stroke-width="1.5" marker-end="url(#af)"/>
+
+          <rect x="272" y="90" width="160" height="60" rx="10" fill="#0D2A42" stroke="#13B9FD"/>
+          <text x="352" y="115" fill="#7FDBFF" font-size="11" text-anchor="middle" font-weight="700">Flutter engine</text>
+          <text x="352" y="132" fill="#5A6690" font-size="9" text-anchor="middle">renders every pixel itself</text>
+
+          <line x1="432" y1="108" x2="500" y2="50" stroke="#13B9FD" stroke-width="1.2" marker-end="url(#af)"/>
+          <line x1="432" y1="120" x2="500" y2="120" stroke="#13B9FD" stroke-width="1.2" marker-end="url(#af)"/>
+          <line x1="432" y1="132" x2="500" y2="190" stroke="#13B9FD" stroke-width="1.2" marker-end="url(#af)"/>
+
+          <rect x="504" y="24" width="130" height="46" rx="8" fill="#101C36" stroke="#243459"/>
+          <text x="569" y="52" fill="#EAEEF7" font-size="10.5" text-anchor="middle">📱 iOS</text>
+
+          <rect x="504" y="97" width="130" height="46" rx="8" fill="#101C36" stroke="#243459"/>
+          <text x="569" y="125" fill="#EAEEF7" font-size="10.5" text-anchor="middle">🤖 Android</text>
+
+          <rect x="504" y="167" width="130" height="46" rx="8" fill="#101C36" stroke="#243459"/>
+          <text x="569" y="195" fill="#EAEEF7" font-size="10.5" text-anchor="middle">🌐 Web</text>
+
+          <line x1="432" y1="120" x2="500" y2="120" stroke="#13B9FD" stroke-width="0" />
+          <rect x="504" y="132" width="0" height="0"/>
+
+          <text x="720" y="70" fill="#5A6690" font-size="9" text-anchor="middle">+ macOS</text>
+          <text x="720" y="120" fill="#5A6690" font-size="9" text-anchor="middle">+ Windows</text>
+          <text x="720" y="195" fill="#5A6690" font-size="9" text-anchor="middle">+ Linux</text>
+
+          <text x="450" y="230" fill="#5A6690" font-size="9.5" text-anchor="middle">Flutter doesn't wrap native components — it paints every widget itself, identically everywhere</text>
+        </svg>
+        <div class="diagram-cap">one Dart codebase, compiled down to real native apps on every platform</div>
+      </div>
+    </section>
+
+    <div class="content" id="content">
+
+      <div class="part-banner setup-b" id="part-0">
+        <span class="pnum">PART 00</span><span class="ptitle">What Flutter Actually Is</span>
+        <span class="desc">Before any code — the handful of ideas everything else in this page assumes you already have.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — the vocabulary</div>
+        <div class="primer-sub">Six words you'll see constantly from here on, defined once, properly.</div>
+        <ol class="primer-list">
+          <li><strong>Flutter</strong> is a toolkit from Google for building apps from <em>one</em> codebase that run natively on iOS, Android, web, and desktop — "natively" meaning it's not a website wrapped in an app shell, it's real compiled code.</li>
+          <li><strong>Dart</strong> is the programming language Flutter apps are written in — created by Google specifically to pair with Flutter. If you know JavaScript, Dart will feel very familiar; Part 01 covers exactly where they differ.</li>
+          <li><strong>A widget</strong> is Flutter's name for "a piece of UI" — but in Flutter, <em>everything</em> is a widget: not just buttons and text, but padding, alignment, and even the app itself. There's no separate "layout language" like HTML/CSS — it's all just widgets nested inside widgets.</li>
+          <li><strong>The widget tree</strong> is the nested structure that results — a screen is really one big tree of widgets, each one wrapping or sitting next to others, all the way down to individual pixels.</li>
+          <li><strong>Hot reload</strong> is a Flutter-specific feature: change your code while the app is running, and the change appears on screen in under a second — without losing whatever state the app was in (Demo 3 below shows exactly what that means).</li>
+          <li><strong>Cross-platform</strong> here means genuinely one codebase — not "mostly one codebase with platform-specific exceptions everywhere." Flutter draws every pixel itself rather than relying on each platform's native UI components, which is exactly why the same code looks identical on iOS and Android.</li>
+        </ol>
+      </div>
+
+      <div class="demo setup" id="demo-0-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>"Everything is a widget" — click through a real tree</h4></div>
+        <p class="desc">This is what building a simple screen actually looks like: widgets wrapping widgets. Click any box below to see what that widget's actual job is.</p>
+        <div class="demo-code"><pre><code class="language-dart">Scaffold(
+  appBar: AppBar(title: Text('My App')),
+  body: Center(
+    child: Column(
+      children: [
+        Text('Hello!'),
+        ElevatedButton(onPressed: () {}, child: Text('Tap me')),
+      ],
+    ),
+  ),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="tree" id="widget-tree-explorer">
+            <div class="tree-node" data-w="scaffold" onclick="wtreeClick('scaffold')">📦 Scaffold</div>
+            <div class="tree-indent">
+              <div class="tree-node" data-w="appbar" onclick="wtreeClick('appbar')">📱 AppBar</div>
+              <div class="tree-node" data-w="center" onclick="wtreeClick('center')">🎯 Center</div>
+              <div class="tree-indent">
+                <div class="tree-node" data-w="column" onclick="wtreeClick('column')">📊 Column</div>
+                <div class="tree-indent">
+                  <div class="tree-node" data-w="text" onclick="wtreeClick('text')">🔤 Text</div>
+                  <div class="tree-node" data-w="button" onclick="wtreeClick('button')">🔘 ElevatedButton</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tree-desc" id="widget-tree-desc">Click a widget above to see what it does.</div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-0-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>How Flutter draws, vs. how most cross-platform tools draw</h4></div>
+        <p class="desc">Most "cross-platform" tools take your code and translate it into each platform's real native buttons and text fields. Flutter does something different — worth seeing the difference directly.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo02('native')">Show: wraps native components</button>
+            <button class="dbtn" onclick="fzDemo02('flutter')">Show: Flutter's approach</button>
+          </div>
+          <div class="demo-output" id="out-0-2"></div>
+        </div>
+        <div class="callout">
+          <span class="why">Why this is the actual reason Flutter looks identical everywhere</span>
+          <p>A tool that wraps native iOS/Android components will always look slightly different on each platform, because it's really using each platform's own UI kit underneath. Flutter skips that entirely — it has its own rendering engine and paints every pixel itself, the same way on every platform, which is also why a Flutter button doesn't automatically look "iOS-native" or "Android-native" unless you tell it to (Part 07 covers this choice).</p>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-0-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>Hot reload vs. a full restart — the difference that matters</h4></div>
+        <p class="desc">Change the button's label below, then try both buttons. Hot reload keeps the counter's current value; a full restart wipes it back to zero — exactly what happens with real Flutter apps.</p>
+        <div class="demo-code"><pre><code class="language-dart">// change this line while the app is running...
+Text('Tap count: $count')
+
+// hot reload shows the change instantly, AND keeps count at whatever it currently is
+// a full restart shows the change too, but count resets back to 0</code></pre></div>
+        <div class="demo-panel">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-appbar">My App</div>
+              <div class="phone-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+                <div id="hr-count" style="font-size:28px;font-weight:700;color:var(--dart);">0</div>
+                <button onclick="fzHrTap()" style="background:var(--dart);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;">Tap me</button>
+                <div id="hr-label" style="font-size:12px;color:#666;">label: "Tap me"</div>
+              </div>
+            </div>
+          </div>
+          <div class="demo-controls" style="margin-top:14px;">
+            <input type="text" id="hr-new-label" placeholder="new button label" value="Tap here!">
+            <button class="dbtn" onclick="fzHotReload()">⚡ Hot reload</button>
+            <button class="dbtn alt" onclick="fzFullRestart()">🔄 Full restart</button>
+          </div>
+          <div class="demo-output" id="out-0-3"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-0-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Widget composition — building one card out of three smaller widgets</h4></div>
+        <p class="desc">Real screens are never one giant widget — they're small widgets combined. Click "build" to watch a profile card assemble itself, one widget at a time.</p>
+        <div class="demo-code"><pre><code class="language-dart">Container(                              // 1. the outer box
+  padding: EdgeInsets.all(16),
+  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+  child: Row(                           // 2. lay the avatar and text side by side
+    children: [
+      CircleAvatar(child: Icon(Icons.person)),  // 3. the avatar
+      SizedBox(width: 12),
+      Column(                                    // 4. name + subtitle, stacked
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [Text('Amara', style: TextStyle(fontWeight: FontWeight.bold)), Text('Flutter developer')],
+      ),
+    ],
+  ),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo04build()">Build it, one widget at a time</button>
+            <button class="dbtn alt" onclick="fzDemo04reset()">Reset</button>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:20px;display:flex;justify-content:center;">
+            <div id="compose-card" style="background:#fff;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;min-width:200px;min-height:50px;"></div>
+          </div>
+          <div class="demo-output" id="out-0-4"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-0-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>main() — the very first thing that runs</h4></div>
+        <p class="desc">Every Flutter app boils down to this same three-line skeleton. Click through what each line actually does.</p>
+        <div class="demo-code"><pre><code class="language-dart">void main() {
+  runApp(MyApp());     // hands your root widget to Flutter's engine
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: HomeScreen());   // sets up Material styling + your first screen
+  }
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo05('main')">1. void main()</button>
+            <button class="dbtn" onclick="fzDemo05('runapp')">2. runApp(MyApp())</button>
+            <button class="dbtn" onclick="fzDemo05('materialapp')">3. MaterialApp(home: ...)</button>
+          </div>
+          <div class="demo-output" id="out-0-5"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-0-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>Declarative UI vs. imperative UI — why Flutter code reads differently</h4></div>
+        <p class="desc">Older UI toolkits are usually <strong>imperative</strong>: you give step-by-step instructions to mutate what's already on screen. Flutter is <strong>declarative</strong>: you describe what the screen should look like right now, for the current data, and Flutter figures out the steps.</p>
+        <div class="demo-code"><pre><code class="language-dart">// imperative (not how Flutter works) — step-by-step mutation
+label.setText("5 items");
+label.setColor(Colors.red);
+if (count > 10) { label.setBold(true); }
+
+// declarative (how Flutter actually works) — describe the end result for the current state
+Text(
+  '$count items',
+  style: TextStyle(color: Colors.red, fontWeight: count > 10 ? FontWeight.bold : FontWeight.normal),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo06('imperative')">Show the imperative mindset</button>
+            <button class="dbtn good" onclick="fzDemo06('declarative')">Show the declarative mindset</button>
+          </div>
+          <div class="demo-output" id="out-0-6"></div>
+        </div>
+        <div class="callout">
+          <span class="why">Why this explains so much of Flutter at once</span>
+          <p>This single idea is <em>why</em> <code>setState</code> exists (Part 05) — you never manually update a label's text; you change the underlying data and let <code>build()</code> re-describe the whole screen from scratch, every time.</p>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-0-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>build() gets called again — more often than you'd expect</h4></div>
+        <p class="desc">Every tap below calls <code>setState</code>, which calls <code>build()</code> again — watch the counter climb even though the visible number barely changes.</p>
+        <div class="demo-code"><pre><code class="language-dart">int buildCount = 0;
+
+@override
+Widget build(BuildContext context) {
+  buildCount++;   // just for this demo — not something real apps track
+  return Text('Tapped $tapCount times (build() has run $buildCount times)');
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo07()">Tap (triggers setState)</button>
+            <button class="dbtn alt" onclick="fzDemo07reset()">Reset</button>
+          </div>
+          <div class="mini-card" id="buildcount-display" style="text-align:center;">Tapped 0 times (build() has run 0 times)</div>
+        </div>
+      </div>
+
+      <div class="part-banner setup-b" id="part-1">
+        <span class="pnum">PART 01</span><span class="ptitle">Dart Essentials for Flutter</span>
+        <span class="desc">If JavaScript is familiar, most of this will feel like a dialect — here's exactly where Dart differs, and why those differences exist.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — Dart vs. JavaScript, side by side</div>
+        <div class="primer-sub">Not a full language course — just the handful of differences that actually show up in every Flutter file you'll write.</div>
+        <ol class="primer-list">
+          <li><strong>Dart is statically typed</strong> — a variable's type is fixed when it's declared and checked before the app even runs, unlike JavaScript where a variable can hold anything, anytime.</li>
+          <li><strong><code>var</code></strong> in Dart still infers a fixed type from the first value — it's not the free-for-all <code>var</code> from old JavaScript. <strong><code>final</code></strong> is Dart's <code>const</code> — assign once, never reassign. <strong><code>const</code></strong> in Dart is stricter still: the value must be knowable at compile time.</li>
+          <li><strong>Null safety</strong> — a plain <code>String name</code> in Dart can <em>never</em> be null; if it might be, you write <code>String? name</code>. The compiler enforces this, which eliminates an entire category of crashes JavaScript happily allows.</li>
+          <li><strong>Classes</strong> are Dart's core building block — every widget you write is a class. Dart's class syntax will look familiar if you've seen classes in any typed language.</li>
+          <li><strong>Named parameters</strong> — Dart functions (and especially widget constructors) commonly use <code>{curly braces}</code> to accept arguments by name instead of position, e.g. <code>Text('hi', style: myStyle)</code> — this is everywhere in Flutter code.</li>
+          <li><strong><code>async</code>/<code>await</code></strong> work exactly like JavaScript's version — same keywords, same idea: pause this function until the awaited thing resolves.</li>
+        </ol>
+      </div>
+
+      <div class="demo setup" id="demo-1-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>var, final, const — Dart's three declarations</h4></div>
+        <p class="desc">All three exist in Dart too, but the rules are stricter than JavaScript's version of the same names.</p>
+        <div class="demo-code"><pre><code class="language-dart">var age = 25;        // type is inferred as int, and locked in — age = 'old' would be an error
+final name = 'Amara'; // like JS const: assign once, never reassign
+const pi = 3.14159;    // like final, but must be a compile-time constant
+
+age = 26;        // fine — var can be reassigned, as long as the type matches
+// name = 'Kofi'; // error — final can't be reassigned
+// const now = DateTime.now(); // error — DateTime.now() isn't knowable at compile time</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo11('var')">1. var — type locked, value isn't</button>
+            <button class="dbtn" onclick="fzDemo11('final')">2. final — value locked too</button>
+          </div>
+          <div class="demo-controls">
+            <button class="dbtn danger" onclick="fzDemo11('typeerror')">3. wrong-type assignment (error)</button>
+          </div>
+          <div class="demo-output" id="out-1-1"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-1-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Null safety — the ? that stops a whole category of crashes</h4></div>
+        <p class="desc">In Dart, a variable can only ever be <code>null</code> if you explicitly said it's allowed to be, using <code>?</code> after the type. Toggle between a safe and unsafe declaration below.</p>
+        <div class="demo-code"><pre><code class="language-dart">String name = 'Amara';   // can NEVER be null — Dart guarantees this at compile time
+// name = null;          // this line would fail to even compile
+
+String? nickname;        // the ? means "this is allowed to be null"
+print(nickname);         // null — totally fine, we said it could be
+
+// safely reading a value that might be null:
+print(nickname?.toUpperCase() ?? 'no nickname set');</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label><input type="checkbox" id="ns-toggle" checked> nickname has a value</label>
+            <button class="dbtn" onclick="fzDemo12()">Read nickname safely</button>
+          </div>
+          <div class="demo-output" id="out-1-2"></div>
+        </div>
+        <div class="callout">
+          <span class="why">Familiar, on purpose</span>
+          <p>If Part 02 of Unlearn.js's optional chaining (<code>?.</code>) rings a bell — that's not a coincidence. Dart's <code>?.</code> and <code>??</code> work identically to JavaScript's. Dart just takes it a step further by making the <em>type declaration itself</em> say whether null is even allowed in the first place.</p>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-1-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>Classes — the shape every widget you write will have</h4></div>
+        <p class="desc">A Dart class bundles data and behavior together. Every single Flutter widget — including ones you write yourself — is a class that looks roughly like this.</p>
+        <div class="demo-code"><pre><code class="language-dart">class Person {
+  String name;
+  int age;
+
+  Person(this.name, this.age);   // a constructor — runs when you create a new Person
+
+  String greet() {
+    return 'Hi, I\'m $name and I\'m $age years old.';
+  }
+}
+
+final amara = Person('Amara', 25);
+print(amara.greet());</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="class-name" placeholder="name" value="Amara">
+            <input type="number" id="class-age" placeholder="age" value="25">
+            <button class="dbtn" onclick="fzDemo13()">Create a Person &amp; greet</button>
+          </div>
+          <div class="demo-output" id="out-1-3"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-1-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Named parameters — how you'll actually call widget constructors</h4></div>
+        <p class="desc">Curly braces in a function signature mean "these arguments are passed by name, not by position" — you'll type this pattern constantly once real Flutter widgets show up in Part 03.</p>
+        <div class="demo-code"><pre><code class="language-dart">void greet({required String name, String greeting = 'Hello'}) {
+  print('$greeting, $name!');
+}
+
+greet(name: 'Amara');                          // uses the default greeting
+greet(name: 'Kofi', greeting: 'Welcome');       // order doesn't matter, since they're named
+greet(greeting: 'Hey', name: 'Zara');           // this works too — same result</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="named-name" placeholder="name" value="Amara">
+            <input type="text" id="named-greeting" placeholder="greeting (optional)">
+            <button class="dbtn" onclick="fzDemo14()">Call greet()</button>
+          </div>
+          <div class="demo-output" id="out-1-4"></div>
+        </div>
+        <div class="callout">
+          <span class="why">Why required matters</span>
+          <p>Marking a named parameter <code>required</code> means Dart won't even compile if you forget to pass it — the same "catch it before it ships" philosophy as null safety, applied to function calls instead of variables.</p>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-1-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Loops — for, for-in, and while, Dart-style</h4></div>
+        <p class="desc">Almost identical to JavaScript's loops — the small syntax differences are worth seeing directly.</p>
+        <div class="demo-code"><pre><code class="language-dart">for (int i = 1; i <= 3; i++) { print('Round $i'); }
+
+final fruits = ['apple', 'banana', 'grape'];
+for (final fruit in fruits) { print(fruit); }   // Dart's for-in, like JS's for...of
+
+int count = 0;
+while (count < 3) { print('while: $count'); count++; }</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo15('for')">1. for loop</button>
+            <button class="dbtn" onclick="fzDemo15('forin')">2. for-in loop</button>
+            <button class="dbtn" onclick="fzDemo15('while')">3. while loop</button>
+          </div>
+          <div class="demo-output" id="out-1-5"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-1-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>List, Map, Set — Dart's three built-in collections</h4></div>
+        <p class="desc">A <strong>List</strong> is Dart's array. A <strong>Map</strong> is Dart's object/dictionary — key-value pairs. A <strong>Set</strong> is a list that automatically removes duplicates.</p>
+        <div class="demo-code"><pre><code class="language-dart">List<String> fruits = ['apple', 'banana', 'grape'];
+fruits.add('mango');
+
+Map<String, dynamic> user = {'name': 'Amara', 'age': 25};
+print(user['name']);   // 'Amara'
+
+Set<int> uniqueNumbers = {1, 2, 2, 3, 3, 3};
+print(uniqueNumbers);   // {1, 2, 3} — duplicates silently dropped</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo16('list')">1. List</button>
+            <button class="dbtn" onclick="fzDemo16('map')">2. Map</button>
+            <button class="dbtn" onclick="fzDemo16('set')">3. Set</button>
+          </div>
+          <div class="demo-output" id="out-1-6"></div>
+        </div>
+      </div>
+
+      <div class="demo setup" id="demo-1-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>String interpolation — $variable and ${expression}</h4></div>
+        <p class="desc">You've already seen <code>$name</code> throughout this page — here's the full picture, including when the curly braces are actually required.</p>
+        <div class="demo-code"><pre><code class="language-dart">final name = 'Amara';
+final age = 25;
+
+print('Hi $name');              // simple variable — no braces needed
+print('Next year: ${age + 1}'); // an EXPRESSION — braces are required here
+print('${name.toUpperCase()}'); // calling a method — also needs braces</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="interp-name" placeholder="name" value="Amara">
+            <input type="number" id="interp-age" placeholder="age" value="25">
+            <button class="dbtn" onclick="fzDemo17()">Run all three</button>
+          </div>
+          <div class="demo-output" id="out-1-7"></div>
+        </div>
+      </div>
+
+      <div class="part-banner files-b" id="part-2">
+        <span class="pnum">PART 02</span><span class="ptitle">The Project File System</span>
+        <span class="desc">Every Flutter project you'll ever open has this exact same shape — click through a real one below instead of just reading a list.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — why the structure looks like this</div>
+        <div class="primer-sub">Running <code>flutter create my_app</code> generates all of this automatically — here's the reasoning behind the biggest pieces.</div>
+        <ol class="primer-list">
+          <li><strong><code>lib/</code></strong> is where your actual app code lives — nearly everything you personally write goes here. It's short for "library."</li>
+          <li><strong><code>lib/main.dart</code></strong> is the entry point — the very first file that runs when your app starts, containing a <code>main()</code> function that kicks everything off.</li>
+          <li><strong><code>pubspec.yaml</code></strong> is your project's configuration file — dependencies (packages you're using), app metadata, and asset declarations all live here. Demo 2 below breaks down a real one.</li>
+          <li><strong><code>android/</code> and <code>ios/</code></strong> hold the actual native project shells Flutter builds into — you'll rarely touch these directly, but they're what turns your Dart code into a real .apk or .ipa file.</li>
+          <li><strong><code>assets/</code></strong> is a folder <em>you</em> create and name yourself, for images, fonts, and other files your app needs — it has to be declared in <code>pubspec.yaml</code> before Flutter will actually bundle it in.</li>
+          <li><strong><code>test/</code></strong> holds automated tests for your app — separate from your real app code, but structured to mirror it.</li>
+          <li><strong><code>build/</code></strong> is entirely generated output — compiled files Flutter produces when you run or build your app. It's never edited by hand, and typically excluded from version control entirely.</li>
+        </ol>
+      </div>
+
+      <div class="demo files" id="demo-2-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>Click through a real Flutter project</h4></div>
+        <p class="desc">This is exactly what <code>flutter create my_app</code> generates. Click any file or folder to see what it's actually for.</p>
+        <div class="demo-panel">
+          <div class="tree" id="file-tree-explorer">
+            <div class="tree-node" data-f="root" onclick="ftreeClick('root')">📁 my_app/</div>
+            <div class="tree-indent">
+              <div class="tree-node" data-f="lib" onclick="ftreeClick('lib')">📁 lib/</div>
+              <div class="tree-indent">
+                <div class="tree-node" data-f="main" onclick="ftreeClick('main')">📄 main.dart</div>
+                <div class="tree-node" data-f="screens" onclick="ftreeClick('screens')">📁 screens/  <span style="color:var(--text-faint);font-size:11px;">(you create this)</span></div>
+                <div class="tree-node" data-f="widgets" onclick="ftreeClick('widgets')">📁 widgets/  <span style="color:var(--text-faint);font-size:11px;">(you create this)</span></div>
+              </div>
+              <div class="tree-node" data-f="android" onclick="ftreeClick('android')">📁 android/</div>
+              <div class="tree-node" data-f="ios" onclick="ftreeClick('ios')">📁 ios/</div>
+              <div class="tree-node" data-f="web" onclick="ftreeClick('web')">📁 web/</div>
+              <div class="tree-node" data-f="assets" onclick="ftreeClick('assets')">📁 assets/  <span style="color:var(--text-faint);font-size:11px;">(you create this)</span></div>
+              <div class="tree-node" data-f="test" onclick="ftreeClick('test')">📁 test/</div>
+              <div class="tree-node" data-f="build" onclick="ftreeClick('build')">📁 build/  <span style="color:var(--text-faint);font-size:11px;">(generated, ignore)</span></div>
+              <div class="tree-node" data-f="pubspec" onclick="ftreeClick('pubspec')">📄 pubspec.yaml</div>
+              <div class="tree-node" data-f="analysis" onclick="ftreeClick('analysis')">📄 analysis_options.yaml</div>
+            </div>
+          </div>
+          <div class="tree-desc" id="file-tree-desc">Click a file or folder above.</div>
+        </div>
+      </div>
+
+      <div class="demo files" id="demo-2-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>pubspec.yaml, annotated</h4></div>
+        <p class="desc">This one file controls your app's name, its dependencies, and which asset files get bundled in. Click each line for what it does.</p>
+        <div class="demo-code"><pre><code class="language-yaml">name: my_app
+description: "A new Flutter project."
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0          # a third-party package — added here, then `flutter pub get`
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/    # tells Flutter to actually bundle everything in this folder</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo22('name')">name &amp; version</button>
+            <button class="dbtn" onclick="fzDemo22('deps')">dependencies</button>
+            <button class="dbtn" onclick="fzDemo22('assets')">assets</button>
+          </div>
+          <div class="demo-output" id="out-2-2"></div>
+        </div>
+        <div class="callout">
+          <span class="why">The one command that reads this whole file</span>
+          <p>Whenever you add a dependency or a new asset path here, you have to run <code>flutter pub get</code> in the terminal — that's the command that actually goes and fetches the packages, and registers the assets, based on exactly what this file says.</p>
+        </div>
+      </div>
+
+      <div class="demo files" id="demo-2-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>"Where do I put X?" — a quick reference</h4></div>
+        <p class="desc">The folders under <code>lib/</code> beyond <code>main.dart</code> aren't generated for you — you invent them yourself, and every team's exact naming varies slightly. This is the most common convention.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <select id="whereto-select">
+              <option value="screen">A new full screen (like a login page)</option>
+              <option value="widget">A reusable small widget (like a custom button)</option>
+              <option value="model">A data model / class (like a User)</option>
+              <option value="service">Code that calls an API</option>
+              <option value="image">An image file</option>
+              <option value="theme">Your app's colors and text styles</option>
+            </select>
+            <button class="dbtn" onclick="fzDemo23()">Where does this go?</button>
+          </div>
+          <div class="demo-output" id="out-2-3"></div>
+        </div>
+      </div>
+
+      <div class="demo files" id="demo-2-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Creating a new screen — the actual steps</h4></div>
+        <p class="desc">Adding a screen isn't a special command — it's three ordinary steps. Click through them in order.</p>
+        <div class="demo-code"><pre><code class="language-dart">// step 1: create the file lib/screens/settings_screen.dart
+
+class SettingsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: AppBar(title: Text('Settings')), body: Center(child: Text('Settings go here')));
+  }
+}
+
+// step 2: import it wherever you need to navigate to it
+import 'screens/settings_screen.dart';
+
+// step 3: navigate to it
+Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen()));</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo24('create')">1. create the file</button>
+            <button class="dbtn" onclick="fzDemo24('import')">2. import it</button>
+            <button class="dbtn" onclick="fzDemo24('navigate')">3. navigate to it</button>
+          </div>
+          <div class="demo-output" id="out-2-4"></div>
+        </div>
+      </div>
+
+      <div class="demo files" id="demo-2-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Import statements — three kinds you'll type constantly</h4></div>
+        <p class="desc">Every Dart file starts with its imports — here's what each style of import path actually means.</p>
+        <div class="demo-code"><pre><code class="language-dart">import 'package:flutter/material.dart';   // 1. Flutter's own built-in widget library
+import 'package:http/http.dart' as http;  // 2. a third-party package from pubspec.yaml
+import 'widgets/custom_button.dart';      // 3. your own file, using a relative path</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo25('flutter')">1. Flutter's own library</button>
+            <button class="dbtn" onclick="fzDemo25('package')">2. a third-party package</button>
+            <button class="dbtn" onclick="fzDemo25('local')">3. your own file</button>
+          </div>
+          <div class="demo-output" id="out-2-5"></div>
+        </div>
+      </div>
+
+      <div class="demo files" id="demo-2-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>main.dart, line by line</h4></div>
+        <p class="desc">The exact file Flutter generates for a brand-new project — click each line to see what it does.</p>
+        <div class="demo-code"><pre><code class="language-dart">import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'My App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomeScreen(),
+    );
+  }
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo26('import')">the import</button>
+            <button class="dbtn" onclick="fzDemo26('key')">super.key</button>
+            <button class="dbtn" onclick="fzDemo26('theme')">theme:</button>
+          </div>
+          <div class="demo-output" id="out-2-6"></div>
+        </div>
+      </div>
+
+      <div class="demo files" id="demo-2-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>File naming — snake_case, checked live</h4></div>
+        <p class="desc">Dart file names are conventionally <code>snake_case</code> (lowercase, underscores) — even though the class inside is <code>PascalCase</code>. Type a class name and see the matching file name.</p>
+        <div class="demo-code"><pre><code class="language-dart">// class name: UserProfileScreen
+// file name:  user_profile_screen.dart   ← lowercase, underscores between words</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="filename-class" placeholder="ClassName" value="UserProfileScreen" style="flex:1;min-width:200px" oninput="fzDemo27()">
+          </div>
+          <div class="demo-output" id="out-2-7"></div>
+        </div>
+      </div>
+
+      <div class="part-banner flutter-b" id="part-3">
+        <span class="pnum">PART 03</span><span class="ptitle">Your First Widgets</span>
+        <span class="desc">StatelessWidget, StatefulWidget, and the four or five widgets that show up in almost every screen you'll ever build.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — the two kinds of widget</div>
+        <div class="primer-sub">Every widget you'll write is one of exactly two kinds — knowing which one you need is the very first decision in building any screen.</div>
+        <ol class="primer-list">
+          <li><strong>StatelessWidget</strong> — a widget with no memory of its own. Give it the same inputs twice, get the exact same output twice. Perfect for anything that doesn't change once it's drawn — a label, an icon, a static card.</li>
+          <li><strong>StatefulWidget</strong> — a widget that <em>can</em> change over time, in response to user interaction or data arriving. It has an attached piece of memory (its "state") that persists across rebuilds.</li>
+          <li>Every widget class has a <strong><code>build()</code> method</strong> — this is the function Flutter calls to ask "what should you look like right now?" It returns a tree of other widgets, and Flutter calls it again anytime something changes.</li>
+          <li><strong><code>Text('...')</code></strong> displays a string. <strong><code>Icon(...)</code></strong> displays a built-in icon. <strong><code>Container(...)</code></strong> is a flexible box — color, padding, margin, size, decoration all live here.</li>
+          <li><strong>Every widget is a Dart class</strong> — this is Part 01's class lesson made concrete. Creating a widget on screen is exactly like Demo 3's <code>Person('Amara', 25)</code>, just with a widget class instead.</li>
+        </ol>
+      </div>
+
+      <div class="demo flutter" id="demo-3-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>Text — adjust it live</h4></div>
+        <p class="desc">The simplest possible widget: a string in, styled text out. Try every control below.</p>
+        <div class="demo-code"><pre><code class="language-dart">Text(
+  'Hello, Flutter!',
+  style: TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.blue,
+  ),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="text-content" placeholder="text" value="Hello, Flutter!" style="flex:1;min-width:180px" oninput="fzDemo31()">
+            <label>size <input type="range" id="text-size" min="12" max="40" value="24" oninput="fzDemo31()"></label>
+          </div>
+          <div class="demo-controls">
+            <label><input type="checkbox" id="text-bold" onchange="fzDemo31()"> bold</label>
+            <label>color
+              <select id="text-color" onchange="fzDemo31()">
+                <option value="#0175C2">blue</option>
+                <option value="#FF6B8B">pink</option>
+                <option value="#1a1a2e">black</option>
+                <option value="#2E7D32">green</option>
+              </select>
+            </label>
+          </div>
+          <div class="phone" style="width:220px;">
+            <div class="phone-notch"></div>
+            <div class="phone-screen" style="min-height:120px;align-items:center;justify-content:center;display:flex;">
+              <span id="text-preview" style="font-size:24px;color:#0175C2;">Hello, Flutter!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-3-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Container — the box everything else lives inside</h4></div>
+        <p class="desc"><code>Container</code> is the widget you'll reach for constantly — color, size, padding, margin, and rounded corners, all in one place.</p>
+        <div class="demo-code"><pre><code class="language-dart">Container(
+  width: 160,
+  height: 100,
+  padding: EdgeInsets.all(16),
+  margin: EdgeInsets.all(12),
+  decoration: BoxDecoration(
+    color: Colors.blue,
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Text('Inside the box', style: TextStyle(color: Colors.white)),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>padding <input type="range" id="cont-padding" min="0" max="40" value="16" oninput="fzDemo32()"></label>
+            <label>radius <input type="range" id="cont-radius" min="0" max="40" value="12" oninput="fzDemo32()"></label>
+          </div>
+          <div class="demo-controls">
+            <label>color
+              <select id="cont-color" onchange="fzDemo32()">
+                <option value="#0175C2">blue</option>
+                <option value="#FF6B8B">pink</option>
+                <option value="#FFB020">amber</option>
+                <option value="#2E7D32">green</option>
+              </select>
+            </label>
+          </div>
+          <div style="background:#1a2440;padding:24px;border-radius:8px;display:flex;justify-content:center;">
+            <div id="container-preview" style="background:#0175C2;border-radius:12px;padding:16px;color:#fff;font-family:var(--mono);font-size:12px;">Inside the box</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-3-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>StatelessWidget vs. StatefulWidget — the same button, both ways</h4></div>
+        <p class="desc">Watch what happens when you tap each button. One of these classes literally cannot remember anything happened.</p>
+        <div class="demo-code"><pre><code class="language-dart">// StatelessWidget — no memory. Every tap does nothing to what's on screen.
+class GreetingButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(onPressed: () {}, child: Text('Tap me'));
+  }
+}
+
+// StatefulWidget — has memory, via setState (Part 05 covers this fully)
+class CounterButton extends StatefulWidget {
+  @override
+  State<CounterButton> createState() => _CounterButtonState();
+}
+class _CounterButtonState extends State<CounterButton> {
+  int taps = 0;
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => setState(() => taps++),
+      child: Text('Tapped $taps times'),
+    );
+  }
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn alt" onclick="fzDemo33('stateless')">Tap the StatelessWidget</button>
+            <button class="dbtn" onclick="fzDemo33('stateful')">Tap the StatefulWidget</button>
+          </div>
+          <div class="demo-output" id="out-3-3"></div>
+        </div>
+        <div class="callout">
+          <span class="why">This is the single most important distinction in Flutter</span>
+          <p>Neither is "better" — a static label should be a <code>StatelessWidget</code>, because giving it memory it doesn't need is wasted complexity. Anything that changes in response to interaction needs to be a <code>StatefulWidget</code>. Part 05 goes all the way into how <code>setState</code> actually works.</p>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-3-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Icon — built-in, scalable, and easy to color</h4></div>
+        <p class="desc">Flutter ships with the entire Material Icons set built in — no image files needed for common icons.</p>
+        <div class="demo-code"><pre><code class="language-dart">Icon(Icons.favorite, size: 32, color: Colors.pink)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <select id="icon-select" onchange="fzDemo34()">
+              <option value="❤️">Icons.favorite</option>
+              <option value="⭐">Icons.star</option>
+              <option value="🏠">Icons.home</option>
+              <option value="⚙️">Icons.settings</option>
+            </select>
+            <label>size <input type="range" id="icon-size" min="16" max="64" value="32" oninput="fzDemo34()"></label>
+          </div>
+          <div id="icon-preview" style="font-size:32px;text-align:center;padding:10px;">❤️</div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-3-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Image — asset vs. network, and the code difference</h4></div>
+        <p class="desc">Two widgets, almost identical to use — one loads from your bundled assets, one loads over the internet.</p>
+        <div class="demo-code"><pre><code class="language-dart">Image.asset('assets/images/logo.png')     // bundled with the app, works offline
+
+Image.network('https://example.com/photo.jpg')   // fetched live, needs an internet connection</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo35('asset')">Image.asset()</button>
+            <button class="dbtn" onclick="fzDemo35('network')">Image.network()</button>
+          </div>
+          <div class="demo-output" id="out-3-5"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-3-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>Composing a real profile card — everything so far, combined</h4></div>
+        <p class="desc">Text, Container, Row, and Column, all together — this is what "real" Flutter code actually looks like once the individual pieces click.</p>
+        <div class="demo-code"><pre><code class="language-dart">Container(
+  padding: EdgeInsets.all(16),
+  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+  child: Row(
+    children: [
+      Icon(Icons.account_circle, size: 48, color: Colors.blue),
+      SizedBox(width: 12),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Amara Okafor', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text('Flutter Developer', style: TextStyle(color: Colors.grey)),
+        ],
+      ),
+    ],
+  ),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="card-name" value="Amara Okafor" placeholder="name" oninput="fzDemo36()">
+            <input type="text" id="card-title" value="Flutter Developer" placeholder="title" oninput="fzDemo36()">
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:20px;display:flex;justify-content:center;">
+            <div style="background:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;min-width:220px;">
+              <span style="font-size:40px;color:#0175C2;">👤</span>
+              <div>
+                <div id="card-name-out" style="font-weight:700;color:#1a1a2e;">Amara Okafor</div>
+                <div id="card-title-out" style="color:#888;font-size:13px;">Flutter Developer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-3-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>Four button types — and when to use each</h4></div>
+        <p class="desc">Flutter ships several button widgets, each signaling a different importance level to the user.</p>
+        <div class="demo-code"><pre><code class="language-dart">ElevatedButton(onPressed: () {}, child: Text('Primary action'))   // raised, filled — the main action
+OutlinedButton(onPressed: () {}, child: Text('Secondary action')) // outlined — a lesser action
+TextButton(onPressed: () {}, child: Text('Cancel'))               // flat text — lowest emphasis
+IconButton(onPressed: () {}, icon: Icon(Icons.favorite))          // just an icon, no label</code></pre></div>
+        <div class="demo-panel">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <button style="background:#0175C2;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;">Primary action</button>
+            <button style="background:transparent;color:#0175C2;border:1px solid #0175C2;border-radius:6px;padding:10px 18px;font-size:13px;">Secondary action</button>
+            <button style="background:transparent;color:#0175C2;border:none;padding:10px 18px;font-size:13px;">Cancel</button>
+            <button style="background:transparent;border:none;font-size:20px;color:#FF6B8B;cursor:pointer;">❤️</button>
+          </div>
+          <p style="margin-top:12px;font-size:13px;color:var(--text-dim);">One screen should usually have exactly one <code>ElevatedButton</code> — the single most important action. Everything else takes a lower-emphasis style.</p>
+        </div>
+      </div>
+
+      <div class="part-banner flutter-b" id="part-4">
+        <span class="pnum">PART 04</span><span class="ptitle">Layout Widgets</span>
+        <span class="desc">Row, Column, Stack, and the sizing widgets that control them — every playground below is a live HTML flexbox mockup built to move exactly like the real thing.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — main axis vs. cross axis</div>
+        <div class="primer-sub">One idea underlies almost everything in this part — get this straight and every alignment property below makes sense on sight.</div>
+        <ol class="primer-list">
+          <li><strong>Row</strong> arranges children left to right. <strong>Column</strong> arranges children top to bottom. Same concept, opposite direction.</li>
+          <li>Every Row/Column has a <strong>main axis</strong> — the direction it lays children out in — and a <strong>cross axis</strong>, perpendicular to it. For a Row, main axis is horizontal, cross axis is vertical. For a Column, it's flipped.</li>
+          <li><strong><code>mainAxisAlignment</code></strong> controls spacing <em>along</em> the main axis — bunched at the start, spread evenly, centered, etc. <strong><code>crossAxisAlignment</code></strong> controls alignment <em>across</em> the cross axis.</li>
+          <li><strong><code>Expanded</code></strong> tells a child "take up all the leftover space." <strong><code>Flexible</code></strong> is similar but allows the child to be smaller than the space it's offered — Demo 2 makes the difference visible.</li>
+          <li><strong><code>Stack</code></strong> is different from Row/Column entirely — instead of arranging children in a line, it layers them on top of each other, like layers in a design tool. <strong><code>Positioned</code></strong> pins a Stack child to a specific spot.</li>
+          <li><strong><code>Padding</code></strong> adds space <em>inside</em> a widget's own edge. <strong><code>SizedBox</code></strong> is most often used as a fixed-size spacer between widgets, with no visible content of its own.</li>
+        </ol>
+      </div>
+
+      <div class="demo flutter" id="demo-4-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>Row &amp; Column — mainAxisAlignment live</h4></div>
+        <p class="desc">Same three boxes, same widget — only the alignment option changes. Click each one.</p>
+        <div class="demo-code"><pre><code class="language-dart">Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [Box(), Box(), Box()],
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzAxis('row')">Row (horizontal)</button>
+            <button class="dbtn alt" onclick="fzAxis('column')">Column (vertical)</button>
+          </div>
+          <div class="demo-controls">
+            <select id="main-axis-select" onchange="fzDemo41()">
+              <option value="start">MainAxisAlignment.start</option>
+              <option value="center">MainAxisAlignment.center</option>
+              <option value="end">MainAxisAlignment.end</option>
+              <option value="spaceBetween">MainAxisAlignment.spaceBetween</option>
+              <option value="spaceAround">MainAxisAlignment.spaceAround</option>
+              <option value="spaceEvenly">MainAxisAlignment.spaceEvenly</option>
+            </select>
+          </div>
+          <div id="axis-preview" style="background:#1a2440;border-radius:8px;padding:16px;display:flex;flex-direction:row;justify-content:flex-start;min-height:100px;gap:0;">
+            <div class="widget-box" style="background:#0175C2;color:#fff;border:none;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">1</div>
+            <div class="widget-box" style="background:#13B9FD;color:#04202E;border:none;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">2</div>
+            <div class="widget-box" style="background:#FF6B8B;color:#3A1424;border:none;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">3</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-4-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Expanded &amp; Flexible — proportional sizing</h4></div>
+        <p class="desc">Three boxes in a Row, each wrapped in <code>Expanded</code> with a different <code>flex</code> value — drag the sliders and watch the ratio hold.</p>
+        <div class="demo-code"><pre><code class="language-dart">Row(
+  children: [
+    Expanded(flex: 1, child: Box(color: Colors.blue)),
+    Expanded(flex: 2, child: Box(color: Colors.cyan)),
+    Expanded(flex: 1, child: Box(color: Colors.pink)),
+  ],
+)
+// total flex = 4 — box 2 always gets exactly 2/4 (half) of the available width</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>box 1 flex <input type="range" id="flex-1" min="1" max="5" value="1" oninput="fzDemo42()"></label>
+            <label>box 2 flex <input type="range" id="flex-2" min="1" max="5" value="2" oninput="fzDemo42()"></label>
+            <label>box 3 flex <input type="range" id="flex-3" min="1" max="5" value="1" oninput="fzDemo42()"></label>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:16px;display:flex;flex-direction:row;gap:4px;height:70px;">
+            <div id="flex-box-1" style="background:#0175C2;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:11px;flex:1;">1</div>
+            <div id="flex-box-2" style="background:#13B9FD;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#04202E;font-family:var(--mono);font-size:11px;flex:2;">2</div>
+            <div id="flex-box-3" style="background:#FF6B8B;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#3A1424;font-family:var(--mono);font-size:11px;flex:1;">3</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-4-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>Stack &amp; Positioned — layering, not lining up</h4></div>
+        <p class="desc">A Stack ignores the "one after another" idea entirely — every child sits on top of the last, and <code>Positioned</code> pins a child to a specific edge.</p>
+        <div class="demo-code"><pre><code class="language-dart">Stack(
+  children: [
+    Container(width: 200, height: 120, color: Colors.blue),       // bottom layer
+    Positioned(
+      right: 8, top: 8,
+      child: Icon(Icons.favorite, color: Colors.white),           // pinned to top-right
+    ),
+    Positioned(
+      left: 8, bottom: 8,
+      child: Text('Caption', style: TextStyle(color: Colors.white)),
+    ),
+  ],
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label><input type="checkbox" id="stack-icon" checked onchange="fzDemo43()"> show pinned icon (top-right)</label>
+            <label><input type="checkbox" id="stack-caption" checked onchange="fzDemo43()"> show caption (bottom-left)</label>
+          </div>
+          <div style="background:#0175C2;border-radius:8px;width:100%;max-width:280px;height:140px;position:relative;">
+            <span id="stack-icon-el" style="position:absolute;top:8px;right:8px;font-size:20px;">❤️</span>
+            <span id="stack-caption-el" style="position:absolute;left:8px;bottom:8px;color:#fff;font-family:var(--mono);font-size:12px;">Caption</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-4-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Padding &amp; SizedBox — spacing, made explicit</h4></div>
+        <p class="desc">Unlike CSS, spacing in Flutter is never implicit — you always add a specific widget for it. Drag the sliders.</p>
+        <div class="demo-code"><pre><code class="language-dart">Padding(
+  padding: EdgeInsets.all(20),
+  child: Text('Padded text'),
+)
+
+Column(
+  children: [
+    Text('First line'),
+    SizedBox(height: 16),   // a fixed-size, invisible spacer — nothing else
+    Text('Second line'),
+  ],
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>Padding.all <input type="range" id="pad-value" min="0" max="40" value="20" oninput="fzDemo44()"></label>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:8px;display:inline-block;">
+            <div id="pad-preview" style="background:#0175C2;padding:20px;border-radius:6px;color:#fff;font-family:var(--mono);font-size:11px;">Padded text</div>
+          </div>
+          <div class="demo-controls" style="margin-top:14px;">
+            <label>SizedBox height <input type="range" id="sizedbox-value" min="0" max="60" value="16" oninput="fzDemo44b()"></label>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:14px;display:flex;flex-direction:column;">
+            <div style="color:#EAEEF7;font-family:var(--mono);font-size:12px;">First line</div>
+            <div id="sizedbox-spacer" style="height:16px;"></div>
+            <div style="color:#EAEEF7;font-family:var(--mono);font-size:12px;">Second line</div>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="why">Why Flutter makes you spell out every gap</span>
+          <p>CSS has margin collapsing, implicit gaps, and cascading rules that can make "why is there space here" a genuine mystery to debug. Flutter's explicit-widget-for-everything approach means the space in front of you is always traceable to one specific line of code that put it there — more typing, but nothing implicit to hunt for.</p>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-4-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Wrap — items that flow to the next line instead of overflowing</h4></div>
+        <p class="desc">A Row that runs out of horizontal space overflows and throws an error. <code>Wrap</code> solves that by moving extra items to a new line automatically — resize by adding more tags.</p>
+        <div class="demo-code"><pre><code class="language-dart">Wrap(
+  spacing: 8,      // horizontal gap between items
+  runSpacing: 8,   // vertical gap between lines
+  children: tags.map((tag) => Chip(label: Text(tag))).toList(),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo45add()">Add a tag</button>
+            <button class="dbtn alt" onclick="fzDemo45reset()">Reset</button>
+          </div>
+          <div id="wrap-preview" style="background:#1a2440;border-radius:8px;padding:14px;display:flex;flex-wrap:wrap;gap:8px;max-width:280px;"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-4-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>ListView — a scrollable list, one line of code</h4></div>
+        <p class="desc">A Column doesn't scroll — if its children overflow the screen, it errors. <code>ListView</code> is the fix, and it's what almost every real list in a real app actually uses.</p>
+        <div class="demo-code"><pre><code class="language-dart">ListView.builder(
+  itemCount: items.length,
+  itemBuilder: (context, index) => ListTile(title: Text(items[index])),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div style="background:#1a2440;border-radius:8px;padding:8px;height:140px;overflow-y:auto;">
+            <div style="padding:8px 10px;border-bottom:1px solid #243459;color:#EAEEF7;font-size:13px;">Item 1</div>
+            <div style="padding:8px 10px;border-bottom:1px solid #243459;color:#EAEEF7;font-size:13px;">Item 2</div>
+            <div style="padding:8px 10px;border-bottom:1px solid #243459;color:#EAEEF7;font-size:13px;">Item 3</div>
+            <div style="padding:8px 10px;border-bottom:1px solid #243459;color:#EAEEF7;font-size:13px;">Item 4</div>
+            <div style="padding:8px 10px;border-bottom:1px solid #243459;color:#EAEEF7;font-size:13px;">Item 5</div>
+            <div style="padding:8px 10px;color:#EAEEF7;font-size:13px;">Item 6 — scroll to see me</div>
+          </div>
+          <p style="margin-top:10px;font-size:12.5px;color:var(--text-dim);">Try scrolling the box above — that's the whole feature, built in for free.</p>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-4-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>Align vs. Center — Center is really just a special case of Align</h4></div>
+        <p class="desc"><code>Center</code> is shorthand for "align in the exact middle." <code>Align</code> lets you pick any position, not just the center.</p>
+        <div class="demo-code"><pre><code class="language-dart">Align(alignment: Alignment.topRight, child: Icon(Icons.close))
+Align(alignment: Alignment.bottomLeft, child: Text('v1.0.0'))
+Center(child: Text('Perfectly centered'))   // shorthand for Alignment.center</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <select id="align-select" onchange="fzDemo47()">
+              <option value="center">Alignment.center (via Center)</option>
+              <option value="topRight">Alignment.topRight</option>
+              <option value="bottomLeft">Alignment.bottomLeft</option>
+              <option value="topLeft">Alignment.topLeft</option>
+            </select>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:0;height:120px;display:flex;position:relative;">
+            <div id="align-box" style="background:#13B9FD;color:#04202E;border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:11px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">box</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="part-banner flutter-b" id="part-5">
+        <span class="pnum">PART 05</span><span class="ptitle">State Management Basics</span>
+        <span class="desc">setState in full — and if Unlearn.js's state/render pattern is familiar, this is the exact same idea, wearing Flutter's syntax.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — what setState actually does</div>
+        <div class="primer-sub">One method call, doing a very specific job — worth being precise about before Demo 1 uses it.</div>
+        <ol class="primer-list">
+          <li><strong>State</strong> is just data that can change while the app runs — a counter's number, whether a checkbox is checked, a list of items. It lives inside a <code>State</code> class, attached to a <code>StatefulWidget</code>.</li>
+          <li><strong><code>setState(() { ... })</code></strong> does two things: runs the code inside the parentheses (usually changing a variable), and tells Flutter "something changed, please call <code>build()</code> again."</li>
+          <li>Changing a variable <em>without</em> calling <code>setState</code> updates the data, but Flutter never finds out — the screen simply won't update. This is the single most common beginner bug in Flutter.</li>
+          <li><strong>The widget lifecycle</strong> — <code>initState()</code> runs once, right when a StatefulWidget is first created (a good place to set up initial data). <code>build()</code> runs every time the screen needs to redraw. <code>dispose()</code> runs once, when the widget is removed for good (a good place to clean things up).</li>
+          <li><strong>"Lifting state up"</strong> means moving a piece of state from a child widget up to a shared parent, when two or more siblings both need access to it — Demo 2 below builds exactly this.</li>
+        </ol>
+      </div>
+
+      <div class="demo flutter" id="demo-5-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>setState, live — and what forgetting it looks like</h4></div>
+        <p class="desc">Both counters below use the same starting code. One calls <code>setState</code>, one doesn't. Tap both a few times.</p>
+        <div class="demo-code"><pre><code class="language-dart">class _CounterState extends State<Counter> {
+  int count = 0;
+
+  void increment() {
+    count++;              // ❌ the number DID change...
+    // setState(() {});   // ...but Flutter was never told to redraw
+  }
+
+  void incrementCorrectly() {
+    setState(() {
+      count++;             // ✅ changes the data AND tells Flutter to redraw
+    });
+  }
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn danger" onclick="fzDemo51('broken')">Tap: forgot setState</button>
+            <button class="dbtn good" onclick="fzDemo51('correct')">Tap: with setState</button>
+          </div>
+          <div class="demo-output" id="out-5-1"></div>
+        </div>
+        <div class="callout">
+          <span class="why">The data changed both times — only the screen tells the difference</span>
+          <p>This is worth sitting with: the "broken" version's <code>count</code> variable really is incrementing under the hood, every single tap. The bug isn't in the math — it's that Flutter was never told to look again and redraw. This is exactly why <code>setState</code> exists as a distinct step from just changing a variable.</p>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-5-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Lifting state up — two widgets, one shared source of truth</h4></div>
+        <p class="desc">A counter display and a reset button are separate widgets — but they both need to agree on the same number. The count lives in their shared parent.</p>
+        <div class="demo-code"><pre><code class="language-dart">class ParentScreen extends StatefulWidget {
+  @override
+  State<ParentScreen> createState() => _ParentScreenState();
+}
+class _ParentScreenState extends State<ParentScreen> {
+  int sharedCount = 0;   // lives in the PARENT, not in either child
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      CounterDisplay(count: sharedCount),                              // just displays it
+      IncrementButton(onPressed: () => setState(() => sharedCount++)), // just requests a change
+    ]);
+  }
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="mini-card" id="lift-display" style="text-align:center;font-size:20px;font-weight:700;color:var(--flutter);margin-bottom:12px;">Shared count: 0</div>
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo52inc()">Child A: increment</button>
+            <button class="dbtn alt" onclick="fzDemo52reset()">Child B: reset</button>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="why">Why neither child holds the count itself</span>
+          <p>If each child kept its own copy, they could drift apart — exactly the bug Unlearn.js's Part 06 demonstrated with two DOM elements manually kept in sync. One parent, one number, both children just read from or request changes to it — never their own separate copy.</p>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-5-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>The widget lifecycle, visualized</h4></div>
+        <p class="desc">Click through the three moments every StatefulWidget passes through.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo53('init')">1. initState()</button>
+            <button class="dbtn" onclick="fzDemo53('build')">2. build()</button>
+            <button class="dbtn" onclick="fzDemo53('dispose')">3. dispose()</button>
+          </div>
+          <div class="demo-output" id="out-5-3"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-5-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>TextEditingController — reading what someone typed</h4></div>
+        <p class="desc">A text field's content isn't automatically part of your state — a <code>TextEditingController</code> is what actually connects what's typed to variables you can use.</p>
+        <div class="demo-code"><pre><code class="language-dart">final controller = TextEditingController();
+
+TextField(
+  controller: controller,
+  onChanged: (value) => setState(() {}),   // rebuild so the preview below updates live
+)
+
+Text('You typed: ${controller.text}')</code></pre></div>
+        <div class="demo-panel">
+          <input type="text" id="controller-input" placeholder="type something..." style="width:100%;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:13px;" oninput="fzDemo54()">
+          <div class="mini-card" id="controller-preview">You typed: (nothing yet)</div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-5-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Conditional rendering — showing or hiding a widget based on state</h4></div>
+        <p class="desc">There's no special "if-widget" — you just use a normal Dart <code>if</code> (or ternary) directly inside <code>build()</code>.</p>
+        <div class="demo-code"><pre><code class="language-dart">Column(
+  children: [
+    if (isLoggedIn) Text('Welcome back!') else Text('Please log in'),
+    if (hasError) Text('Something went wrong', style: TextStyle(color: Colors.red)),
+  ],
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label><input type="checkbox" id="cond-loggedin" checked onchange="fzDemo55()"> isLoggedIn</label>
+            <label><input type="checkbox" id="cond-error" onchange="fzDemo55()"> hasError</label>
+          </div>
+          <div class="mini-card" id="cond-preview"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-5-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>Toggling a list item — the "like button" pattern</h4></div>
+        <p class="desc">A very common real pattern: each item in a list tracks its own boolean, and tapping flips just that one.</p>
+        <div class="demo-code"><pre><code class="language-dart">List<Map<String, dynamic>> posts = [
+  {'title': 'Flutter tips', 'liked': false},
+  {'title': 'Dart null safety', 'liked': false},
+];
+
+IconButton(
+  icon: Icon(posts[index]['liked'] ? Icons.favorite : Icons.favorite_border),
+  onPressed: () => setState(() => posts[index]['liked'] = !posts[index]['liked']),
+)</code></pre></div>
+        <div class="demo-panel">
+          <ul class="mini-list" id="like-list"></ul>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-5-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>Basic form validation</h4></div>
+        <p class="desc">A simple, common check — is the field empty? Real forms use Flutter's built-in <code>Form</code>/<code>TextFormField</code> validators, but the underlying idea is exactly this.</p>
+        <div class="demo-code"><pre><code class="language-dart">String? validateEmail(String value) {
+  if (value.isEmpty) return 'Email is required';
+  if (!value.contains('@')) return 'Enter a valid email';
+  return null;   // null means "valid"
+}</code></pre></div>
+        <div class="demo-panel">
+          <input type="text" id="validate-email" placeholder="email" style="width:100%;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:13px;">
+          <button class="dbtn" onclick="fzDemo57()">Validate</button>
+          <div class="demo-output" id="out-5-7" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="part-banner flutter-b" id="part-6">
+        <span class="pnum">PART 06</span><span class="ptitle">Navigation &amp; Screens</span>
+        <span class="desc">Moving between screens, passing data along the way, and the bottom nav bar pattern nearly every app uses.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — how screens actually work in Flutter</div>
+        <div class="primer-sub">There's no separate "router" file the way some web frameworks have — navigation is just another widget operation.</div>
+        <ol class="primer-list">
+          <li><strong>A "screen" in Flutter is just a widget</strong> — usually a full-page one, but structurally no different from any other widget you've already seen.</li>
+          <li><strong><code>Navigator.push(context, route)</code></strong> puts a new screen on top of a stack, like adding a card to a deck — the old screen is still there underneath, just hidden.</li>
+          <li><strong><code>Navigator.pop(context)</code></strong> removes the current screen, revealing whatever was underneath — this is what a back button does.</li>
+          <li><strong><code>MaterialPageRoute</code></strong> is the most common way to describe "what screen to push" — it wraps the destination widget and handles the transition animation for you.</li>
+          <li>Data can be <strong>passed forward</strong> as constructor arguments to the new screen, and <strong>passed back</strong> as a return value from <code>Navigator.pop(context, someValue)</code>.</li>
+        </ol>
+      </div>
+
+      <div class="demo flutter" id="demo-6-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>Navigator.push / pop — a real two-screen stack</h4></div>
+        <p class="desc">Push a detail screen on top, then pop back — this is exactly how every "tap to see more" flow in a real app works.</p>
+        <div class="demo-code"><pre><code class="language-dart">// on the list screen:
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => DetailScreen(item: selectedItem)),
+);
+
+// on the detail screen, a back button:
+Navigator.pop(context);</code></pre></div>
+        <div class="demo-panel">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen" id="nav-phone-screen">
+              <div class="phone-appbar">Products</div>
+              <div class="phone-body" id="nav-screen-list">
+                <div class="mini-card" style="margin-bottom:8px;cursor:pointer;" onclick="fzNavPush()">Wireless Mouse →</div>
+                <div class="mini-card" style="margin-bottom:8px;cursor:pointer;" onclick="fzNavPush()">Mechanical Keyboard →</div>
+              </div>
+            </div>
+          </div>
+          <div class="demo-output" id="out-6-1" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-6-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Bottom navigation — switching between top-level screens</h4></div>
+        <p class="desc">Unlike push/pop, tabs don't stack — tapping one just swaps which screen is currently showing.</p>
+        <div class="demo-code"><pre><code class="language-dart">BottomNavigationBar(
+  currentIndex: selectedIndex,
+  onTap: (index) => setState(() => selectedIndex = index),
+  items: [
+    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+    BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+  ],
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-appbar" id="tab-title">Home</div>
+              <div class="phone-body" id="tab-body" style="display:flex;align-items:center;justify-content:center;color:#888;">🏠 Home screen content</div>
+              <div style="display:flex;border-top:1px solid #eee;">
+                <div class="tab-item" data-tab="home" onclick="fzTabSwitch('home')" style="flex:1;text-align:center;padding:10px;cursor:pointer;color:var(--dart);font-size:11px;">🏠<br>Home</div>
+                <div class="tab-item" data-tab="search" onclick="fzTabSwitch('search')" style="flex:1;text-align:center;padding:10px;cursor:pointer;color:#999;font-size:11px;">🔍<br>Search</div>
+                <div class="tab-item" data-tab="profile" onclick="fzTabSwitch('profile')" style="flex:1;text-align:center;padding:10px;cursor:pointer;color:#999;font-size:11px;">👤<br>Profile</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-6-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>Passing data forward to a new screen</h4></div>
+        <p class="desc">Data goes forward the same way any Dart class receives data — as a constructor argument.</p>
+        <div class="demo-code"><pre><code class="language-dart">Navigator.push(
+  context,
+  MaterialPageRoute(builder: (_) => ProductDetailScreen(productName: 'Wireless Mouse', price: 24.99)),
+);
+
+class ProductDetailScreen extends StatelessWidget {
+  final String productName;
+  final double price;
+  const ProductDetailScreen({required this.productName, required this.price});
+  // build() can now use productName and price directly
+}</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <input type="text" id="pass-name" value="Wireless Mouse" placeholder="product name">
+            <input type="number" id="pass-price" value="24.99" placeholder="price" step="0.01">
+            <button class="dbtn" onclick="fzDemo63()">Push with this data</button>
+          </div>
+          <div class="demo-output" id="out-6-3"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-6-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Returning data back with pop</h4></div>
+        <p class="desc"><code>Navigator.pop</code> can carry a value back to whoever pushed the screen — perfect for "pick an item and return to the previous screen with it."</p>
+        <div class="demo-code"><pre><code class="language-dart">// on the picker screen:
+Navigator.pop(context, 'Blue');   // pop, handing back a value
+
+// on the screen that pushed it:
+final selectedColor = await Navigator.push(context, MaterialPageRoute(builder: (_) => ColorPicker()));
+print(selectedColor);   // 'Blue'</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo64('Blue')">Pick "Blue"</button>
+            <button class="dbtn" onclick="fzDemo64('Red')">Pick "Red"</button>
+            <button class="dbtn" onclick="fzDemo64('Green')">Pick "Green"</button>
+          </div>
+          <div class="demo-output" id="out-6-4"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-6-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Named routes — an alternative to MaterialPageRoute</h4></div>
+        <p class="desc">Instead of building a route inline every time, you can register routes by name once, then navigate by string.</p>
+        <div class="demo-code"><pre><code class="language-dart">MaterialApp(
+  routes: {
+    '/': (context) => HomeScreen(),
+    '/settings': (context) => SettingsScreen(),
+    '/profile': (context) => ProfileScreen(),
+  },
+)
+
+Navigator.pushNamed(context, '/settings');   // navigate by name, no import of the screen needed here</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <select id="route-select">
+              <option value="/settings">/settings</option>
+              <option value="/profile">/profile</option>
+              <option value="/">/  (home)</option>
+            </select>
+            <button class="dbtn" onclick="fzDemo65()">Navigator.pushNamed()</button>
+          </div>
+          <div class="demo-output" id="out-6-5"></div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-6-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>Drawer — the slide-out side menu</h4></div>
+        <p class="desc">A <code>Drawer</code> attaches to <code>Scaffold</code> directly and slides in from the edge — tap the menu icon.</p>
+        <div class="demo-code"><pre><code class="language-dart">Scaffold(
+  appBar: AppBar(title: Text('My App')),
+  drawer: Drawer(
+    child: ListView(children: [
+      DrawerHeader(child: Text('Menu')),
+      ListTile(title: Text('Home'), onTap: () {}),
+      ListTile(title: Text('Settings'), onTap: () {}),
+    ]),
+  ),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="phone" style="width:220px;">
+            <div class="phone-notch"></div>
+            <div class="phone-screen" style="min-height:160px;position:relative;overflow:hidden;">
+              <div class="phone-appbar" style="display:flex;align-items:center;gap:10px;">
+                <span onclick="fzDemo66()" style="cursor:pointer;">☰</span> My App
+              </div>
+              <div class="phone-body" style="color:#888;font-size:12px;">Screen content</div>
+              <div id="drawer-panel" style="position:absolute;top:0;left:-160px;bottom:0;width:160px;background:#0175C2;color:#fff;transition:left .25s;padding:14px;font-size:12px;">
+                <div style="font-weight:700;margin-bottom:10px;">Menu</div>
+                <div style="padding:6px 0;">Home</div>
+                <div style="padding:6px 0;">Settings</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo flutter" id="demo-6-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>AlertDialog — a modal that interrupts, on purpose</h4></div>
+        <p class="desc">Unlike pushing a new screen, a dialog floats above the current one and demands a response before it's dismissed.</p>
+        <div class="demo-code"><pre><code class="language-dart">showDialog(
+  context: context,
+  builder: (context) => AlertDialog(
+    title: Text('Delete item?'),
+    content: Text('This can\'t be undone.'),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+      TextButton(onPressed: () { /* delete */ Navigator.pop(context); }, child: Text('Delete')),
+    ],
+  ),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn danger" onclick="fzDemo67show()">Show delete confirmation</button>
+          </div>
+          <div id="dialog-overlay" style="display:none;background:rgba(0,0,0,.5);border-radius:8px;padding:30px;justify-content:center;">
+            <div style="background:#fff;border-radius:10px;padding:18px;max-width:220px;">
+              <div style="font-weight:700;margin-bottom:8px;color:#1a1a2e;">Delete item?</div>
+              <div style="font-size:13px;color:#555;margin-bottom:14px;">This can't be undone.</div>
+              <div style="display:flex;justify-content:flex-end;gap:12px;">
+                <span onclick="fzDemo67close('Cancel')" style="color:#0175C2;font-size:13px;cursor:pointer;">Cancel</span>
+                <span onclick="fzDemo67close('Delete')" style="color:#FF6B8B;font-size:13px;cursor:pointer;font-weight:700;">Delete</span>
+              </div>
+            </div>
+          </div>
+          <div class="demo-output" id="out-6-7"></div>
+        </div>
+      </div>
+
+      <div class="part-banner uiux-b" id="part-7">
+        <span class="pnum">PART 07</span><span class="ptitle">UI/UX Design Principles</span>
+        <span class="desc">The difference between an app that works and one that feels genuinely well-made — spacing, contrast, touch targets, and typography, with real calculators, not just advice.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — the vocabulary of "good design"</div>
+        <div class="primer-sub">These apply to every UI framework, not just Flutter — but Flutter gives you the exact tools to follow them.</div>
+        <ol class="primer-list">
+          <li><strong>Material Design</strong> is Google's design system, built into Flutter by default — consistent spacing, elevation, and component styles. <strong>Cupertino</strong> is Flutter's iOS-styled widget set, for when you want an app to feel native to iOS specifically.</li>
+          <li><strong>The 8-point grid</strong> is a spacing convention: every margin, padding, and gap is a multiple of 8 pixels (8, 16, 24, 32...). It's arbitrary as a specific number, but consistency is what actually matters — it's why well-designed apps feel "aligned" even when you can't say exactly why.</li>
+          <li><strong>Touch target size</strong> — Apple and Google both recommend interactive elements be at least 44×44 (iOS) or 48×48 (Android) logical pixels, even if the visible icon inside is smaller — Demo 2 below shows why.</li>
+          <li><strong>Contrast ratio</strong> is a mathematical measure of how different two colors are — WCAG accessibility guidelines require at least 4.5:1 for normal text to be legible for people with low vision. It's a real formula, not a vibe — Demo 3 calculates it live.</li>
+          <li><strong>A type scale</strong> is a small, fixed set of font sizes used consistently across an app (rather than picking a new size every time), so text hierarchy feels intentional instead of random.</li>
+        </ol>
+      </div>
+
+      <div class="demo uiux" id="demo-7-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>The 8-point grid — consistency you can see</h4></div>
+        <p class="desc">Same three boxes, same gaps — toggle between "random spacing" and "8pt grid spacing" and see which one looks intentional.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn danger" onclick="fzDemo71('random')">Random spacing</button>
+            <button class="dbtn good" onclick="fzDemo71('grid')">8pt grid spacing</button>
+          </div>
+          <div id="grid-preview" style="background:#1a2440;border-radius:8px;padding:16px;display:flex;flex-direction:column;">
+            <div style="background:#0175C2;height:40px;border-radius:6px;"></div>
+            <div id="grid-gap-1" style="height:16px;"></div>
+            <div style="background:#13B9FD;height:40px;border-radius:6px;"></div>
+            <div id="grid-gap-2" style="height:16px;"></div>
+            <div style="background:#FF6B8B;height:40px;border-radius:6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-7-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Touch target size — why the icon isn't the whole button</h4></div>
+        <p class="desc">Drag the slider down below 44px and try to imagine tapping this accurately with a real thumb, not a precise mouse cursor.</p>
+        <div class="demo-code"><pre><code class="language-dart">// the icon can be small — the TAPPABLE AREA around it shouldn't be
+IconButton(
+  icon: Icon(Icons.favorite, size: 20),
+  onPressed: () {},
+  // IconButton automatically enforces a 48x48 minimum tap area, even here
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>tap target size <input type="range" id="touch-size" min="24" max="64" value="44" oninput="fzDemo72()"></label>
+            <span id="touch-size-label" style="font-family:var(--mono);font-size:12px;">44px</span>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:24px;display:flex;justify-content:center;">
+            <div id="touch-target" style="width:44px;height:44px;background:rgba(255,107,139,.25);border:2px dashed #FF6B8B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">❤️</div>
+          </div>
+          <div class="demo-output" id="out-7-2"></div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-7-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>Contrast ratio — a real WCAG calculation, live</h4></div>
+        <p class="desc">Pick a text color and a background color — this computes the actual contrast ratio, the same formula accessibility auditing tools use.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>text <input type="text" id="contrast-fg" value="#666666" oninput="fzDemo73()"></label>
+            <label>background <input type="text" id="contrast-bg" value="#FFFFFF" oninput="fzDemo73()"></label>
+          </div>
+          <div id="contrast-preview" style="padding:20px;border-radius:8px;background:#FFFFFF;color:#666666;font-size:16px;text-align:center;">The quick brown fox jumps over the lazy dog</div>
+          <div class="demo-output" id="out-7-3" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-7-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>A type scale — hierarchy without guessing</h4></div>
+        <p class="desc">Material Design's default scale — the same five or six sizes, reused everywhere, instead of a new font size invented for every new piece of text.</p>
+        <div class="demo-panel">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:32px;font-weight:700;">Headline (32px / bold)</div>
+            <div style="font-size:22px;font-weight:600;">Title (22px / semibold)</div>
+            <div style="font-size:16px;font-weight:400;">Body text (16px / regular) — this is what most reading content uses.</div>
+            <div style="font-size:13px;color:var(--text-dim);">Caption / label (13px)</div>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="why">Why "just pick what looks right each time" goes wrong at scale</span>
+          <p>One screen with a font size chosen freehand looks fine. Fifty screens each with their own freehand choices looks inconsistent in a way users feel even if they can't articulate why. A fixed scale is what keeps a whole app feeling like one coherent product instead of fifty separate ones stitched together.</p>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-7-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Breathing room — cramped vs. spaced, same content</h4></div>
+        <p class="desc">No new widget here — literally the same three lines of content, with and without deliberate spacing. Notice how much this alone changes how "finished" something feels.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn danger" onclick="fzDemo75('cramped')">Cramped</button>
+            <button class="dbtn good" onclick="fzDemo75('spaced')">Spaced (8pt grid)</button>
+          </div>
+          <div id="breathing-preview" style="background:#fff;border-radius:8px;padding:4px;color:#1a1a2e;"></div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-7-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>Accessible color pairing — pick a background, get a safe text color</h4></div>
+        <p class="desc">Rather than guessing whether white or black text reads better on a given background, calculate it — this is the same contrast math from Demo 3, applied automatically.</p>
+        <div class="demo-code"><pre><code class="language-dart">Color textColor = backgroundColor.computeLuminance() > 0.5 ? Colors.black : Colors.white;</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>background <input type="text" id="pair-bg" value="#0175C2" oninput="fzDemo76()"></label>
+          </div>
+          <div id="pair-preview" style="padding:20px;border-radius:8px;text-align:center;font-weight:700;">Sample text on this background</div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-7-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>Consistent icon sizing — a small detail that reads as "polish"</h4></div>
+        <p class="desc">Mismatched icon sizes in the same row is one of the fastest ways an interface reads as homemade. Toggle to see the difference.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn danger" onclick="fzDemo77('inconsistent')">Inconsistent sizes</button>
+            <button class="dbtn good" onclick="fzDemo77('consistent')">Consistent sizes</button>
+          </div>
+          <div id="icon-row-preview" style="background:#1a2440;border-radius:8px;padding:16px;display:flex;gap:16px;align-items:center;justify-content:center;"></div>
+        </div>
+      </div>
+
+      <div class="part-banner uiux-b" id="part-8">
+        <span class="pnum">PART 08</span><span class="ptitle">Theming &amp; Styling</span>
+        <span class="desc">ThemeData, consistent color, and dark mode — the difference between hardcoding a color 200 times and defining it once.</span>
+      </div>
+
+      <div class="primer">
+        <div class="primer-head">🧩 Before you dive in — why theming is a Part on its own</div>
+        <div class="primer-sub">Two ideas — one about where colors live, one about how they change.</div>
+        <ol class="primer-list">
+          <li><strong>ThemeData</strong> is a single object where you define your app's colors, fonts, and component styles <em>once</em>, at the top level — every widget can then read from it instead of hardcoding its own values.</li>
+          <li><strong><code>Theme.of(context).colorScheme.primary</code></strong> is how a widget reads the current theme's primary color, rather than writing <code>Colors.blue</code> directly — this one line is what makes Demo 1 below possible.</li>
+          <li><strong>Dark mode</strong>, done properly, is just swapping which <code>ThemeData</code> is active — if every widget reads from the theme instead of hardcoding colors, the entire app switches appearance with zero changes to individual widgets.</li>
+        </ol>
+      </div>
+
+      <div class="demo uiux" id="demo-8-1">
+        <div class="demo-head"><span class="demo-num">1</span><h4>Hardcoded colors vs. a theme — the maintenance difference</h4></div>
+        <p class="desc">Both mini-apps below use "brand blue" in three places. Try changing the brand color on each — one requires editing one line, the other requires finding every instance.</p>
+        <div class="demo-code"><pre><code class="language-dart">// hardcoded — the color is typed three separate times
+AppBar(backgroundColor: Color(0xFF0175C2))
+ElevatedButton(style: ButtonStyle(backgroundColor: Color(0xFF0175C2)))
+Icon(Icons.star, color: Color(0xFF0175C2))
+
+// themed — defined once, read everywhere
+MaterialApp(theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF0175C2))))
+// every Material widget below automatically uses that seed color unless told otherwise</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>brand color <input type="range" id="theme-hue" min="0" max="360" value="205" oninput="fzDemo81()"></label>
+            <button class="dbtn" onclick="fzDemo81apply()">Apply to the "themed" mini-app only</button>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);margin-bottom:6px;">hardcoded (unaffected by the slider)</div>
+              <div style="width:140px;border-radius:8px;overflow:hidden;border:1px solid #243459;">
+                <div style="background:#0175C2;color:#fff;padding:8px;font-size:11px;">App Bar</div>
+                <div style="padding:10px;background:#fff;display:flex;flex-direction:column;gap:6px;align-items:center;">
+                  <button style="background:#0175C2;color:#fff;border:none;border-radius:5px;padding:5px 10px;font-size:10px;">Button</button>
+                  <span style="color:#0175C2;">★</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text-faint);margin-bottom:6px;">themed (updates instantly)</div>
+              <div style="width:140px;border-radius:8px;overflow:hidden;border:1px solid #243459;">
+                <div id="themed-appbar" style="background:#0175C2;color:#fff;padding:8px;font-size:11px;">App Bar</div>
+                <div style="padding:10px;background:#fff;display:flex;flex-direction:column;gap:6px;align-items:center;">
+                  <button id="themed-button" style="background:#0175C2;color:#fff;border:none;border-radius:5px;padding:5px 10px;font-size:10px;">Button</button>
+                  <span id="themed-icon" style="color:#0175C2;">★</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-8-2">
+        <div class="demo-head"><span class="demo-num">2</span><h4>Dark mode — one toggle, one variable</h4></div>
+        <p class="desc">If every widget reads from the theme, switching the whole app to dark mode is exactly this simple.</p>
+        <div class="demo-code"><pre><code class="language-dart">MaterialApp(
+  theme: ThemeData.light(),
+  darkTheme: ThemeData.dark(),
+  themeMode: isDark ? ThemeMode.dark : ThemeMode.light,   // one variable decides everything
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo82('light')">☀️ Light mode</button>
+            <button class="dbtn alt" onclick="fzDemo82('dark')">🌙 Dark mode</button>
+          </div>
+          <div class="phone" style="width:220px;">
+            <div class="phone-notch"></div>
+            <div class="phone-screen" id="darkmode-screen" style="min-height:140px;">
+              <div class="phone-appbar" id="darkmode-appbar">Settings</div>
+              <div class="phone-body" id="darkmode-body" style="color:#1a1a2e;">
+                <div style="font-size:13px;margin-bottom:6px;">Notifications</div>
+                <div style="font-size:13px;">Privacy</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-8-3">
+        <div class="demo-head"><span class="demo-num">3</span><h4>Custom fonts — swapping the default typeface</h4></div>
+        <p class="desc">A font has to be declared in <code>pubspec.yaml</code> before it can be used — then it's referenced by the family name you gave it.</p>
+        <div class="demo-code"><pre><code class="language-yaml"># pubspec.yaml
+flutter:
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700</code></pre></div>
+        <div class="demo-code"><pre><code class="language-dart">ThemeData(fontFamily: 'Poppins')   // applies to the whole app, once, via the theme</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo83('default')">Default font</button>
+            <button class="dbtn" onclick="fzDemo83('custom')">"Custom" font (serif, for contrast)</button>
+          </div>
+          <div id="font-preview" style="font-size:18px;padding:10px;">The quick brown fox jumps over the lazy dog</div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-8-4">
+        <div class="demo-head"><span class="demo-num">4</span><h4>Elevation — shadows that signal "this is above the page"</h4></div>
+        <p class="desc"><code>elevation</code> isn't just a shadow effect — it's Material Design's way of communicating depth and hierarchy: higher elevation reads as "more important" or "temporarily floating above everything else."</p>
+        <div class="demo-code"><pre><code class="language-dart">Card(elevation: 8, child: ...)   // higher number = larger, softer shadow = feels "higher up"</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>elevation <input type="range" id="elevation-value" min="0" max="24" value="4" oninput="fzDemo84()"></label>
+          </div>
+          <div style="background:#1a2440;border-radius:8px;padding:30px;display:flex;justify-content:center;">
+            <div id="elevation-card" style="background:#fff;border-radius:8px;padding:16px;width:120px;text-align:center;font-size:12px;color:#1a1a2e;">Card</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-8-5">
+        <div class="demo-head"><span class="demo-num">5</span><h4>Consistent border radius — a design token, not a magic number</h4></div>
+        <p class="desc">Same idea as the type scale from Part 07 — pick one or two radius values and reuse them everywhere, instead of a new number every time.</p>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <label>radius <input type="range" id="radius-value" min="0" max="24" value="12" oninput="fzDemo85()"></label>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div class="radius-box" style="background:#0175C2;width:60px;height:60px;border-radius:12px;"></div>
+            <div class="radius-box" style="background:#13B9FD;width:60px;height:60px;border-radius:12px;"></div>
+            <div class="radius-box" style="background:#FF6B8B;width:60px;height:60px;border-radius:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-8-6">
+        <div class="demo-head"><span class="demo-num">6</span><h4>Button states — default, pressed, and disabled</h4></div>
+        <p class="desc">A button that looks identical whether it's tappable or not is a real, common usability bug. Compare all three states.</p>
+        <div class="demo-code"><pre><code class="language-dart">ElevatedButton(
+  onPressed: isValid ? handleSubmit : null,   // null = automatically renders as disabled
+  child: Text('Submit'),
+)</code></pre></div>
+        <div class="demo-panel">
+          <div style="display:flex;gap:12px;">
+            <button style="background:#0175C2;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;">Default</button>
+            <button style="background:#015A99;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;box-shadow:inset 0 2px 4px rgba(0,0,0,.3);">Pressed</button>
+            <button style="background:#ccc;color:#888;border:none;border-radius:6px;padding:10px 18px;font-size:13px;cursor:not-allowed;">Disabled</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo uiux" id="demo-8-7">
+        <div class="demo-head"><span class="demo-num">7</span><h4>Responsive layout — adapting to screen width</h4></div>
+        <p class="desc">Flutter has no built-in "breakpoints" the way CSS does — you check the available width yourself, usually with <code>LayoutBuilder</code> or <code>MediaQuery</code>.</p>
+        <div class="demo-code"><pre><code class="language-dart">LayoutBuilder(
+  builder: (context, constraints) {
+    if (constraints.maxWidth > 600) {
+      return TwoColumnLayout();   // tablet / desktop
+    }
+    return SingleColumnLayout();  // phone
+  },
+)</code></pre></div>
+        <div class="demo-panel">
+          <div class="demo-controls">
+            <button class="dbtn" onclick="fzDemo87('phone')">📱 Phone width</button>
+            <button class="dbtn" onclick="fzDemo87('tablet')">💻 Tablet width</button>
+          </div>
+          <div id="responsive-preview" style="background:#1a2440;border-radius:8px;padding:12px;display:flex;gap:8px;transition:all .2s;"></div>
+        </div>
+      </div>
+
+      <section class="finale" id="finale">
+        <div class="eyebrow">The mental model, named</div>
+        <h2>Widget tree in, pixels out — that's the whole engine</h2>
+        <p>Every part above was really building toward one idea: Flutter has exactly one job — take a tree of widget objects describing "what should be on screen," and turn it into pixels. Everything else is a consequence of that one job.</p>
+
+        <ul>
+          <li><strong>Why everything is a widget, even spacing.</strong> If the rendering engine's whole job is "read a tree and paint it," then padding, alignment, and color all have to be nodes in that same tree — there's no separate system for them to live in.</li>
+          <li><strong>Why StatefulWidget and setState exist as a pair.</strong> The tree Flutter paints from is normally treated as fixed data — <code>setState</code> is the one sanctioned way to say "the data changed, please read the tree again and repaint."</li>
+          <li><strong>Why the file structure separates lib/ from android/ and ios/.</strong> Your widget tree (in <code>lib/</code>) is platform-agnostic by design — the platform folders are just the native shells that let Flutter's own engine run on each one.</li>
+          <li><strong>Why UI/UX principles matter even more here than on the web.</strong> Nothing about spacing, contrast, or touch targets is inherited "for free" from the browser or the OS the way it partially is on the web — you're deciding every pixel yourself, which means you're also responsible for every pixel being right.</li>
+          <li><strong>Why theming exists as its own layer.</strong> If a color is hardcoded three times, dark mode means finding it three times. If it's read from one <code>ThemeData</code> object, the whole app changes by changing one thing — the same "one source of truth" idea from Unlearn.js's state pattern, applied to visual design instead of app logic.</li>
+        </ul>
+
+        <p style="margin-top:24px;">Once "widget tree in, pixels out" is automatic, reading unfamiliar Flutter code gets much faster — the real question is always just "what tree does this build, and what part of it changes over time."</p>
+      </section>
+
+    </div>
+
+    <footer>FlutterZero · every layout demo is an HTML/CSS mockup built to match Flutter's real behavior, not actual compiled Dart — labeled "visual preview" throughout.</footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script>
+hljs.highlightAll();
+
+/* ---------- shared helpers ---------- */
+function logTo(id, text, cls) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const line = document.createElement('div');
+  line.className = 'line' + (cls ? ' ' + cls : '');
+  line.textContent = text;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+function clearOut(id) { const el = document.getElementById(id); if(el) el.innerHTML = ''; }
+
+/* ---------- progress bar / sidebar / scrollspy ---------- */
+const progress = document.getElementById('progress');
+function updateProgress(){
+  const h = document.documentElement;
+  const max = h.scrollHeight - h.clientHeight;
+  progress.style.width = (max > 0 ? (h.scrollTop/max)*100 : 0) + '%';
+}
+document.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+const sidebar = document.getElementById('sidebar');
+const navToggle = document.getElementById('navToggle');
+if(navToggle){ navToggle.addEventListener('click', ()=> sidebar.classList.toggle('open')); }
+document.querySelectorAll('.navitem').forEach(item=>{
+  item.addEventListener('click', ()=>{ if(window.innerWidth <= 980) sidebar.classList.remove('open'); });
+});
+const navItems = Array.from(document.querySelectorAll('.navitem'));
+const navSections = navItems.map(item => document.querySelector(item.getAttribute('href'))).filter(Boolean);
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const idx = navSections.indexOf(entry.target);
+    if(idx === -1 || !entry.isIntersecting) return;
+    navItems.forEach(n=>n.classList.remove('active'));
+    navItems[idx].classList.add('active');
+  });
+}, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+navSections.forEach(sec => io.observe(sec));
+
+/* =========================================================
+   PART 00 — WHAT FLUTTER ACTUALLY IS
+   ========================================================= */
+const widgetDescriptions = {
+  scaffold: '<strong>Scaffold</strong> — provides the basic visual page structure: a slot for an app bar, a slot for the main body, a slot for a bottom nav bar. Almost every screen starts with one.',
+  appbar: '<strong>AppBar</strong> — the bar at the top of the screen, usually holding a title and maybe some action icons.',
+  center: '<strong>Center</strong> — a layout widget with exactly one job: center its single child, both horizontally and vertically.',
+  column: '<strong>Column</strong> — arranges its children in a vertical list, top to bottom. Part 04 covers this in full.',
+  text: '<strong>Text</strong> — displays a string. The simplest widget on this whole tree.',
+  button: '<strong>ElevatedButton</strong> — a raised, tappable Material Design button. Its <code>onPressed</code> callback runs when tapped.',
+};
+function wtreeClick(id){
+  document.querySelectorAll('#widget-tree-explorer .tree-node').forEach(n => n.classList.remove('active'));
+  document.querySelector(`#widget-tree-explorer [data-w="${id}"]`).classList.add('active');
+  document.getElementById('widget-tree-desc').innerHTML = widgetDescriptions[id];
+}
+
+function fzDemo02(mode){
+  clearOut('out-0-2');
+  if(mode === 'native'){
+    logTo('out-0-2', 'Your code → translated into real iOS UIKit components on iOS...');
+    logTo('out-0-2', '...and translated into real Android View components on Android.', 'muted');
+    logTo('out-0-2', 'Result: subtly different look and feel on each platform, because you\'re really using two different UI kits underneath.', 'warn');
+  } else {
+    logTo('out-0-2', 'Your code → Flutter\'s own rendering engine (Skia/Impeller) paints every pixel directly.');
+    logTo('out-0-2', 'Same engine, same code, on iOS, Android, web, and desktop.', 'muted');
+    logTo('out-0-2', 'Result: pixel-identical UI everywhere, because nothing platform-specific is involved in the drawing.', 'warn');
+  }
+}
+
+let hrCount = 0;
+function fzHrTap(){
+  hrCount++;
+  document.getElementById('hr-count').textContent = hrCount;
+}
+function fzHotReload(){
+  clearOut('out-0-3');
+  const label = document.getElementById('hr-new-label').value || 'Tap here!';
+  document.querySelector('.phone button').textContent = label;
+  document.getElementById('hr-label').textContent = `label: "${label}"`;
+  logTo('out-0-3', '⚡ Hot reload applied — code changed, UI updated instantly.', 'warn');
+  logTo('out-0-3', `count stayed at ${hrCount} — state was preserved.`, 'muted');
+}
+function fzFullRestart(){
+  clearOut('out-0-3');
+  const label = document.getElementById('hr-new-label').value || 'Tap here!';
+  document.querySelector('.phone button').textContent = label;
+  document.getElementById('hr-label').textContent = `label: "${label}"`;
+  hrCount = 0;
+  document.getElementById('hr-count').textContent = hrCount;
+  logTo('out-0-3', '🔄 Full restart — the whole app relaunched from scratch.', 'err');
+  logTo('out-0-3', 'count reset back to 0 — all state was lost.', 'muted');
+}
+
+function fzDemo04build(){
+  clearOut('out-0-4');
+  const card = document.getElementById('compose-card');
+  const steps = [
+    () => { card.innerHTML = ''; logTo('out-0-4', '1. Container — the outer box exists, empty', 'muted'); },
+    () => { logTo('out-0-4', '2. Row — will lay children side by side', 'muted'); },
+    () => { card.innerHTML = '<span style="font-size:28px;">👤</span>'; logTo('out-0-4', '3. CircleAvatar added', 'warn'); },
+    () => { card.innerHTML += '<div><div style="font-weight:700;color:#1a1a2e;">Amara</div><div style="color:#888;font-size:12px;">Flutter developer</div></div>'; logTo('out-0-4', '4. Column (name + subtitle) added', 'warn'); },
+  ];
+  let i = 0;
+  const interval = setInterval(() => {
+    if(i >= steps.length){ clearInterval(interval); return; }
+    steps[i](); i++;
+  }, 500);
+}
+function fzDemo04reset(){
+  clearOut('out-0-4');
+  document.getElementById('compose-card').innerHTML = '';
+}
+
+function fzDemo05(part){
+  clearOut('out-0-5');
+  if(part === 'main'){
+    logTo('out-0-5', 'void main() { ... }', 'warn');
+    logTo('out-0-5', 'Dart itself calls this function first — nothing Flutter-specific about main() existing.', 'muted');
+  } else if(part === 'runapp'){
+    logTo('out-0-5', 'runApp(MyApp());', 'warn');
+    logTo('out-0-5', 'hands your root widget to Flutter\'s engine — this is the line that actually starts everything.', 'muted');
+  } else {
+    logTo('out-0-5', 'MaterialApp(home: HomeScreen())', 'warn');
+    logTo('out-0-5', 'sets up Material Design defaults and tells Flutter which widget is the first screen.', 'muted');
+  }
+}
+
+function fzDemo06(mode){
+  clearOut('out-0-6');
+  if(mode === 'imperative'){
+    logTo('out-0-6', 'label.setText("5 items");', 'err');
+    logTo('out-0-6', 'label.setColor(Colors.red);', 'err');
+    logTo('out-0-6', 'if (count > 10) { label.setBold(true); }', 'err');
+    logTo('out-0-6', 'you manually mutate an existing object, step by step', 'muted');
+  } else {
+    logTo('out-0-6', "Text('$count items', style: TextStyle(color: Colors.red, ...))", 'warn');
+    logTo('out-0-6', 'you describe the desired end result for the current data — Flutter handles the "how"', 'muted');
+  }
+}
+
+let buildCounterTaps = 0, buildCounterBuilds = 0;
+function fzDemo07(){
+  buildCounterTaps++;
+  buildCounterBuilds++;
+  document.getElementById('buildcount-display').textContent =
+    `Tapped ${buildCounterTaps} times (build() has run ${buildCounterBuilds} times)`;
+}
+function fzDemo07reset(){
+  buildCounterTaps = 0; buildCounterBuilds = 0;
+  document.getElementById('buildcount-display').textContent = 'Tapped 0 times (build() has run 0 times)';
+}
+
+/* =========================================================
+   PART 01 — DART ESSENTIALS
+   ========================================================= */
+function fzDemo11(mode){
+  clearOut('out-1-1');
+  if(mode === 'var'){
+    logTo('out-1-1', 'var age = 25;   // type inferred as int');
+    logTo('out-1-1', 'age = 26;       // fine — same type, new value', 'warn');
+    logTo('out-1-1', 'age is now 26', 'muted');
+  } else if(mode === 'final'){
+    logTo('out-1-1', "final name = 'Amara';");
+    logTo('out-1-1', "name = 'Kofi';   // Error: A final variable can only be set once.", 'err');
+  } else {
+    logTo('out-1-1', 'var age = 25;   // type locked in as int');
+    logTo('out-1-1', "age = 'old';   // Error: A value of type 'String' can't be assigned to a variable of type 'int'.", 'err');
+    logTo('out-1-1', 'Dart catches this before the app even runs — JavaScript would have allowed it silently.', 'muted');
+  }
+}
+
+function fzDemo12(){
+  clearOut('out-1-2');
+  const hasValue = document.getElementById('ns-toggle').checked;
+  const nickname = hasValue ? 'Ammy' : null;
+  logTo('out-1-2', `String? nickname = ${nickname === null ? 'null' : "'" + nickname + "'"};`);
+  const result = (nickname !== null ? nickname.toUpperCase() : null) ?? 'no nickname set';
+  logTo('out-1-2', `nickname?.toUpperCase() ?? 'no nickname set'`);
+  logTo('out-1-2', '→  ' + result, hasValue ? 'warn' : 'err');
+}
+
+function fzDemo13(){
+  clearOut('out-1-3');
+  const name = document.getElementById('class-name').value || 'Amara';
+  const age = Number(document.getElementById('class-age').value) || 0;
+  logTo('out-1-3', `final amara = Person('${name}', ${age});`);
+  logTo('out-1-3', 'amara.greet()');
+  logTo('out-1-3', `→  "Hi, I'm ${name} and I'm ${age} years old."`, 'warn');
+}
+
+function fzDemo14(){
+  clearOut('out-1-4');
+  const name = document.getElementById('named-name').value || 'Amara';
+  const greeting = document.getElementById('named-greeting').value || 'Hello';
+  logTo('out-1-4', `greet(name: '${name}', greeting: '${greeting}');`);
+  logTo('out-1-4', `→  "${greeting}, ${name}!"`, 'warn');
+}
+
+function fzDemo15(mode){
+  clearOut('out-1-5');
+  if(mode === 'for'){
+    for(let i = 1; i <= 3; i++) logTo('out-1-5', 'Round ' + i);
+  } else if(mode === 'forin'){
+    ['apple', 'banana', 'grape'].forEach(f => logTo('out-1-5', f));
+    logTo('out-1-5', "for (final fruit in fruits) — no index math needed", 'muted');
+  } else {
+    let count = 0;
+    while(count < 3){ logTo('out-1-5', 'while: ' + count); count++; }
+  }
+}
+
+function fzDemo16(mode){
+  clearOut('out-1-6');
+  if(mode === 'list'){
+    const fruits = ['apple', 'banana', 'grape'];
+    logTo('out-1-6', "List<String> fruits = ['apple', 'banana', 'grape'];");
+    fruits.push('mango');
+    logTo('out-1-6', 'fruits.add(\'mango\');  →  ' + JSON.stringify(fruits), 'warn');
+  } else if(mode === 'map'){
+    const user = { name: 'Amara', age: 25 };
+    logTo('out-1-6', "Map<String, dynamic> user = {'name': 'Amara', 'age': 25};");
+    logTo('out-1-6', "user['name']  →  '" + user.name + "'", 'warn');
+  } else {
+    const uniqueNumbers = [...new Set([1, 2, 2, 3, 3, 3])];
+    logTo('out-1-6', 'Set<int> uniqueNumbers = {1, 2, 2, 3, 3, 3};');
+    logTo('out-1-6', '→  {' + uniqueNumbers.join(', ') + '}  — duplicates silently dropped', 'warn');
+  }
+}
+
+function fzDemo17(){
+  clearOut('out-1-7');
+  const name = document.getElementById('interp-name').value || 'Amara';
+  const age = Number(document.getElementById('interp-age').value) || 25;
+  logTo('out-1-7', `'Hi $name'  →  'Hi ${name}'`);
+  logTo('out-1-7', `'Next year: \${age + 1}'  →  'Next year: ${age + 1}'`, 'warn');
+  logTo('out-1-7', `'\${name.toUpperCase()}'  →  '${name.toUpperCase()}'`, 'warn');
+}
+
+/* =========================================================
+   PART 02 — THE PROJECT FILE SYSTEM
+   ========================================================= */
+const fileDescriptions = {
+  root: '<strong>my_app/</strong> — the project root. Everything for this app lives somewhere inside here.',
+  lib: '<strong>lib/</strong> — where your actual Dart application code lives. Short for "library." This is where you\'ll spend nearly all your time.',
+  main: '<strong>main.dart</strong> — the entry point. Contains a <code>main()</code> function that\'s the very first thing that runs when your app launches.',
+  screens: '<strong>screens/</strong> — a folder you create yourself, holding one file per full-page screen (e.g. <code>login_screen.dart</code>, <code>home_screen.dart</code>). Not generated automatically — a convention most teams follow.',
+  widgets: '<strong>widgets/</strong> — another self-made folder, for small, reusable widgets you use across multiple screens (e.g. a custom button used everywhere).',
+  android: '<strong>android/</strong> — the real native Android project Flutter builds into. You rarely edit this directly, except for things like app icons or permissions.',
+  ios: '<strong>ios/</strong> — the real native iOS/Xcode project. Same idea as android/, just for Apple\'s side.',
+  web: '<strong>web/</strong> — files needed to run your app as a website, if you\'ve enabled web support — an <code>index.html</code> and icons live here.',
+  assets: '<strong>assets/</strong> — a folder you create for images, fonts, and other bundled files. Has to be listed in <code>pubspec.yaml</code> before Flutter will actually include it in the build.',
+  test: '<strong>test/</strong> — automated tests for your app, kept separate from the real app code but usually mirroring its structure.',
+  build: '<strong>build/</strong> — entirely generated output from compiling your app. Never edit this by hand, and it\'s normally excluded from version control (git) entirely.',
+  pubspec: '<strong>pubspec.yaml</strong> — your project\'s configuration: name, version, dependencies, and declared assets. Demo 2 below breaks this down line by line.',
+  analysis: '<strong>analysis_options.yaml</strong> — configures Dart\'s static analyzer (the tool that flags style issues and potential bugs as you type) — most projects use it to enforce a consistent code style across a team.',
+};
+function ftreeClick(id){
+  document.querySelectorAll('#file-tree-explorer .tree-node').forEach(n => n.classList.remove('active'));
+  document.querySelector(`#file-tree-explorer [data-f="${id}"]`).classList.add('active');
+  document.getElementById('file-tree-desc').innerHTML = fileDescriptions[id];
+}
+
+function fzDemo22(section){
+  clearOut('out-2-2');
+  if(section === 'name'){
+    logTo('out-2-2', 'name: my_app          — the internal project name, used in code');
+    logTo('out-2-2', 'version: 1.0.0+1      — version shown to users, plus an internal build number', 'warn');
+  } else if(section === 'deps'){
+    logTo('out-2-2', 'dependencies:');
+    logTo('out-2-2', '  flutter: sdk: flutter   — the Flutter framework itself');
+    logTo('out-2-2', '  http: ^1.1.0            — a third-party package, added by hand', 'warn');
+    logTo('out-2-2', 'run "flutter pub get" after adding a new one', 'muted');
+  } else {
+    logTo('out-2-2', 'flutter:');
+    logTo('out-2-2', '  assets:');
+    logTo('out-2-2', '    - assets/images/     — everything in this folder gets bundled into the app', 'warn');
+    logTo('out-2-2', 'without this entry, an Image.asset() call for a file in that folder would fail at runtime', 'muted');
+  }
+}
+
+const wheretoAnswers = {
+  screen: "lib/screens/login_screen.dart — one file per full screen, named after what it shows.",
+  widget: "lib/widgets/custom_button.dart — small, reusable pieces used across more than one screen.",
+  model: "lib/models/user.dart — plain Dart classes describing your data shapes.",
+  service: "lib/services/api_service.dart — functions that call outside APIs, kept separate from UI code.",
+  image: "assets/images/logo.png — then declare the assets/images/ folder in pubspec.yaml.",
+  theme: "lib/theme/app_theme.dart — one ThemeData object, imported wherever it's needed (Part 08 covers why).",
+};
+function fzDemo23(){
+  clearOut('out-2-3');
+  const key = document.getElementById('whereto-select').value;
+  logTo('out-2-3', wheretoAnswers[key], 'warn');
+}
+
+function fzDemo24(step){
+  clearOut('out-2-4');
+  if(step === 'create'){
+    logTo('out-2-4', 'Created: lib/screens/settings_screen.dart', 'warn');
+    logTo('out-2-4', 'a plain new file, containing one StatelessWidget class', 'muted');
+  } else if(step === 'import'){
+    logTo('out-2-4', "import 'screens/settings_screen.dart';", 'warn');
+    logTo('out-2-4', 'now whatever file this import is in can reference SettingsScreen', 'muted');
+  } else {
+    logTo('out-2-4', 'Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen()));', 'warn');
+    logTo('out-2-4', 'the screen is live — Part 06 covers navigation in full', 'muted');
+  }
+}
+
+function fzDemo25(kind){
+  clearOut('out-2-5');
+  if(kind === 'flutter'){
+    logTo('out-2-5', "import 'package:flutter/material.dart';", 'warn');
+    logTo('out-2-5', 'gives you Text, Container, Scaffold, and every other built-in widget', 'muted');
+  } else if(kind === 'package'){
+    logTo('out-2-5', "import 'package:http/http.dart' as http;", 'warn');
+    logTo('out-2-5', 'this package must be listed in pubspec.yaml first — "as http" avoids name clashes', 'muted');
+  } else {
+    logTo('out-2-5', "import 'widgets/custom_button.dart';", 'warn');
+    logTo('out-2-5', 'a relative path to a file you wrote yourself, inside your own lib/ folder', 'muted');
+  }
+}
+
+function fzDemo26(part){
+  clearOut('out-2-6');
+  if(part === 'import'){
+    logTo('out-2-6', "import 'package:flutter/material.dart';", 'warn');
+    logTo('out-2-6', 'brings in every built-in widget used in this file', 'muted');
+  } else if(part === 'key'){
+    logTo('out-2-6', 'const MyApp({super.key});', 'warn');
+    logTo('out-2-6', 'passes an optional identity key up to the base Widget class — helps Flutter tell widgets apart when rebuilding lists of them', 'muted');
+  } else {
+    logTo('out-2-6', 'theme: ThemeData(primarySwatch: Colors.blue)', 'warn');
+    logTo('out-2-6', 'sets the app-wide default color — Part 08 goes deep on this', 'muted');
+  }
+}
+
+function fzDemo27(){
+  clearOut('out-2-7');
+  const className = document.getElementById('filename-class').value || 'MyClass';
+  const fileName = className
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .toLowerCase() + '.dart';
+  logTo('out-2-7', `class ${className} { ... }`);
+  logTo('out-2-7', `→  ${fileName}`, 'warn');
+}
+
+/* =========================================================
+   PART 03 — YOUR FIRST WIDGETS
+   ========================================================= */
+function fzDemo31(){
+  const content = document.getElementById('text-content').value || 'Hello, Flutter!';
+  const size = document.getElementById('text-size').value;
+  const bold = document.getElementById('text-bold').checked;
+  const color = document.getElementById('text-color').value;
+  const el = document.getElementById('text-preview');
+  el.textContent = content;
+  el.style.fontSize = size + 'px';
+  el.style.fontWeight = bold ? '700' : '400';
+  el.style.color = color;
+}
+
+function fzDemo32(){
+  const padding = document.getElementById('cont-padding').value;
+  const radius = document.getElementById('cont-radius').value;
+  const color = document.getElementById('cont-color').value;
+  const el = document.getElementById('container-preview');
+  el.style.padding = padding + 'px';
+  el.style.borderRadius = radius + 'px';
+  el.style.background = color;
+}
+
+let statelessLog = 0, statefulLog = 0;
+function fzDemo33(mode){
+  clearOut('out-3-3');
+  if(mode === 'stateless'){
+    statelessLog++;
+    logTo('out-3-3', `Tap #${statelessLog} on the StatelessWidget.`);
+    logTo('out-3-3', 'build() runs the same way every time — nothing on screen changes, ever.', 'err');
+  } else {
+    statefulLog++;
+    logTo('out-3-3', `setState(() => taps++); → taps is now ${statefulLog}`);
+    logTo('out-3-3', `Button now reads: "Tapped ${statefulLog} times"`, 'warn');
+  }
+}
+
+function fzDemo34(){
+  const icon = document.getElementById('icon-select').value;
+  const size = document.getElementById('icon-size').value;
+  const el = document.getElementById('icon-preview');
+  el.textContent = icon;
+  el.style.fontSize = size + 'px';
+}
+
+function fzDemo35(mode){
+  clearOut('out-3-5');
+  if(mode === 'asset'){
+    logTo('out-3-5', "Image.asset('assets/images/logo.png')", 'warn');
+    logTo('out-3-5', 'loads instantly, works offline — but must be declared in pubspec.yaml first', 'muted');
+  } else {
+    logTo('out-3-5', "Image.network('https://example.com/photo.jpg')", 'warn');
+    logTo('out-3-5', 'fetched over the internet — shows a loading state, and can fail if there\'s no connection', 'muted');
+  }
+}
+
+function fzDemo36(){
+  const name = document.getElementById('card-name').value || 'Amara Okafor';
+  const title = document.getElementById('card-title').value || 'Flutter Developer';
+  document.getElementById('card-name-out').textContent = name;
+  document.getElementById('card-title-out').textContent = title;
+}
+
+/* =========================================================
+   PART 04 — LAYOUT WIDGETS
+   ========================================================= */
+let axisMode = 'row';
+function fzAxis(mode){
+  axisMode = mode;
+  document.getElementById('axis-preview').style.flexDirection = mode === 'row' ? 'row' : 'column';
+  document.getElementById('axis-preview').style.minHeight = mode === 'column' ? '220px' : '100px';
+  fzDemo41();
+}
+function fzDemo41(){
+  const val = document.getElementById('main-axis-select').value;
+  const map = {
+    start: 'flex-start', center: 'center', end: 'flex-end',
+    spaceBetween: 'space-between', spaceAround: 'space-around', spaceEvenly: 'space-evenly',
+  };
+  document.getElementById('axis-preview').style.justifyContent = map[val];
+}
+
+function fzDemo42(){
+  const f1 = document.getElementById('flex-1').value;
+  const f2 = document.getElementById('flex-2').value;
+  const f3 = document.getElementById('flex-3').value;
+  document.getElementById('flex-box-1').style.flex = f1;
+  document.getElementById('flex-box-2').style.flex = f2;
+  document.getElementById('flex-box-3').style.flex = f3;
+}
+
+function fzDemo43(){
+  document.getElementById('stack-icon-el').style.display = document.getElementById('stack-icon').checked ? '' : 'none';
+  document.getElementById('stack-caption-el').style.display = document.getElementById('stack-caption').checked ? '' : 'none';
+}
+
+function fzDemo44(){
+  const val = document.getElementById('pad-value').value;
+  document.getElementById('pad-preview').style.padding = val + 'px';
+}
+function fzDemo44b(){
+  const val = document.getElementById('sizedbox-value').value;
+  document.getElementById('sizedbox-spacer').style.height = val + 'px';
+}
+
+let wrapTagCount = 0;
+const wrapTagNames = ['Flutter', 'Dart', 'Mobile', 'Cross-platform', 'UI', 'Widgets', 'Material', 'Fast'];
+function fzDemo45add(){
+  const preview = document.getElementById('wrap-preview');
+  const tag = document.createElement('span');
+  tag.textContent = wrapTagNames[wrapTagCount % wrapTagNames.length];
+  tag.style.cssText = 'background:#0175C2;color:#fff;padding:6px 12px;border-radius:16px;font-size:11px;font-family:var(--mono);';
+  preview.appendChild(tag);
+  wrapTagCount++;
+}
+function fzDemo45reset(){
+  document.getElementById('wrap-preview').innerHTML = '';
+  wrapTagCount = 0;
+}
+
+function fzDemo47(){
+  const val = document.getElementById('align-select').value;
+  const box = document.getElementById('align-box');
+  const positions = {
+    center: { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' },
+    topRight: { top: '10px', left: 'auto', right: '10px', transform: 'none' },
+    bottomLeft: { top: 'auto', bottom: '10px', left: '10px', transform: 'none' },
+    topLeft: { top: '10px', left: '10px', transform: 'none' },
+  };
+  Object.assign(box.style, { top: 'auto', bottom: 'auto', left: 'auto', right: 'auto', transform: 'none' });
+  Object.assign(box.style, positions[val]);
+}
+
+/* =========================================================
+   PART 05 — STATE MANAGEMENT BASICS
+   ========================================================= */
+let brokenCount = 0, correctCount = 0, brokenDisplay = 0;
+function fzDemo51(mode){
+  clearOut('out-5-1');
+  if(mode === 'broken'){
+    brokenCount++;   // the data really does change...
+    logTo('out-5-1', `count variable is now ${brokenCount} (really — it changed)`, 'muted');
+    logTo('out-5-1', `but the screen still shows: ${brokenDisplay}`, 'err');
+    logTo('out-5-1', 'no setState() was called, so Flutter never redrew the widget', 'muted');
+  } else {
+    correctCount++;
+    brokenDisplay = brokenDisplay; // no-op, just for clarity
+    logTo('out-5-1', `setState(() => count++); → count is now ${correctCount}`);
+    logTo('out-5-1', `screen updates to show: ${correctCount}`, 'warn');
+  }
+}
+
+let liftedCount = 0;
+function fzDemo52inc(){
+  liftedCount++;
+  document.getElementById('lift-display').textContent = 'Shared count: ' + liftedCount;
+}
+function fzDemo52reset(){
+  liftedCount = 0;
+  document.getElementById('lift-display').textContent = 'Shared count: ' + liftedCount;
+}
+
+function fzDemo53(phase){
+  clearOut('out-5-3');
+  if(phase === 'init'){
+    logTo('out-5-3', 'initState() — runs once, right when this widget is first created.', 'warn');
+    logTo('out-5-3', 'good place for: setting up initial values, starting a subscription, one-time setup.', 'muted');
+  } else if(phase === 'build'){
+    logTo('out-5-3', 'build() — runs every time Flutter needs to redraw this widget.', 'warn');
+    logTo('out-5-3', 'called at least once initially, then again every time setState() is called.', 'muted');
+  } else {
+    logTo('out-5-3', 'dispose() — runs once, when this widget is removed from the tree for good.', 'warn');
+    logTo('out-5-3', 'good place for: canceling subscriptions, closing controllers, cleanup.', 'muted');
+  }
+}
+
+function fzDemo54(){
+  const val = document.getElementById('controller-input').value;
+  document.getElementById('controller-preview').textContent = 'You typed: ' + (val || '(nothing yet)');
+}
+
+function fzDemo55(){
+  const loggedIn = document.getElementById('cond-loggedin').checked;
+  const hasError = document.getElementById('cond-error').checked;
+  const preview = document.getElementById('cond-preview');
+  let html = loggedIn ? 'Welcome back!' : 'Please log in';
+  if(hasError) html += '<br><span style="color:var(--uiux);">Something went wrong</span>';
+  preview.innerHTML = html;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('cond-preview');
+  if(el) el.textContent = 'Welcome back!';
+  renderLikeList();
+});
+
+let likePosts = [
+  { title: 'Flutter tips', liked: false },
+  { title: 'Dart null safety', liked: true },
+];
+function renderLikeList(){
+  const list = document.getElementById('like-list');
+  if(!list) return;
+  list.innerHTML = '';
+  likePosts.forEach((post, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${post.title}</span><span style="cursor:pointer;" onclick="toggleLike(${index})">${post.liked ? '❤️' : '🤍'}</span>`;
+    list.appendChild(li);
+  });
+}
+function toggleLike(index){
+  likePosts[index].liked = !likePosts[index].liked;
+  renderLikeList();
+}
+
+function fzDemo57(){
+  clearOut('out-5-7');
+  const value = document.getElementById('validate-email').value;
+  let error = null;
+  if(value.length === 0) error = 'Email is required';
+  else if(!value.includes('@')) error = 'Enter a valid email';
+  if(error){
+    logTo('out-5-7', 'validateEmail(...)  →  "' + error + '"', 'err');
+  } else {
+    logTo('out-5-7', 'validateEmail(...)  →  null (valid!)', 'warn');
+  }
+}
+
+/* =========================================================
+   PART 06 — NAVIGATION & SCREENS
+   ========================================================= */
+function fzNavPush(){
+  clearOut('out-6-1');
+  const body = document.getElementById('nav-screen-list');
+  const appbar = document.querySelector('#nav-phone-screen .phone-appbar');
+  appbar.innerHTML = '‹ Details';
+  body.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-weight:700;margin-bottom:6px;">Wireless Mouse</div>
+      <div style="font-size:12px;color:#666;margin-bottom:12px;">$24.99 — in stock</div>
+      <button onclick="fzNavPop()" style="background:#0175C2;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;">‹ Back</button>
+    </div>`;
+  logTo('out-6-1', 'Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen()));', 'warn');
+  logTo('out-6-1', 'the list screen is still there underneath — just hidden', 'muted');
+}
+function fzNavPop(){
+  clearOut('out-6-1');
+  const body = document.getElementById('nav-screen-list');
+  const appbar = document.querySelector('#nav-phone-screen .phone-appbar');
+  appbar.innerHTML = 'Products';
+  body.innerHTML = `
+    <div class="mini-card" style="margin-bottom:8px;cursor:pointer;" onclick="fzNavPush()">Wireless Mouse →</div>
+    <div class="mini-card" style="margin-bottom:8px;cursor:pointer;" onclick="fzNavPush()">Mechanical Keyboard →</div>`;
+  logTo('out-6-1', 'Navigator.pop(context); → back to the list, exactly where we left it', 'warn');
+}
+
+const tabContent = {
+  home: { title: 'Home', body: '🏠 Home screen content' },
+  search: { title: 'Search', body: '🔍 Search screen content' },
+  profile: { title: 'Profile', body: '👤 Profile screen content' },
+};
+function fzTabSwitch(tab){
+  document.getElementById('tab-title').textContent = tabContent[tab].title;
+  document.getElementById('tab-body').textContent = tabContent[tab].body;
+  document.querySelectorAll('.tab-item').forEach(el => {
+    el.style.color = el.dataset.tab === tab ? 'var(--dart)' : '#999';
+  });
+}
+
+function fzDemo63(){
+  clearOut('out-6-3');
+  const name = document.getElementById('pass-name').value || 'Wireless Mouse';
+  const price = document.getElementById('pass-price').value || '24.99';
+  logTo('out-6-3', `ProductDetailScreen(productName: '${name}', price: ${price})`, 'warn');
+  logTo('out-6-3', 'the new screen receives both values directly through its constructor', 'muted');
+}
+
+function fzDemo64(color){
+  clearOut('out-6-4');
+  logTo('out-6-4', `Navigator.pop(context, '${color}');`, 'warn');
+  logTo('out-6-4', `final selectedColor = await Navigator.push(...);`);
+  logTo('out-6-4', `selectedColor  →  '${color}'`, 'warn');
+}
+
+function fzDemo65(){
+  clearOut('out-6-5');
+  const route = document.getElementById('route-select').value;
+  logTo('out-6-5', `Navigator.pushNamed(context, '${route}');`, 'warn');
+  logTo('out-6-5', `Flutter looks up '${route}' in the routes map and navigates there`, 'muted');
+}
+
+function fzDemo66(){
+  const panel = document.getElementById('drawer-panel');
+  const isOpen = panel.style.left === '0px';
+  panel.style.left = isOpen ? '-160px' : '0px';
+}
+
+function fzDemo67show(){
+  document.getElementById('dialog-overlay').style.display = 'flex';
+  clearOut('out-6-7');
+}
+function fzDemo67close(choice){
+  document.getElementById('dialog-overlay').style.display = 'none';
+  clearOut('out-6-7');
+  logTo('out-6-7', `Navigator.pop(context);  // dialog dismissed via "${choice}"`, choice === 'Delete' ? 'err' : 'warn');
+}
+
+/* =========================================================
+   PART 07 — UI/UX DESIGN PRINCIPLES
+   ========================================================= */
+function fzDemo71(mode){
+  if(mode === 'random'){
+    document.getElementById('grid-gap-1').style.height = '7px';
+    document.getElementById('grid-gap-2').style.height = '23px';
+  } else {
+    document.getElementById('grid-gap-1').style.height = '16px';
+    document.getElementById('grid-gap-2').style.height = '16px';
+  }
+}
+
+function fzDemo72(){
+  const size = document.getElementById('touch-size').value;
+  document.getElementById('touch-size-label').textContent = size + 'px';
+  const target = document.getElementById('touch-target');
+  target.style.width = size + 'px';
+  target.style.height = size + 'px';
+  clearOut('out-7-2');
+  if(size < 44){
+    logTo('out-7-2', `${size}px is below the 44px (iOS) / 48px (Android) recommended minimum.`, 'err');
+    logTo('out-7-2', 'real fingers are much less precise than a mouse cursor — small targets get mis-tapped constantly.', 'muted');
+  } else {
+    logTo('out-7-2', `${size}px meets the recommended minimum tap target size.`, 'warn');
+  }
+}
+
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+  const num = parseInt(hex, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+function relLuminance([r,g,b]){
+  const [rs,gs,bs] = [r,g,b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
+  });
+  return 0.2126*rs + 0.7152*gs + 0.0722*bs;
+}
+function fzDemo73(){
+  const fg = document.getElementById('contrast-fg').value || '#666666';
+  const bg = document.getElementById('contrast-bg').value || '#FFFFFF';
+  const preview = document.getElementById('contrast-preview');
+  preview.style.color = fg;
+  preview.style.background = bg;
+  clearOut('out-7-3');
+  try {
+    const L1 = relLuminance(hexToRgb(fg));
+    const L2 = relLuminance(hexToRgb(bg));
+    const lighter = Math.max(L1, L2), darker = Math.min(L1, L2);
+    const ratio = (lighter + 0.05) / (darker + 0.05);
+    logTo('out-7-3', `Contrast ratio: ${ratio.toFixed(2)}:1`, ratio >= 4.5 ? 'warn' : 'err');
+    logTo('out-7-3', ratio >= 4.5 ? '✓ Passes WCAG AA for normal text (needs 4.5:1+)' : '✗ Fails WCAG AA for normal text (needs 4.5:1+)', 'muted');
+  } catch(e) {
+    logTo('out-7-3', 'Enter valid hex colors, e.g. #666666', 'err');
+  }
+}
+
+function fzDemo75(mode){
+  const preview = document.getElementById('breathing-preview');
+  if(mode === 'cramped'){
+    preview.innerHTML = `
+      <div style="font-weight:700;padding:2px;">Order #4471</div>
+      <div style="font-size:12px;padding:1px;color:#666;">3 items · $67.50</div>
+      <button style="margin:2px;padding:3px 6px;font-size:11px;">View</button>`;
+  } else {
+    preview.innerHTML = `
+      <div style="font-weight:700;padding:8px 8px 0;">Order #4471</div>
+      <div style="font-size:13px;padding:8px;color:#666;">3 items · $67.50</div>
+      <div style="padding:0 8px 8px;"><button style="padding:8px 16px;font-size:12px;background:#0175C2;color:#fff;border:none;border-radius:6px;">View</button></div>`;
+  }
+}
+
+function fzDemo76(){
+  const bg = document.getElementById('pair-bg').value || '#0175C2';
+  const preview = document.getElementById('pair-preview');
+  try {
+    const [r,g,b] = hexToRgb(bg);
+    const luminance = relLuminance([r,g,b]);
+    preview.style.background = bg;
+    preview.style.color = luminance > 0.5 ? '#000000' : '#FFFFFF';
+  } catch(e) { /* invalid hex, ignore */ }
+}
+
+function fzDemo77(mode){
+  const preview = document.getElementById('icon-row-preview');
+  if(mode === 'inconsistent'){
+    preview.innerHTML = `<span style="font-size:14px;">🏠</span><span style="font-size:28px;">🔍</span><span style="font-size:18px;">⚙️</span><span style="font-size:34px;">👤</span>`;
+  } else {
+    preview.innerHTML = `<span style="font-size:24px;">🏠</span><span style="font-size:24px;">🔍</span><span style="font-size:24px;">⚙️</span><span style="font-size:24px;">👤</span>`;
+  }
+}
+
+/* =========================================================
+   PART 08 — THEMING & STYLING
+   ========================================================= */
+function fzDemo81(){ /* slider just previews via apply button, no live action needed */ }
+function fzDemo81apply(){
+  const hue = document.getElementById('theme-hue').value;
+  const color = `hsl(${hue}, 70%, 45%)`;
+  document.getElementById('themed-appbar').style.background = color;
+  document.getElementById('themed-button').style.background = color;
+  document.getElementById('themed-icon').style.color = color;
+}
+
+function fzDemo82(mode){
+  const screen = document.getElementById('darkmode-screen');
+  const appbar = document.getElementById('darkmode-appbar');
+  const body = document.getElementById('darkmode-body');
+  if(mode === 'dark'){
+    screen.style.background = '#121212';
+    appbar.style.background = '#1E1E1E';
+    body.style.color = '#EAEAEA';
+  } else {
+    screen.style.background = '#fff';
+    appbar.style.background = '#0175C2';
+    body.style.color = '#1a1a2e';
+  }
+}
+
+function fzDemo83(mode){
+  const el = document.getElementById('font-preview');
+  el.style.fontFamily = mode === 'custom' ? 'Georgia, serif' : 'var(--sans)';
+}
+
+function fzDemo84(){
+  const val = document.getElementById('elevation-value').value;
+  const card = document.getElementById('elevation-card');
+  const blur = Math.max(2, val * 1.5);
+  const spread = val / 4;
+  card.style.boxShadow = `0 ${val}px ${blur}px rgba(0,0,0,${0.15 + val/100})`;
+}
+
+function fzDemo85(){
+  const val = document.getElementById('radius-value').value;
+  document.querySelectorAll('.radius-box').forEach(box => box.style.borderRadius = val + 'px');
+}
+
+function fzDemo87(mode){
+  const preview = document.getElementById('responsive-preview');
+  if(mode === 'phone'){
+    preview.style.flexDirection = 'column';
+    preview.innerHTML = `
+      <div style="background:#0175C2;border-radius:6px;padding:10px;color:#fff;font-size:11px;">Sidebar content</div>
+      <div style="background:#13B9FD;border-radius:6px;padding:10px;color:#04202E;font-size:11px;">Main content</div>`;
+  } else {
+    preview.style.flexDirection = 'row';
+    preview.innerHTML = `
+      <div style="background:#0175C2;border-radius:6px;padding:10px;color:#fff;font-size:11px;flex:1;">Sidebar content</div>
+      <div style="background:#13B9FD;border-radius:6px;padding:10px;color:#04202E;font-size:11px;flex:3;">Main content</div>`;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rust + Actix-web — for Django developers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root{
+  --bg:#0E1116;
+  --panel:#151B23;
+  --panel-2:#1B222C;
+  --border:#2A3441;
+  --border-soft:#212934;
+  --text:#E7ECF2;
+  --text-dim:#8B96A5;
+  --text-faint:#546073;
+  --rust:#CE5A3B;
+  --rust-dim:#5A2A1C;
+  --steel:#4C8FB0;
+  --steel-dim:#1F3A47;
+  --green:#5FBF8A;
+  --green-dim:#204636;
+  --amber:#D9A441;
+  --amber-dim:#4A3A19;
+  --violet:#9B8CFF;
+  --violet-dim:#332D57;
+  --disp:'Space Grotesk',sans-serif;
+  --body:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --shadow-lg:0 26px 60px -28px rgba(0,0,0,.75);
+  --shadow-sm:0 8px 20px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--body);
+  line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(76,143,176,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76,143,176,.05) 1px, transparent 1px);
+  background-size:64px 64px;
+}
+body::after{
+  content:'';position:fixed;top:-10%;left:50%;transform:translateX(-50%);
+  width:1100px;height:600px;
+  background:radial-gradient(ellipse at center, rgba(206,90,59,.08) 0%, rgba(76,143,176,.05) 45%, transparent 72%);
+  pointer-events:none;z-index:0;filter:blur(6px);
+}
+a{color:var(--rust);text-decoration:none;}
+code{font-family:var(--mono);}
+::selection{background:var(--rust);color:#0E1116;}
+:focus-visible{outline:2px solid var(--steel);outline-offset:2px;border-radius:3px;}
+
+.wrap{max-width:880px;margin:0 auto;padding-left:26px;padding-right:26px;position:relative;z-index:1;}
+
+/* ============ PROGRESS BAR ============ */
+.scroll-progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--rust),var(--steel));z-index:100;width:0%;transition:width .1s linear;}
+
+/* ============ NAV ============ */
+.topnav{
+  position:sticky;top:2px;z-index:50;
+  background:rgba(14,17,22,.88);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:12px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:600;font-size:14px;color:#fff;}
+.brand .mark{width:16px;height:16px;border:2px solid var(--rust);border-radius:4px;transform:rotate(45deg);flex-shrink:0;}
+.navlinks{display:flex;gap:1px;flex-wrap:wrap;}
+.navlinks a{
+  font-family:var(--body);font-size:12.5px;color:var(--text-dim);
+  padding:6px 10px;border-radius:5px;border:1px solid transparent;transition:all .18s ease;white-space:nowrap;
+}
+.navlinks a:hover{color:var(--text);background:var(--panel);}
+.navlinks a.active{color:var(--rust);border-color:var(--border);background:var(--panel);}
+
+/* ============ HERO ============ */
+.hero{padding:56px 0 20px;}
+.hero h1{
+  font-family:var(--disp);font-weight:700;font-size:clamp(28px,4.6vw,46px);line-height:1.1;letter-spacing:-.01em;
+  color:#fff;max-width:680px;
+}
+.hero p.lede{font-size:15.5px;color:var(--text-dim);max-width:600px;margin-top:18px;}
+.hero p.lede b{color:var(--text);font-weight:600;}
+.hero p.scope{font-size:13.5px;color:var(--text-faint);max-width:600px;margin-top:12px;}
+
+/* ============ SIDE-BY-SIDE COMPARISON (hero signature element) ============ */
+.compare{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-lg);}
+@media(max-width:720px){.compare{grid-template-columns:1fr;}}
+.compare-pane{background:#0A0C10;}
+.compare-head{display:flex;align-items:center;gap:8px;padding:11px 15px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.compare-head .lang{font-family:var(--mono);font-size:11px;color:var(--text-faint);text-transform:none;}
+.compare-head .who{margin-left:auto;font-family:var(--body);font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
+.compare-head .who.django{color:#0C4B33;background:#5FBF8A;}
+.compare-head .who.rust{color:#3A160D;background:var(--rust);}
+.compare-pane pre{margin:0 !important;border:none !important;border-radius:0 !important;background:#0A0C10 !important;padding:16px 17px !important;font-size:12px !important;}
+
+/* ============ SECTIONS ============ */
+.stage{position:relative;z-index:1;padding:56px 0;border-top:1px solid var(--border-soft);}
+.stage:first-of-type{border-top:none;}
+.tag{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-weight:600;font-size:12px;
+  padding:5px 12px;border-radius:20px;margin-bottom:14px;
+}
+.tag::before{content:'';width:6px;height:6px;border-radius:50%;}
+.tag.mindset{color:var(--amber);background:var(--amber-dim);}
+.tag.mindset::before{background:var(--amber);}
+.tag.fund{color:var(--rust);background:var(--rust-dim);}
+.tag.fund::before{background:var(--rust);}
+.tag.actix{color:var(--steel);background:var(--steel-dim);}
+.tag.actix::before{background:var(--steel);}
+.tag.data{color:var(--green);background:var(--green-dim);}
+.tag.data::before{background:var(--green);}
+.tag.unlearn{color:var(--violet);background:var(--violet-dim);}
+.tag.unlearn::before{background:var(--violet);}
+.stage h2{font-family:var(--disp);font-weight:700;font-size:clamp(21px,2.8vw,28px);color:#fff;letter-spacing:-.008em;max-width:640px;}
+.stage-sub{color:var(--text-dim);max-width:620px;margin:14px 0 28px;font-size:14.5px;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:20px;}
+.card h3{font-family:var(--disp);font-size:15px;color:#fff;margin-bottom:9px;font-weight:600;}
+.card p{color:var(--text-dim);font-size:13.5px;margin-bottom:8px;}
+.inline-code{background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:12px;color:var(--rust);}
+
+.callout{border-left:3px solid var(--rust);background:var(--panel);border-radius:0 9px 9px 0;padding:15px 19px;margin:18px 0;}
+.callout.steel{border-left-color:var(--steel);}
+.callout.green{border-left-color:var(--green);}
+.callout.amber{border-left-color:var(--amber);}
+.callout .label{font-family:var(--body);font-weight:600;font-size:12.5px;color:var(--rust);display:block;margin-bottom:6px;}
+.callout.steel .label{color:var(--steel);}
+.callout.green .label{color:var(--green);}
+.callout.amber .label{color:var(--amber);}
+.callout p{color:var(--text-dim);font-size:13.5px;margin:0;}
+
+.step-label{
+  font-family:var(--body);font-weight:600;font-size:12.5px;color:var(--steel);
+  display:flex;align-items:center;gap:8px;margin:24px 0 8px;
+}
+.step-label .num{
+  width:19px;height:19px;border-radius:50%;background:var(--steel-dim);color:var(--steel);
+  display:flex;align-items:center;justify-content:center;font-size:10.5px;flex-shrink:0;
+}
+
+/* ============ CODE PANELS (type-along, non-executable) ============ */
+.panel{background:#0A0C10;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:14px 0;transition:border-color .2s ease;}
+.panel:focus-within{border-color:#3A4658;box-shadow:0 0 0 3px rgba(76,143,176,.12);}
+.panel-bar{display:flex;align-items:center;gap:10px;padding:9px 13px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.panel-lang{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+.panel-bar .actions{margin-left:auto;display:flex;gap:8px;}
+.pbtn{font-family:var(--body);font-size:11px;font-weight:500;background:transparent;color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;transition:all .15s ease;}
+.pbtn:hover{border-color:var(--steel);color:var(--steel);}
+.pbtn.copied{border-color:var(--green);color:var(--green);}
+.pbtn.play{border-color:var(--rust-dim);color:var(--rust);}
+.pbtn.play:hover{border-color:var(--rust);}
+
+.panel-input-wrap{position:relative;}
+.panel-highlight{
+  position:absolute !important;inset:0 !important;margin:0 !important;z-index:0;
+  background:#0A0C10 !important;border:none !important;border-radius:0 !important;
+  padding:14px 16px !important;font-family:var(--mono) !important;font-size:12.5px !important;
+  line-height:1.7 !important;white-space:pre-wrap !important;word-break:break-word !important;
+  overflow:hidden;pointer-events:none;
+}
+.panel-highlight code.hljs{background:transparent !important;padding:0 !important;display:block;font-family:var(--mono) !important;font-size:12.5px !important;line-height:1.7 !important;white-space:pre-wrap !important;word-break:break-word !important;}
+.panel-input{
+  position:relative;z-index:1;width:100%;
+  background:transparent !important;border:none;color:transparent;caret-color:#fff;
+  font-family:var(--mono);font-size:12.5px;padding:14px 16px;resize:none;outline:none;
+  line-height:1.7;min-height:40px;display:block;overflow:hidden;white-space:pre-wrap;word-break:break-word;
+}
+.panel-input::selection{background:rgba(76,143,176,.35);color:transparent;}
+.panel-note{
+  font-family:var(--mono);font-size:11.5px;padding:9px 16px;border-top:1px solid var(--border-soft);
+  color:var(--text-faint);background:#07090C;
+}
+
+/* plain, non-editable pre (Cargo.toml, transcripts) */
+pre.plain{background:#0A0C10 !important;border:1px solid var(--border);border-radius:9px;padding:15px 17px !important;font-family:var(--mono) !important;font-size:12px !important;overflow-x:visible;white-space:pre-wrap;word-break:break-word;margin:12px 0;}
+
+/* ============ TERMINAL TRANSCRIPT (hero-adjacent, honest static example) ============ */
+.term{margin-top:18px;background:#080A0D;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.term-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.tdot{width:9px;height:9px;border-radius:50%;}
+.term-bar .ttitle{margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+.term-body{padding:15px 16px;font-family:var(--mono);font-size:12px;color:var(--text-dim);white-space:pre-wrap;line-height:1.75;}
+.term-body .prompt{color:var(--steel);}
+.term-body .ok{color:var(--green);}
+
+/* ============ COMPARISON TABLE ============ */
+.dtable{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;}
+.dtable th{text-align:left;font-family:var(--body);font-weight:600;color:var(--text-dim);font-size:12px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.dtable td{padding:12px 14px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);vertical-align:top;}
+.dtable td:first-child{color:var(--text);font-weight:500;white-space:nowrap;}
+.dtable td:nth-child(2){color:var(--steel);}
+.dtable tr:last-child td{border-bottom:none;}
+@media(max-width:720px){.dtable{font-size:12px;}.dtable td, .dtable th{padding:9px 8px;}}
+
+/* ============ ANTI-ADVICE ============ */
+.myth{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border-soft);}
+.myth:last-child{border-bottom:none;}
+.myth .x{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--rust-dim);color:var(--rust);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:13px;font-weight:700;}
+.myth-body b{color:var(--text);font-weight:600;font-size:13.5px;}
+.myth-body p{color:var(--text-dim);font-size:13.5px;margin-top:3px;}
+
+/* ============ ROADMAP (getting started) ============ */
+.roadmap{margin-top:14px;}
+.road-item{display:flex;gap:16px;padding:15px 0;border-bottom:1px solid var(--border-soft);cursor:pointer;}
+.road-item:last-child{border-bottom:none;}
+.road-check{
+  width:26px;height:26px;border-radius:7px;border:1px solid var(--border);flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--text-faint);
+  transition:all .2s ease;
+}
+.road-item.done .road-check{background:var(--rust);border-color:var(--rust);color:#0E1116;}
+.road-body h4{font-family:var(--disp);font-size:14px;color:#fff;font-weight:600;margin-bottom:3px;}
+.road-item.done .road-body h4{color:var(--text-dim);text-decoration:line-through;text-decoration-color:var(--border-soft);}
+.road-body p{color:var(--text-dim);font-size:13px;}
+
+/* ============ FUNDAMENTALS ICON LIST ============ */
+.flist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
+.flist-item{display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);}
+.flist-item:last-child{border-bottom:none;}
+.flist-item code{color:var(--rust);font-size:12.5px;flex-shrink:0;}
+.flist-item span{color:var(--text-dim);font-size:13px;}
+
+footer{padding:50px 0 70px;color:var(--text-faint);font-size:13px;position:relative;z-index:1;max-width:680px;}
+footer .quote{color:var(--text-dim);font-style:normal;font-size:14.5px;line-height:1.7;}
+footer .sig{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav class="topnav">
+  <div class="brand"><span class="mark"></span> Rust for Django devs</div>
+  <div class="navlinks">
+    <a href="#s-reality">Reality</a>
+    <a href="#s-syntax">Syntax basics</a>
+    <a href="#s-fund">Fundamentals</a>
+    <a href="#s-actix">Actix-web</a>
+    <a href="#s-data">Data &amp; auth</a>
+    <a href="#s-compare">Comparison</a>
+    <a href="#s-unlearn">Unlearn</a>
+    <a href="#s-anti">Anti-advice</a>
+    <a href="#s-start">Get started</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="hero">
+  <h1>Same job. Different guarantees.</h1>
+  <p class="lede">Django gives you an ORM, admin, auth, and forms out of the box. Actix-web gives you a fast HTTP core and lets you assemble the rest. This guide covers the roughly <b>30%</b> of Rust + Actix-web that does most of the practical work in a typical Django project — CRUD, JSON APIs, auth, and services.</p>
+  <p class="scope">Twelve topics, real code you type yourself, one honest comparison table, and a list of habits to unlearn on the way in.</p>
+
+  <div class="compare">
+    <div class="compare-pane">
+      <div class="compare-head"><span class="lang">views.py</span><span class="who django">Django</span></div>
+      <pre class="plain"><code class="language-python">@api_view(["POST"])
+def create_item(request, id):
+    data = request.data
+    item = Item.objects.create(
+        id=id, name=data["name"]
+    )
+    return Response(
+        {"id": item.id, "name": item.name},
+        status=201
+    )</code></pre>
+    </div>
+    <div class="compare-pane">
+      <div class="compare-head"><span class="lang">handlers.rs</span><span class="who rust">Actix-web</span></div>
+      <pre class="plain"><code class="language-rust">#[post("/items/{id}")]
+async fn create_item(
+    path: web::Path<u32>,
+    body: web::Json<Item>,
+) -> impl Responder {
+    let id = path.into_inner();
+    HttpResponse::Created().json(Item {
+        id,
+        name: body.name.clone(),
+    })
+}</code></pre>
+    </div>
+  </div>
+  <p class="scope" style="margin-top:12px;">Same shape — path parameter in, JSON body in, JSON out. The Rust version is checked by the compiler before it ever runs.</p>
+</header>
+
+<section class="stage" id="s-reality">
+  <span class="tag mindset">Reality check</span>
+  <h2>Read this before you write a line of Rust</h2>
+  <p class="stage-sub">Django is batteries-included: ORM, admin, auth, forms, templates, migrations, and security defaults all come ready. Actix-web is a high-performance HTTP framework — you assemble the rest yourself with crates. There is no mature, complete "Django for Rust." Expect more explicit code, in exchange for compile-time safety and speed.</p>
+
+  <div class="callout amber">
+    <span class="label">What "the 30%" means here</span>
+    <p>This guide covers the small core of Rust + Actix-web knowledge that delivers most of the practical value of a typical Django project — for APIs, CRUD apps, and services. Not everything Rust can do. Just the part you'll actually reach for first.</p>
+  </div>
+</section>
+
+<section class="stage" id="s-syntax">
+  <span class="tag mindset">Syntax basics</span>
+  <h2>Plain Rust, before any of the Rust-specific ideas</h2>
+  <p class="stage-sub">You already know how to program — but Rust's own syntax and its immutability rule are genuinely new, and nothing below assumes you've seen them. Five small steps, in order, each building on the last.</p>
+
+  <div class="step-label"><span class="num">1</span>Hello world — the entry point</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz1')">Copy</button><button class="pbtn play" onclick="openPlayground('pz1')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz1-code"></code></pre>
+<textarea class="panel-input" id="pz1-input" spellcheck="false">fn main() {
+    println!("Hello, world!");
+}</textarea>
+</div>
+    <div class="panel-note">fn main() is where every Rust program starts — always, no if __name__ == "__main__" check needed. println! ends in ! because it's a macro, not a function; the practical difference doesn't matter yet.</div>
+  </div>
+
+  <div class="step-label"><span class="num">2</span>Variables — and the one big surprise: immutable by default</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">In Python, every variable can be reassigned, always. In Rust, <code class="inline-code">let</code> creates a variable you can <b>read but not change</b>, unless you explicitly add <code class="inline-code">mut</code>. This is Rust's first safety rail, and it exists before ownership even enters the picture.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz2')">Copy</button><button class="pbtn play" onclick="openPlayground('pz2')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz2-code"></code></pre>
+<textarea class="panel-input" id="pz2-input" spellcheck="false">fn main() {
+    let age = 28;
+    println!("{age}");
+
+    // age = 29;   // uncomment this: it will not compile.
+    // error: "cannot assign twice to immutable variable"
+
+    let mut age = 28;   // adding `mut` opts in to reassignment
+    age = 29;            // now this is allowed
+    println!("{age}");
+}</textarea>
+</div>
+    <div class="panel-note">Immutable by default means: when you read `let x = ...` anywhere in someone else's code, you know x never changes — no need to trace the whole function to check.</div>
+  </div>
+
+  <div class="step-label"><span class="num">3</span>Basic types — what actually goes in a variable</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Numbers come in specific sizes and signedness — <code class="inline-code">u32</code> means "unsigned, 32-bit" — never negative, which is exactly what a port number or a count is. Text has two common forms: <code class="inline-code">String</code> (owned, growable) and <code class="inline-code">&amp;str</code> (a borrowed view into text) — you'll see why that split exists in the next section, on ownership.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz3')">Copy</button><button class="pbtn play" onclick="openPlayground('pz3')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz3-code"></code></pre>
+<textarea class="panel-input" id="pz3-input" spellcheck="false">fn main() {
+    let age: i32 = 28;          // i32 = signed 32-bit whole number (can be negative)
+    let port: u16 = 8080;       // u16 = unsigned 16-bit — never negative
+    let ratio: f64 = 1.75;      // f64 = decimal number
+    let is_active: bool = true; // true or false, same as Python
+
+    let owned: String = String::from("Alice");  // owned, growable text
+    let borrowed: &str = "Alice";                 // a view into text — this is what "Alice" literally is
+
+    println!("{age} {port} {ratio} {is_active} {owned} {borrowed}");
+}</textarea>
+</div>
+    <div class="panel-note">The `: i32` part is a type annotation — often optional, since Rust can infer it, but shown here so you can see what's actually there.</div>
+  </div>
+
+  <div class="step-label"><span class="num">4</span>Functions — and returning without the word "return"</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz4')">Copy</button><button class="pbtn play" onclick="openPlayground('pz4')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz4-code"></code></pre>
+<textarea class="panel-input" id="pz4-input" spellcheck="false">fn add(a: i32, b: i32) -> i32 {   // -> i32 means "this returns an i32"
+    a + b   // no semicolon, no `return` — the last expression IS the return value
+}
+
+fn add_explicit(a: i32, b: i32) -> i32 {
+    return a + b;   // this also works, and is identical — just more typing
+}
+
+fn main() {
+    let sum = add(2, 3);
+    println!("{sum}");
+}</textarea>
+</div>
+    <div class="panel-note">A trailing semicolon changes an expression into a statement, which returns nothing — a very common early mistake is adding one to your last line by habit and getting a confusing error.</div>
+  </div>
+
+  <div class="step-label"><span class="num">5</span>Control flow — if, for, and while</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz5')">Copy</button><button class="pbtn play" onclick="openPlayground('pz5')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz5-code"></code></pre>
+<textarea class="panel-input" id="pz5-input" spellcheck="false">fn main() {
+    let age = 20;
+
+    if age >= 18 {
+        println!("adult");
+    } else {
+        println!("minor");
+    }
+
+    // if is an expression in Rust — it can produce a value directly
+    let label = if age >= 18 { "adult" } else { "minor" };
+    println!("{label}");
+
+    for i in 0..3 {              // 0..3 means 0, 1, 2 — like Python's range(3)
+        println!("{i}");
+    }
+
+    let mut count = 0;
+    while count < 3 {
+        println!("{count}");
+        count += 1;               // Rust has += , same as Python
+    }
+}</textarea>
+</div>
+    <div class="panel-note">No parentheses around the condition, but the curly braces are always required — even for a single-line body.</div>
+  </div>
+
+  <div class="step-label"><span class="num">6</span>Operators — arithmetic and comparison</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Same symbols as Python, with one trap: dividing two whole numbers stays a whole number and drops the remainder, exactly like Python's <code class="inline-code">//</code> — except Rust's plain <code class="inline-code">/</code> does that automatically for integers.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz6')">Copy</button><button class="pbtn play" onclick="openPlayground('pz6')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz6-code"></code></pre>
+<textarea class="panel-input" id="pz6-input" spellcheck="false">fn main() {
+    let a = 10;
+    let b = 3;
+
+    println!("{}", a + b);   // 13
+    println!("{}", a - b);   // 7
+    println!("{}", a * b);   // 30
+    println!("{}", a / b);   // 3 — integer division truncates, no automatic float
+    println!("{}", a % b);   // 1 — remainder
+
+    let x = 10.0;
+    let y = 3.0;
+    println!("{}", x / y);   // 3.3333333333333335 — float division works as expected
+
+    println!("{}", a > b);          // true
+    println!("{}", a == b);         // false
+    println!("{}", a > 5 && b < 5); // && = and, || = or, ! = not — same meaning as Python's and/or/not
+}</textarea>
+</div>
+    <div class="panel-note">Mixing an integer and a float directly (like `a / y`) won't compile — Rust never silently converts types for you. You have to convert explicitly.</div>
+  </div>
+
+  <div class="step-label"><span class="num">7</span>Shadowing — reusing a name, without mut</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">This looks like reassignment but isn't: each <code class="inline-code">let age = ...</code> creates a brand new variable that happens to reuse the old name. It's how you transform a value — even change its type — without inventing throwaway names like <code class="inline-code">age_str</code>, <code class="inline-code">age_int</code>.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz7')">Copy</button><button class="pbtn play" onclick="openPlayground('pz7')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz7-code"></code></pre>
+<textarea class="panel-input" id="pz7-input" spellcheck="false">fn main() {
+    let age = "28";                          // age starts out as text
+    let age: i32 = age.parse().unwrap();     // shadowed — now age is a number
+    let age = age + 1;                       // shadowed again — still a number, new value
+
+    println!("{age}");   // 29
+}</textarea>
+</div>
+    <div class="panel-note">mut changes a variable's value in place, but never its type. Shadowing makes a new variable — so it's allowed to change type. Different tools for different jobs.</div>
+  </div>
+
+  <div class="step-label"><span class="num">8</span>Constants — fixed values, known before the program runs</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz8')">Copy</button><button class="pbtn play" onclick="openPlayground('pz8')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz8-code"></code></pre>
+<textarea class="panel-input" id="pz8-input" spellcheck="false">const MAX_CONNECTIONS: u32 = 100;   // always needs a type, always SCREAMING_SNAKE_CASE
+
+fn main() {
+    println!("{MAX_CONNECTIONS}");
+}</textarea>
+</div>
+    <div class="panel-note">const is never allowed to be mut, and its value must be computable before the program starts — no reading a file or calling a function to set it. Used for things like max retries or a default port.</div>
+  </div>
+
+  <div class="step-label"><span class="num">9</span>Tuples — grouping a few different values together</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz9')">Copy</button><button class="pbtn play" onclick="openPlayground('pz9')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz9-code"></code></pre>
+<textarea class="panel-input" id="pz9-input" spellcheck="false">fn min_max(a: i32, b: i32) -> (i32, i32) {   // returns two values as one tuple
+    if a < b { (a, b) } else { (b, a) }
+}
+
+fn main() {
+    let point: (i32, i32) = (3, 7);
+    println!("{} {}", point.0, point.1);   // access by position, starting at 0
+
+    let (x, y) = point;    // destructuring — pull both values out into their own names
+    println!("{x} {y}");
+
+    let (low, high) = min_max(9, 4);
+    println!("low: {low}, high: {high}");
+}</textarea>
+</div>
+    <div class="panel-note">Reach for a tuple when you need to hand back two or three values that don't deserve their own named struct yet.</div>
+  </div>
+
+  <div class="step-label"><span class="num">10</span>Arrays vs Vec — fixed-size vs growable lists</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;"><code class="inline-code">Vec&lt;T&gt;</code> is Rust's version of a Python list — this is the one you'll reach for almost every time. A plain array's size is fixed and part of its type, which is a narrower, less common case.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz10')">Copy</button><button class="pbtn play" onclick="openPlayground('pz10')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz10-code"></code></pre>
+<textarea class="panel-input" id="pz10-input" spellcheck="false">fn main() {
+    let fixed: [i32; 3] = [1, 2, 3];   // array — size (3) is part of the type, can't grow
+    println!("{}", fixed[0]);
+
+    let mut servers: Vec<String> = Vec::new();   // Vec — growable, like a Python list
+    servers.push(String::from("web-01"));
+    servers.push(String::from("web-02"));
+
+    for server in &servers {           // borrow the Vec, so it's still usable after the loop
+        println!("{server}");
+    }
+
+    println!("count: {}", servers.len());
+}</textarea>
+</div>
+    <div class="panel-note">vec!["web-01", "web-02"] is a shortcut macro for building a Vec with values already in it, the same way [1, 2, 3] builds an array.</div>
+  </div>
+
+  <div class="step-label"><span class="num">11</span>String formatting — {}, {:?}, and precision</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz11')">Copy</button><button class="pbtn play" onclick="openPlayground('pz11')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz11-code"></code></pre>
+<textarea class="panel-input" id="pz11-input" spellcheck="false">fn main() {
+    let name = "Alice";
+    let items = vec!["a", "b", "c"];
+
+    println!("{name}");             // Display — the human-readable form
+    println!("{items:?}");          // Debug — the programmer-readable form, works on almost everything
+
+    let pi = 3.14159;
+    println!("{pi:.2}");             // 3.14 — 2 decimal places
+
+    println!("{} is {} years old", name, 28);   // positional args also still work
+}</textarea>
+</div>
+    <div class="panel-note">If {name} refuses to compile for some type, try {name:?} instead — most types support Debug even when they don't support the plain Display form.</div>
+  </div>
+
+  <div class="step-label"><span class="num">12</span>match — an upgraded switch statement</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Python only recently got <code class="inline-code">match</code>; Rust has had it from the start, and leans on it heavily. The compiler forces you to handle every possibility — <code class="inline-code">_</code> is the catch-all, like Python's <code class="inline-code">case _:</code>.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz12')">Copy</button><button class="pbtn play" onclick="openPlayground('pz12')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz12-code"></code></pre>
+<textarea class="panel-input" id="pz12-input" spellcheck="false">fn main() {
+    let status_code = 404;
+
+    let message = match status_code {
+        200 => "OK",
+        404 => "Not Found",
+        500 => "Server Error",
+        _ => "Unknown",   // required unless every possible value is listed above
+    };
+    println!("{message}");
+}</textarea>
+</div>
+    <div class="panel-note">You'll see match constantly once Option and Result show up in the next section — it's the standard way to handle "this might be one of several things."</div>
+  </div>
+
+  <div class="step-label"><span class="num">13</span>loop with a value — Rust's break can hand something back</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pz13')">Copy</button><button class="pbtn play" onclick="openPlayground('pz13')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pz13-code"></code></pre>
+<textarea class="panel-input" id="pz13-input" spellcheck="false">fn main() {
+    let mut count = 0;
+
+    let result = loop {          // loop repeats forever, until you break
+        count += 1;
+        if count == 5 {
+            break count * 2;     // this stops the loop AND produces a value
+        }
+    };
+
+    println!("{result}");   // 10
+}</textarea>
+</div>
+    <div class="panel-note">while and for never produce a value this way — only plain loop can, which is why it exists as its own keyword instead of being just "while true".</div>
+  </div>
+
+  <div class="callout">
+    <span class="label">That's the whole syntax layer</span>
+    <p>Thirteen steps, all plain Rust — no ownership, no traits, no async yet. Everything from here on is Rust-specific ideas layered on top of exactly what you just typed, not new syntax to memorize. If any of the thirteen steps above still feels unfamiliar, it's worth re-running them before continuing.</p>
+  </div>
+</section>
+
+<section class="stage" id="s-fund">
+  <span class="tag fund">Fundamentals</span>
+  <h2>The Rust-specific ideas you actually need</h2>
+  <p class="stage-sub">Now the six bigger ideas — the ones with no real Python equivalent. Everything in Actix builds on these. You don't need deep lifetime annotations for normal web work; most are elided by the compiler.</p>
+
+  <div class="flist">
+    <div class="flist-item"><code>&amp; / &amp;mut</code><span>Ownership, borrowing &amp; move semantics — how memory is managed without a garbage collector</span></div>
+    <div class="flist-item"><code>struct/enum</code><span><code class="inline-code">struct</code> + <code class="inline-code">impl</code> + <code class="inline-code">enum</code> + traits — how you model data and behavior</span></div>
+    <div class="flist-item"><code>Result/?</code><span><code class="inline-code">Result</code> / <code class="inline-code">Option</code> + the <code class="inline-code">?</code> operator — replaces try/except; errors become values</span></div>
+    <div class="flist-item"><code>async/await</code><span>Async/await + Tokio — Actix runs on the Tokio runtime</span></div>
+    <div class="flist-item"><code>serde</code><span>Serialize/deserialize JSON and other formats</span></div>
+    <div class="flist-item"><code>cargo</code><span>Cargo + modules — project layout and dependencies</span></div>
+  </div>
+
+
+  <div class="step-label"><span class="num">1</span>Ownership — the idea Python never made you think about</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">In Python, many variables can point at the same value and the garbage collector cleans up when nobody needs it anymore. In Rust, each value has exactly <b>one owner</b>. When you assign it to something else, the old owner loses access — this is called a <b>move</b>. Run this and read the comments before the code below it.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p0a')">Copy</button><button class="pbtn play" onclick="openPlayground('p0a')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p0a-code"></code></pre>
+<textarea class="panel-input" id="p0a-input" spellcheck="false">fn main() {
+    let name = String::from("Alice");
+    let greeting = name;   // ownership of the String MOVES to `greeting`
+
+    // println!("{name}");   // uncomment this line: it will not compile.
+    // error: "value borrowed here after move" — `name` no longer owns anything
+
+    println!("{greeting}"); // this works — `greeting` is the owner now
+}</textarea>
+</div>
+    <div class="panel-note">This is not a bug in your code — it's the compiler stopping a class of bug (two owners freeing the same memory) before it can exist.</div>
+  </div>
+
+  <div class="step-label"><span class="num">2</span>Borrowing with &amp; — using a value without taking it</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Most of the time you don't want to move a value, you just want to look at it or use it briefly. <code class="inline-code">&amp;value</code> creates a <b>borrow</b> — temporary access, ownership stays where it was. This is what almost every function parameter in Actix handlers actually is.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p0b')">Copy</button><button class="pbtn play" onclick="openPlayground('p0b')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p0b-code"></code></pre>
+<textarea class="panel-input" id="p0b-input" spellcheck="false">fn print_length(s: &String) {   // &String = "let me look, don't take it"
+    println!("length: {}", s.len());
+}
+
+fn main() {
+    let name = String::from("Alice");
+
+    print_length(&name);   // borrow it — name still belongs to main()
+    print_length(&name);   // borrow it again — perfectly fine, unlimited read-only borrows
+
+    println!("still usable: {name}");  // name was never moved, so this works
+}</textarea>
+</div>
+    <div class="panel-note">A plain <code class="inline-code">&amp;T</code> borrow is read-only. <code class="inline-code">&amp;mut T</code> is a borrow that's allowed to change the value — but Rust only ever allows one <code class="inline-code">&amp;mut</code> borrow at a time, which is what actually prevents data races.</div>
+  </div>
+
+  <div class="step-label"><span class="num">3</span>struct + impl + trait — modeling data and behavior</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">A <code class="inline-code">struct</code> is your data shape — like a Django model's fields, with no ORM behind it. <code class="inline-code">impl</code> attaches methods to it. A <code class="inline-code">trait</code> is like a Python abstract base class or a "protocol" — a set of methods a type promises to implement.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p0c')">Copy</button><button class="pbtn play" onclick="openPlayground('p0c')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p0c-code"></code></pre>
+<textarea class="panel-input" id="p0c-input" spellcheck="false">struct Server {
+    name: String,
+    is_running: bool,
+}
+
+// impl attaches methods to Server — like defining methods inside a Python class
+impl Server {
+    fn status_line(&self) -> String {
+        if self.is_running {
+            format!("{} is running", self.name)
+        } else {
+            format!("{} is stopped", self.name)
+        }
+    }
+}
+
+// a trait: any type that implements Describable must provide describe()
+trait Describable {
+    fn describe(&self) -> String;
+}
+
+impl Describable for Server {
+    fn describe(&self) -> String {
+        format!("Server: {}", self.name)
+    }
+}
+
+fn main() {
+    let web01 = Server { name: String::from("web-01"), is_running: true };
+    println!("{}", web01.status_line());
+    println!("{}", web01.describe());
+}</textarea>
+</div>
+    <div class="panel-note">impl Responder in the Actix examples earlier is this same idea — "any type that implements the Responder trait can be returned from a handler."</div>
+  </div>
+
+  <div class="step-label"><span class="num">4</span>async/await — why Actix handlers all say async fn</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">An <code class="inline-code">async fn</code> doesn't run when called — it returns a "future" that runs when something <code class="inline-code">.await</code>s it. This lets one thread handle thousands of waiting requests (like a slow database query) without blocking. Tokio is the runtime that actually drives these futures forward.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p0d')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p0d-code"></code></pre>
+<textarea class="panel-input" id="p0d-input" spellcheck="false">// Cargo.toml: tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+async fn fetch_user(id: u32) -> String {
+    // pretend this is a real database call that takes time
+    format!("user #{id}")
+}
+
+#[tokio::main]                  // sets up the async runtime so main() can be async
+async fn main() {
+    let user = fetch_user(1).await;   // .await pauses here without blocking the thread
+    println!("{user}");
+}</textarea>
+</div>
+    <div class="panel-note">This is the same relationship as Actix: #[actix_web::main] is Actix's own version of #[tokio::main] — it starts the runtime your handlers run inside.</div>
+  </div>
+
+  <div class="step-label"><span class="num">5</span>Result and the ? operator — this replaces try/except</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">In Django you'd write <code class="inline-code">try: id = int(s) except ValueError: ...</code>. In Rust, a function that can fail returns a <code class="inline-code">Result</code> instead of raising — and <code class="inline-code">?</code> means "if this failed, stop here and hand the error up."</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p1')">Copy</button><button class="pbtn play" onclick="openPlayground('p1')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p1-code"></code></pre>
+<textarea class="panel-input" id="p1-input" spellcheck="false">// Result replaces try/except. The ? operator propagates errors.
+fn parse_id(s: &str) -> Result<u32, std::num::ParseIntError> {
+    let id = s.parse::<u32>()?;   // returns early on error
+    Ok(id)
+}
+
+fn main() {
+    match parse_id("42") {
+        Ok(id) => println!("parsed: {id}"),
+        Err(e) => println!("failed: {e}"),
+    }
+
+    match parse_id("banana") {
+        Ok(id) => println!("parsed: {id}"),
+        Err(e) => println!("failed: {e}"),
+    }
+}</textarea>
+</div>
+    <div class="panel-note">This one is pure Rust — no Actix needed — so it runs as-is on the Playground.</div>
+  </div>
+
+  <div class="step-label"><span class="num">6</span>Same idea, inside a web handler</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p2')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p2-code"></code></pre>
+<textarea class="panel-input" id="p2-input" spellcheck="false">// In handlers you usually map an error to an HTTP response
+async fn handler() -> Result<HttpResponse, actix_web::Error> {
+    let id = parse_id("42").map_err(|e| {
+        actix_web::error::ErrorBadRequest(e.to_string())
+    })?;
+    Ok(HttpResponse::Ok().json(id))
+}</textarea>
+</div>
+    <div class="panel-note">Needs Actix-web in scope — see the full running example below.</div>
+  </div>
+
+  <div class="callout">
+    <span class="label">Structs replace models &amp; serializers, together</span>
+    <p>A Django model separates "what shape is the data" (the model) from "how does it become JSON" (the serializer). In Rust, one <code class="inline-code">struct</code> with <code class="inline-code">#[derive(Serialize, Deserialize)]</code> from Serde usually does both jobs — you'll see this in the Actix example next.</p>
+  </div>
+
+  <div class="step-label"><span class="num">↳</span>Try it — fix the ownership error</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">This one won't compile as written. Uncomment the marked line, paste it into the Playground, read the compiler's error message, then fix it using what you just learned about <code class="inline-code">&amp;</code>.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust · practice</span><div class="actions"><button class="pbtn" onclick="copyPanel('p0e')">Copy</button><button class="pbtn play" onclick="openPlayground('p0e')">Playground ↗</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p0e-code"></code></pre>
+<textarea class="panel-input" id="p0e-input" spellcheck="false">fn print_name(s: String) {   // takes ownership — not a borrow
+    println!("{s}");
+}
+
+fn main() {
+    let name = String::from("web-01");
+
+    print_name(name);
+    // print_name(name);   // uncomment this second call — it won't compile
+
+    // Fix it: change print_name's parameter to &String, and pass &name instead.
+    // Then both calls will work, because neither one takes ownership.
+}</textarea>
+</div>
+    <div class="panel-note">If you get stuck, scroll back up to Step 2 — that's the exact fix.</div>
+  </div>
+</section>
+
+<section class="stage" id="s-actix">
+  <span class="tag actix">Actix-web</span>
+  <h2>The surface area that matters</h2>
+  <p class="stage-sub">Six pieces cover almost everything: <code class="inline-code">HttpServer</code> + <code class="inline-code">App</code> as the entry point, routing, handlers, extractors, middleware, and application state. We'll build one real app, piece by piece.</p>
+
+  <div class="step-label"><span class="num">1</span>The smallest possible server — one route</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p3')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p3-code"></code></pre>
+<textarea class="panel-input" id="p3-input" spellcheck="false">use actix_web::{get, App, HttpResponse, HttpServer, Responder};
+
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello from Actix!")
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| App::new().service(hello))
+        .bind(("127.0.0.1", 8080))?
+        .run()
+        .await
+}</textarea>
+</div>
+    <div class="panel-note">cargo run, then open http://127.0.0.1:8080/</div>
+  </div>
+
+  <div class="step-label"><span class="num">2</span>Add a path extractor — like a Django path converter</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p4')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p4-code"></code></pre>
+<textarea class="panel-input" id="p4-input" spellcheck="false">use actix_web::{get, web, Responder};
+
+// GET /users/42 → user_id = 42, already parsed as a u32
+#[get("/users/{id}")]
+async fn get_user(path: web::Path<u32>) -> impl Responder {
+    let user_id = path.into_inner();
+    format!("user id is {user_id}")
+}</textarea>
+</div>
+    <div class="panel-note">web::Path&lt;u32&gt; both extracts and validates — a non-number in the URL is rejected before your code runs.</div>
+  </div>
+
+  <div class="step-label"><span class="num">3</span>Add a JSON body extractor — like DRF's request.data</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p5')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p5-code"></code></pre>
+<textarea class="panel-input" id="p5-input" spellcheck="false">use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct Item {
+    id: u32,
+    name: String,
+}
+
+#[post("/items/{id}")]
+async fn create_item(
+    path: web::Path<u32>,      // /items/42 → id = 42
+    body: web::Json<Item>,     // JSON body deserialized automatically
+) -> impl Responder {
+    let id = path.into_inner();
+    HttpResponse::Created().json(Item {
+        id,
+        name: body.name.clone(),
+    })
+}</textarea>
+</div>
+    <div class="panel-note">A malformed JSON body is rejected automatically with a 400 — you never manually parse it.</div>
+  </div>
+
+  <div class="step-label"><span class="num">4</span>Put it together — a full, runnable app</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust · main.rs</span><div class="actions"><button class="pbtn" onclick="copyPanel('p6')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p6-code"></code></pre>
+<textarea class="panel-input" id="p6-input" spellcheck="false">use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct Item {
+    id: u32,
+    name: String,
+}
+
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello from Actix!")
+}
+
+#[post("/items/{id}")]
+async fn create_item(
+    path: web::Path<u32>,
+    body: web::Json<Item>,
+) -> impl Responder {
+    let id = path.into_inner();
+    HttpResponse::Created().json(Item {
+        id,
+        name: body.name.clone(),
+    })
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(create_item)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}</textarea>
+</div>
+    <div class="panel-note">Cargo.toml needs: actix-web = "4", serde (with the "derive" feature), tokio (with "macros", "rt-multi-thread")</div>
+  </div>
+
+  <div class="term">
+    <div class="term-bar">
+      <div class="tdot" style="background:#FF5C74"></div>
+      <div class="tdot" style="background:#D9A441"></div>
+      <div class="tdot" style="background:#5FBF8A"></div>
+      <span class="ttitle">reference transcript — what running this actually looks like</span>
+    </div>
+    <div class="term-body"><span class="prompt">$</span> cargo run
+   Compiling myapi v0.1.0
+    Finished dev [unoptimized + debuginfo] target(s)
+     Running `target/debug/myapi`
+<span class="ok">Listening on 127.0.0.1:8080</span>
+
+<span class="prompt">$</span> curl -X POST localhost:8080/items/42 -H "content-type: application/json" -d '{"id":0,"name":"widget"}'
+{"id":42,"name":"widget"}</div>
+  </div>
+
+  <div class="callout steel">
+    <span class="label">Middleware &amp; application state</span>
+    <p>Middleware (logging, CORS, auth guards, compression) wraps every request the same way Django middleware does. Shared state — usually a DB pool or config — is wrapped in <code class="inline-code">web::Data&lt;T&gt;</code> and attached with <code class="inline-code">.app_data(...)</code>, the closest equivalent to a Django app-level singleton.</p>
+  </div>
+</section>
+
+<section class="stage" id="s-data">
+  <span class="tag data">Data, auth &amp; templates</span>
+  <h2>The minimum viable stack</h2>
+  <p class="stage-sub">Django's ORM has no single free equivalent. This is the honest replacement stack for a typical project.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Database</h3>
+      <p>Prefer <b>SQLx</b> — async, compile-time checked SQL. <b>Diesel</b> or <b>SeaORM</b> if you want a fuller ORM feel.</p>
+    </div>
+    <div class="card">
+      <h3>Auth</h3>
+      <p><b>JWT</b> (<code class="inline-code">jsonwebtoken</code> + <code class="inline-code">argon2</code>) plus session middleware, or a focused auth crate.</p>
+    </div>
+    <div class="card">
+      <h3>Templates</h3>
+      <p><b>Tera</b> — very close to Django/Jinja2 syntax. <b>Askama</b> if you want compile-time checked templates.</p>
+    </div>
+    <div class="card">
+      <h3>Validation</h3>
+      <p>Serde plus the <code class="inline-code">validator</code> crate, or logic built directly into your extractors.</p>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <span class="label">The one honest gap</span>
+    <p>There is no free, mature equivalent of the Django admin. Build a simple one yourself, or accept its absence for pure JSON APIs.</p>
+  </div>
+
+  <div class="step-label"><span class="num">1</span>SQLx + shared state — the Django ORM, made explicit</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p7')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p7-code"></code></pre>
+<textarea class="panel-input" id="p7-input" spellcheck="false">use sqlx::PgPool;
+use actix_web::{web, HttpResponse};
+
+// Shared state: the connection pool
+struct AppState {
+    db: PgPool,
+}
+
+async fn list_items(state: web::Data<AppState>) -> Result<HttpResponse, actix_web::Error> {
+    // Compile-time checked query — needs DATABASE_URL at compile time, or offline mode
+    let rows = sqlx::query_as!(
+        Item,
+        "SELECT id, name FROM items ORDER BY id"
+    )
+    .fetch_all(&state.db)
+    .await
+    .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+
+    Ok(HttpResponse::Ok().json(rows))
+}
+
+// In main():
+// let pool = PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
+// .app_data(web::Data::new(AppState { db: pool }))</textarea>
+</div>
+    <div class="panel-note">Needs a running Postgres and DATABASE_URL set — not runnable in a browser sandbox, only locally.</div>
+  </div>
+
+  <p style="color:var(--text-dim);font-size:13.5px;margin-top:10px;">Notice what didn't happen: no hidden query builder, no lazy queryset, no N+1 surprise. The query is a literal string, checked against your real database schema at compile time — if a column name is wrong, the build fails before deploy, not in production.</p>
+</section>
+
+<section class="stage" id="s-compare">
+  <span class="tag steel-tag" style="background:var(--steel-dim);color:var(--steel);">Comparison</span>
+  <h2>What this 30% covers vs Django</h2>
+  <p class="stage-sub">Typical internal tools, SaaS backends, and JSON APIs map well. Content-heavy CMS sites with deep admin customization do not.</p>
+
+  <table class="dtable">
+    <tr><th>Django strength</th><th>Rust / Actix equivalent</th><th>Reality for beginners</th></tr>
+    <tr><td>ORM + migrations</td><td>SQLx / Diesel / SeaORM</td><td>Explicit SQL or a DSL. More control, less magic.</td></tr>
+    <tr><td>Admin interface</td><td>Custom templates or starters</td><td>You build it, or live without it.</td></tr>
+    <tr><td>Auth + permissions</td><td>JWT / sessions + your own guards</td><td>More code, in exchange for compile-time safety.</td></tr>
+    <tr><td>Forms + validation</td><td>Extractors + Serde + validator</td><td>Explicit and predictable.</td></tr>
+    <tr><td>Middleware / security</td><td>Actix middleware + crates</td><td>You wire the pieces yourself.</td></tr>
+    <tr><td>Templates</td><td>Tera or Askama</td><td>Very close to Django/Jinja.</td></tr>
+    <tr><td>Signals / managers</td><td>Explicit functions or queues</td><td>No hidden magic.</td></tr>
+    <tr><td>Background jobs</td><td>Tokio tasks or external workers</td><td>Thinner ecosystem, still capable.</td></tr>
+  </table>
+</section>
+
+<section class="stage" id="s-unlearn">
+  <span class="tag unlearn">Unlearn</span>
+  <h2>Habits to drop from Python / Django</h2>
+  <p class="stage-sub">These will fight you until you let them go.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Dynamic typing</h3>
+      <p>"It will work at runtime" stops being the plan. Types are the primary design tool — the compiler catches whole classes of bugs before you ever run the code.</p>
+    </div>
+    <div class="card">
+      <h3>Exceptions everywhere</h3>
+      <p>No more <code class="inline-code">try</code>/<code class="inline-code">except</code> as a catch-all. Use <code class="inline-code">Result</code> and <code class="inline-code">Option</code> — errors become values you handle explicitly with <code class="inline-code">?</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Free shared mutable state</h3>
+      <p>Ownership rules apply everywhere. Design clear data flow instead of reaching for <code class="inline-code">.clone()</code> or <code class="inline-code">Arc&lt;Mutex&lt;T&gt;&gt;</code> as a first reaction.</p>
+    </div>
+    <div class="card">
+      <h3>Django magic</h3>
+      <p>Auto admin, signals, model managers — all become explicit functions and types. Longer to write at first, much clearer to read later.</p>
+    </div>
+    <div class="card">
+      <h3>The GIL mental model</h3>
+      <p>Rust has true multi-threaded concurrency plus async. You need to think differently about how data is shared across tasks.</p>
+    </div>
+    <div class="card">
+      <h3>Fast interpret-and-run iteration</h3>
+      <p>Compile times exist. Structure your project so the code you're actively changing recompiles quickly.</p>
+    </div>
+  </div>
+
+  <div class="step-label"><span class="num">1</span>Sharing state the Rust way — no global mutable variables</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('p8')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="p8-code"></code></pre>
+<textarea class="panel-input" id="p8-input" spellcheck="false">use std::sync::Arc;
+use actix_web::{web, HttpResponse, Responder};
+
+struct AppState {
+    db: sqlx::PgPool,     // PgPool is already cheap to clone (internally Arc)
+    config: Arc<Config>,  // wrap expensive/read-only data in Arc yourself
+}
+
+// In App::new():
+// .app_data(web::Data::new(AppState { db: pool, config: Arc::new(cfg) }))
+
+// In a handler — web::Data clones the Arc cheaply, no locking needed for reads
+async fn handler(state: web::Data<AppState>) -> impl Responder {
+    // use &state.db, &state.config
+    HttpResponse::Ok().finish()
+}</textarea>
+</div>
+    <div class="panel-note">This is the pattern almost every Actix app uses for "global" config and DB access.</div>
+  </div>
+</section>
+
+<section class="stage" id="s-anti">
+  <span class="tag amber-tag" style="background:var(--amber-dim);color:var(--amber);">Anti-advice</span>
+  <h2>Common bad takes to ignore</h2>
+  <p class="stage-sub">You'll hear all of these. Here's the honest counter to each.</p>
+
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"Just clone everything to silence the borrow checker."</b><p>Destroys performance and clarity — it's treating a design signal as an annoyance.</p></div>
+  </div>
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"You must master lifetimes before writing a web service."</b><p>Most web code needs almost none — the compiler elides them in normal handler code.</p></div>
+  </div>
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"Rust is only for systems programming."</b><p>False for performance-sensitive or long-lived services — which is most backends.</p></div>
+  </div>
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"Rewrite the entire Django monolith in pure Actix."</b><p>Prefer incremental migration or extracting just the hot path.</p></div>
+  </div>
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"Actix is dead, only use Axum."</b><p>Actix remains one of the highest-throughput options available. Choose based on your needs, not trends.</p></div>
+  </div>
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"Expect Django-level productivity on day one."</b><p>You will be slower for weeks. Then the compiler becomes an ally instead of an obstacle.</p></div>
+  </div>
+  <div class="myth">
+    <div class="x">✕</div>
+    <div class="myth-body"><b>"Reach for hexagonal architecture on a simple CRUD service."</b><p>Over-engineering before you've felt the pain it solves. Start simple.</p></div>
+  </div>
+</section>
+
+<section class="stage" id="s-start">
+  <span class="tag fund">Get started</span>
+  <h2>Your first seven steps</h2>
+  <p class="stage-sub">In order. Click each one off as you finish it.</p>
+
+  <div class="roadmap" id="roadmap">
+    <div class="road-item" data-idx="0"><div class="road-check">1</div><div class="road-body"><h4>Install Rust</h4><p>Via rustup.rs, then run <code class="inline-code">cargo new myapi &amp;&amp; cd myapi</code>.</p></div></div>
+    <div class="road-item" data-idx="1"><div class="road-check">2</div><div class="road-body"><h4>Add the core dependencies</h4><p>actix-web, tokio, serde, and sqlx to Cargo.toml — see the reference below.</p></div></div>
+    <div class="road-item" data-idx="2"><div class="road-check">3</div><div class="road-body"><h4>Type the minimal Actix example</h4><p>Run it with <code class="inline-code">cargo run</code>, then hit http://127.0.0.1:8080/</p></div></div>
+    <div class="road-item" data-idx="3"><div class="road-check">4</div><div class="road-body"><h4>Add a second route</h4><p>One that takes a Path and a Json body. Confirm it works with curl.</p></div></div>
+    <div class="road-item" data-idx="4"><div class="road-check">5</div><div class="road-body"><h4>Add a database pool</h4><p>PgPool or SqlitePool, plus one real SELECT query with SQLx.</p></div></div>
+    <div class="road-item" data-idx="5"><div class="road-check">6</div><div class="road-body"><h4>Deploy the binary in Docker</h4><p>Notice how small and simple the runtime image is compared to a Python one.</p></div></div>
+    <div class="road-item" data-idx="6"><div class="road-check">7</div><div class="road-body"><h4>Only then expand</h4><p>Measure. Let the compiler teach you where the next piece belongs.</p></div></div>
+  </div>
+
+  <div class="step-label" style="margin-top:30px;"><span class="num">↳</span>Starter Cargo.toml — quick reference</div>
+  <pre class="plain"><code class="language-toml">[dependencies]
+actix-web = "4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "macros"] }
+
+# Optional later:
+# jsonwebtoken = "9"     # JWT
+# argon2 = "0.5"         # password hashing
+# tera = "1"             # templates (Jinja-like)
+# validator = { version = "0.18", features = ["derive"] }
+# env_logger = "0.11"
+# dotenvy = "0.15"</code></pre>
+
+  <div class="callout">
+    <span class="label">When to stay on Django instead</span>
+    <p>If your project lives or dies by the admin panel, stay on Django, or explore a hybrid. If you care about throughput, predictable latency, low memory, and long-term correctness, the Rust path is superior once the team is over the learning curve.</p>
+  </div>
+</section>
+
+<footer>
+  <p class="quote">"Start small. Own the edges. Prefer explicit over magical. The borrow checker is not your enemy — it is the reason many classes of bugs never reach production."</p>
+  <p class="sig">Rust + Actix-web for Django developers — type every example yourself before you trust it.</p>
+</footer>
+
+</main>
+
+<script>
+hljs.highlightAll();
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* =========================================================
+   LIVE SYNTAX HIGHLIGHTING (textarea + hljs overlay) — editing only, no execution
+   ========================================================= */
+function highlightPair(inputEl, codeEl){
+  codeEl.textContent = inputEl.value;
+  delete codeEl.dataset.highlighted;
+  codeEl.className = 'language-rust';
+  hljs.highlightElement(codeEl);
+}
+function autoGrow(el){
+  if(!el) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+function wirePanel(inputId, codeId){
+  const inputEl = document.getElementById(inputId);
+  const codeEl = document.getElementById(codeId);
+  if(!inputEl || !codeEl) return;
+  highlightPair(inputEl, codeEl);
+  autoGrow(inputEl);
+  inputEl.addEventListener('input', () => { highlightPair(inputEl, codeEl); autoGrow(inputEl); });
+  inputEl.addEventListener('keydown', (e) => {
+    if(e.key === 'Tab'){
+      e.preventDefault();
+      const start = inputEl.selectionStart, end = inputEl.selectionEnd;
+      inputEl.value = inputEl.value.slice(0, start) + '    ' + inputEl.value.slice(end);
+      inputEl.selectionStart = inputEl.selectionEnd = start + 4;
+      highlightPair(inputEl, codeEl);
+      autoGrow(inputEl);
+    }
+  });
+  window.addEventListener('resize', () => autoGrow(inputEl));
+}
+document.querySelectorAll('.panel-input-wrap textarea.panel-input').forEach(ta => {
+  wirePanel(ta.id, ta.id.replace(/-input$/, '-code'));
+});
+
+/* =========================================================
+   COPY + PLAYGROUND
+   ========================================================= */
+function copyPanel(id){
+  const ta = document.getElementById(id + '-input');
+  const btn = event.currentTarget;
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1400);
+  });
+}
+function openPlayground(id){
+  const ta = document.getElementById(id + '-input');
+  const url = 'https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&code=' + encodeURIComponent(ta.value);
+  window.open(url, '_blank');
+}
+
+/* =========================================================
+   ROADMAP TOGGLES
+   ========================================================= */
+document.querySelectorAll('.road-item').forEach(item => {
+  item.addEventListener('click', () => {
+    item.classList.toggle('done');
+    if(item.classList.contains('done')) item.querySelector('.road-check').textContent = '✓';
+    else item.querySelector('.road-check').textContent = (parseInt(item.dataset.idx) + 1);
+  });
+});
+
+/* =========================================================
+   SCROLL PROGRESS + NAV SCROLL-SPY
+   ========================================================= */
+const progressBar = document.getElementById('scrollProgress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progressBar.style.width = scrolled + '%';
+}
+window.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+const navLinks = Array.from(document.querySelectorAll('.navlinks a'));
+const navSections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+function updateActiveNav(){
+  let current = navSections[0];
+  for(const sec of navSections){
+    if(sec.getBoundingClientRect().top - 90 <= 0) current = sec;
+  }
+  navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+updateActiveNav();
+
+/* =========================================================
+   SCROLL REVEAL — one quiet pass, not per-card
+   ========================================================= */
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window){
+  document.querySelectorAll('.stage').forEach(sec => {
+    sec.style.opacity = '0';
+    sec.style.transform = 'translateY(12px)';
+    sec.style.transition = 'opacity .5s ease, transform .5s ease';
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'none';
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.06, rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('.stage').forEach(sec => io.observe(sec));
+}
+</script>
+</body>
+</html>
