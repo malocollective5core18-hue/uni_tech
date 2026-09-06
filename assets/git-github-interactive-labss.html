@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git &amp; GitHub — Interactive Labs</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --paper:#080b09;
+  --paper-raised:#0d1310;
+  --ink:#d6f3e2;
+  --ink-soft:#5f8674;
+  --line:#1c2b23;
+  --amber:#39e08a;
+  --amber-soft:#0f2b1c;
+  --teal:#1fae72;
+  --teal-soft:#0d2318;
+  --red:#e5544a;
+  --red-soft:#2c1210;
+  --term-bg:#020403;
+  --term-text:#b6d6c4;
+  --term-green:#4df0a0;
+  --term-amber:#8fe3a8;
+  --term-red:#ff8a80;
+  --term-blue:#7fe3c9;
+  --radius-sm:4px;
+  --radius-md:8px;
+  --font-head:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(57,224,138,0.05), transparent 40%),
+    radial-gradient(circle at 88% 92%, rgba(31,174,114,0.06), transparent 40%);
+  z-index:0;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;width:100%;margin:0;padding:0;}
+body{
+  margin:0;
+  padding:0;
+  width:100%;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.55;
+  overflow-x:hidden;
+}
+::selection{background:var(--amber-soft);}
+a{color:inherit;}
+
+/* Consistent styling for raw <code> tags used inside explanations / do-dont lists
+   (previously unstyled — fell back to the browser default monospace with no
+   accent color, which broke the intended visual identity of the page). */
+code{
+  font-family:var(--font-mono);
+  color:var(--amber);
+  background:rgba(57,224,138,0.08);
+  padding:1px 5px;
+  border-radius:3px;
+  font-size:0.92em;
+}
+
+/* ---------- Layout shell ---------- */
+.shell{
+  display:flex;
+  min-height:100vh;
+  width:100%;
+  max-width:1400px;
+  margin:0 auto;
+}
+
+.rail{
+  position:sticky;
+  top:0;
+  align-self:flex-start;
+  height:100vh;
+  width:250px;
+  flex:0 0 auto;
+  border-right:1px solid var(--line);
+  padding:28px 0 28px 28px;
+  overflow-y:auto;
+}
+.rail::-webkit-scrollbar{width:6px;}
+.rail::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+@media (max-width:820px){
+  .shell{flex-direction:column;}
+  .rail{
+    position:relative;
+    width:auto;
+    height:auto;
+    max-height:none;
+    border-right:none;
+    border-bottom:1px solid var(--line);
+    padding:20px 20px 16px;
+  }
+  .rail-track{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 14px;
+    padding-left:0;
+  }
+  .rail-track::before{display:none;}
+  .rail-item{padding:4px 0;font-size:12.5px;}
+  .rail-dot{position:static;display:inline-block;margin-right:6px;top:0;}
+  /* .main no longer carries side padding — .lab cards (which have their own
+     internal padding) now span the full viewport width and touch the left
+     and right edges of the screen instead of sitting inset from them.
+     Sections that are plain text with no card/border (hero, footer) get
+     their own side padding below so their text doesn't press against the
+     screen edge. */
+  .main{padding:32px 0 70px;}
+  .hero{padding:0 18px;}
+  .hero h1{font-size:32px;}
+  footer.site-footer{padding:8px 18px 0;}
+}
+
+.rail-brand{
+  font-family:var(--font-head);
+  font-weight:700;
+  font-size:18px;
+  letter-spacing:-0.01em;
+  margin-bottom:2px;
+}
+.rail-brand span{color:var(--amber);}
+.rail-sub{
+  font-size:12.5px;
+  color:var(--ink-soft);
+  margin-bottom:26px;
+}
+.rail-track{
+  position:relative;
+  padding-left:22px;
+}
+.rail-track::before{
+  content:"";
+  position:absolute;
+  left:5px;
+  top:6px;
+  bottom:6px;
+  width:2px;
+  background:var(--line);
+}
+.rail-item{
+  position:relative;
+  display:block;
+  padding:9px 10px 9px 0;
+  text-decoration:none;
+  color:var(--ink-soft);
+  font-size:13px;
+  font-weight:500;
+  border-radius:var(--radius-sm);
+  transition:color .15s ease;
+}
+.rail-item:hover{color:var(--ink);}
+.rail-dot{
+  position:absolute;
+  left:-22px;
+  top:13px;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:var(--paper);
+  border:2px solid var(--line);
+  transition:all .2s ease;
+}
+.rail-item.done .rail-dot{
+  background:var(--amber);
+  border-color:var(--amber);
+  box-shadow:0 0 0 3px var(--amber-soft);
+}
+.rail-item.done{color:var(--ink);}
+.rail-progress{
+  margin-top:24px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.rail-progress b{color:var(--ink);font-family:var(--font-mono);}
+
+/* ---------- Main column ---------- */
+.main{
+  flex:1;
+  min-width:0;
+  padding:56px 48px 100px;
+}
+
+.hero{
+  max-width:760px;
+  margin-bottom:64px;
+}
+.hero-kicker{
+  font-family:var(--font-mono);
+  font-size:13px;
+  color:var(--teal);
+  margin-bottom:14px;
+}
+.hero h1{
+  font-family:var(--font-head);
+  font-size:44px;
+  line-height:1.08;
+  letter-spacing:-0.015em;
+  margin:0 0 18px;
+}
+.hero p{
+  font-size:16.5px;
+  color:var(--ink-soft);
+  max-width:640px;
+  margin:0 0 10px;
+}
+.hero-note{
+  margin-top:22px;
+  padding:14px 18px;
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-left:4px solid var(--amber);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  font-size:13.5px;
+  color:var(--ink-soft);
+}
+.hero-note strong{color:var(--ink);}
+
+/* ---------- Lab card ---------- */
+.lab{
+  scroll-margin-top:24px;
+  margin-bottom:56px;
+  background:var(--paper-raised);
+  border:1px solid var(--line);
+  border-left:4px solid var(--amber);
+}
+.lab-head{
+  padding:22px 28px 18px;
+  border-bottom:1px solid var(--line);
+}
+.lab-index{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--amber);
+  font-weight:700;
+}
+.lab-head h2{
+  font-family:var(--font-head);
+  font-size:23px;
+  margin:4px 0 10px;
+  letter-spacing:-0.01em;
+}
+.lab-blurb{
+  font-size:14px;
+  color:var(--ink-soft);
+  max-width:680px;
+  margin:0;
+}
+.lab-goal{
+  display:inline-block;
+  margin-top:10px;
+  font-size:12.5px;
+  color:var(--teal);
+  background:var(--teal-soft);
+  padding:3px 9px;
+  border-radius:var(--radius-sm);
+}
+
+.lab-controls-top{
+  padding:18px 28px 20px;
+  border-bottom:1px solid var(--line);
+  background:rgba(57,224,138,0.03);
+}
+.flow-label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.03em;
+  color:var(--amber);
+  margin-bottom:10px;
+  font-weight:700;
+}
+
+/* .lab-body now stacks its two panels as block-level sections, one per row,
+   instead of the previous two-column grid. The terminal panel (exact
+   terminal output) is placed before the diagram panel in source order and
+   is also pinned there visually via `order`, so "exact terminal output"
+   always renders above "watch it happen — state diagram" at every viewport
+   width — the two no longer share a line at any breakpoint. */
+.lab-body{
+  display:flex;
+  flex-direction:column;
+}
+.diagram-panel, .terminal-panel{
+  padding:20px 24px 24px;
+  min-width:0;
+}
+.terminal-panel{
+  order:-1;
+  border-bottom:1px solid var(--line);
+}
+.diagram-panel{
+  order:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(57,224,138,0.035) 24px);
+}
+@media (max-width:480px){
+  .diagram-panel, .terminal-panel{padding:16px 14px 18px;}
+}
+.panel-label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.02em;
+  color:var(--ink-soft);
+  margin-bottom:12px;
+}
+
+.diagram-scroll{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:4px;
+}
+.diagram-panel svg{width:100%;min-width:520px;height:auto;display:block;}
+.diagram-scroll-hint{
+  display:none;
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  color:var(--amber);
+  margin-top:8px;
+}
+@media (max-width:600px){
+  .diagram-scroll-hint{display:block;}
+  .diagram-panel svg{min-width:600px;}
+}
+
+.diagram-panel svg text{
+  font-family:var(--font-mono);
+  fill:var(--ink);
+}
+.diagram-panel svg .lbl{font-size:10.5px;fill:var(--ink-soft);}
+.diagram-panel svg .lbl-strong{font-size:10.5px;fill:var(--ink);font-weight:700;}
+.diagram-panel svg .node{fill:var(--paper-raised);stroke:var(--line);stroke-width:2;}
+.diagram-panel svg .node-fill{fill:var(--ink);stroke:var(--ink);}
+.diagram-panel svg .node-amber{fill:var(--amber);stroke:var(--amber);}
+.diagram-panel svg .node-teal{fill:var(--teal);stroke:var(--teal);}
+.diagram-panel svg .node-red{fill:var(--red);stroke:var(--red);}
+.diagram-panel svg .edge{stroke:var(--line);stroke-width:2;fill:none;}
+.diagram-panel svg .edge-active{stroke:var(--amber);stroke-width:2.5;fill:none;}
+.diagram-panel svg .edge-dash{stroke:var(--ink-soft);stroke-width:1.6;fill:none;stroke-dasharray:4 4;}
+.diagram-panel svg [data-show-from]{opacity:0.16;transition:opacity .35s ease, filter .35s ease;}
+.diagram-panel svg [data-show-from].is-active{opacity:1;}
+.diagram-panel svg [data-show-for]{opacity:0;transition:opacity .3s ease;}
+.diagram-panel svg [data-show-for].is-active{opacity:1;}
+.diagram-panel svg .pulse{animation:pulseGlow 1.1s ease-in-out infinite;}
+@keyframes pulseGlow{
+  0%,100%{filter:drop-shadow(0 0 0px currentColor);}
+  50%{filter:drop-shadow(0 0 5px currentColor);}
+}
+
+/* ---------- Terminal ---------- */
+.terminal{
+  background:var(--term-bg);
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:1px solid #1f2733;
+}
+.term-topbar{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:9px 12px;
+  background:#161b22;
+  border-bottom:1px solid #1f2733;
+}
+.term-dot{width:9px;height:9px;border-radius:50%;background:#3a4351;}
+.term-title{
+  margin-left:8px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:#6e7887;
+}
+.term-body{
+  padding:14px 16px 16px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  line-height:1.65;
+  color:var(--term-text);
+  min-height:120px;
+  max-height:340px;
+  overflow-y:auto;
+}
+.term-body::-webkit-scrollbar{width:6px;}
+.term-body::-webkit-scrollbar-thumb{background:#2a323d;border-radius:4px;}
+.term-line{white-space:pre-wrap;word-break:break-word;opacity:0;animation:termIn .28s ease forwards;}
+@keyframes termIn{from{opacity:0;transform:translateY(2px);}to{opacity:1;transform:translateY(0);}}
+.term-cmd{color:var(--term-text);}
+.term-cmd::before{content:"$ ";color:var(--term-green);}
+.term-out{color:#9099a4;}
+.term-out.hl-green{color:var(--term-green);}
+.term-out.hl-amber{color:var(--term-amber);}
+.term-out.hl-red{color:var(--term-red);}
+.term-out.hl-blue{color:var(--term-blue);}
+.term-idle{color:#4b5561;font-style:italic;}
+.term-caret{
+  display:inline-block;width:7px;height:14px;background:var(--term-green);
+  vertical-align:-2px;animation:blink 1s step-end infinite;
+}
+@keyframes blink{50%{opacity:0;}}
+
+.lab-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.cmd-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.cmd-btn{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  padding:8px 13px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--line);
+  background:var(--paper-raised);
+  color:var(--ink-soft);
+  cursor:pointer;
+  transition:all .15s ease;
+  white-space:nowrap;
+}
+.cmd-btn .num{
+  color:var(--amber);
+  opacity:.7;
+  margin-right:6px;
+}
+.cmd-btn:hover{
+  border-color:var(--amber);
+  color:var(--ink);
+}
+.cmd-btn.active{
+  background:var(--amber);
+  border-color:var(--amber);
+  color:#04140b;
+  font-weight:700;
+}
+.cmd-btn.active .num{color:#04140b;opacity:.65;}
+
+.btn{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:13px;
+  padding:9px 16px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--amber);
+  background:var(--amber);
+  color:#04140b;
+  cursor:pointer;
+  transition:transform .1s ease, background .15s ease;
+}
+.btn:hover{background:#4ff5a0;}
+.btn:active{transform:scale(0.97);}
+.btn:disabled{background:var(--line);border-color:var(--line);color:#5f6b64;cursor:not-allowed;}
+.btn-ghost{
+  background:transparent;
+  color:var(--ink-soft);
+  border:1px solid var(--line);
+}
+.btn-ghost:hover{background:var(--paper);color:var(--ink);}
+.step-counter{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-left:auto;
+}
+
+.lab-notes{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  border-top:1px solid var(--line);
+}
+@media (max-width:880px){.lab-notes{grid-template-columns:1fr;}}
+.note-col{padding:16px 24px;min-width:0;}
+.note-col + .note-col{border-left:1px solid var(--line);}
+@media (max-width:880px){.note-col + .note-col{border-left:none;border-top:1px solid var(--line);}}
+@media (max-width:600px){
+  /* The .lab card now spans edge-to-edge on mobile (see .main / .lab-body
+     rules above). These sections still need some inset so their text
+     doesn't press directly against the card's own border. */
+  .lab-head{padding:18px 18px 16px;}
+  .lab-controls-top{padding:16px 18px 18px;}
+  .note-col{padding:14px 18px;}
+  .explain-panel{padding:12px 18px 18px;}
+}
+.note-col h4{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  margin:0 0 8px;
+  letter-spacing:.02em;
+}
+.note-do h4{color:var(--teal);}
+.note-dont h4{color:var(--red);}
+.note-col ul{margin:0;padding-left:16px;}
+.note-col li{font-size:12.8px;color:var(--ink-soft);margin-bottom:6px;line-height:1.5;overflow-wrap:anywhere;}
+.note-col li b{color:var(--ink);}
+
+footer.site-footer{
+  max-width:760px;
+  font-size:12.5px;
+  color:var(--ink-soft);
+  padding-top:8px;
+  border-top:1px solid var(--line);
+}
+
+/* ---- explanation panel below diagram ---- */
+.explain-panel {
+  padding: 12px 24px 20px;
+  border-top: 1px solid var(--line);
+  background: rgba(57,224,138,0.02);
+}
+.explain-panel .explain-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.explain-panel .explain-text {
+  font-size: 13.5px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin:0;
+  overflow-wrap:anywhere;
+}
+.explain-panel .explain-text i {
+  color: var(--amber);
+  font-style: normal;
+  font-weight: 500;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" id="rail">
+    <div class="rail-brand">git<span>/</span>hub<span>·</span>labs</div>
+    <div class="rail-sub">Run the command. Watch it happen.</div>
+    <div class="rail-track" id="rail-track"></div>
+    <div class="rail-progress">Progress <b id="rail-progress-text">0/12 labs run</b></div>
+  </nav>
+
+  <main class="main">
+    <div class="hero">
+      <div class="hero-kicker">interactive · not a cheat sheet</div>
+      <h1>Git &amp; GitHub, by running it</h1>
+      <p>Every lab below is a real command sequence, broken into buttons. Click any command and two things happen at once: a terminal shows the exact output Git would print, and a diagram beside it shows what just moved — a file crossing into staging, a branch splitting off, a commit landing on the wrong side of a merge.</p>
+      <p>Nothing here needs an install. Work top to bottom, or jump straight to whichever command you keep forgetting.</p>
+      <div class="hero-note"><strong>How to use it:</strong> each button is one real command — click them left to right to follow a lab's story, or jump to any one directly to see exactly what that command does on its own.</div>
+    </div>
+
+    <div id="labs-root"></div>
+
+    <footer class="site-footer">Git &amp; GitHub Interactive Labs — terminal output is simulated to match real Git behavior exactly; diagrams represent repository state, not literal file contents.</footer>
+  </main>
+</div>
+
+<script>
+/* ===================== GENERIC ENGINE ===================== */
+function el(html){
+  const d=document.createElement('div');
+  d.innerHTML=html.trim();
+  return d.firstElementChild;
+}
+
+function updateDiagramStep(svg, step){
+  if(!svg) return;
+  svg.querySelectorAll('[data-show-from]').forEach(function(node){
+    var from = parseInt(node.getAttribute('data-show-from'),10);
+    node.classList.toggle('is-active', step>=from);
+  });
+  svg.querySelectorAll('[data-active-at]').forEach(function(node){
+    var at = parseInt(node.getAttribute('data-active-at'),10);
+    node.classList.toggle('pulse', step===at);
+  });
+}
+
+function updateDiagramScenario(svg, scenario){
+  if(!svg) return;
+  svg.querySelectorAll('[data-show-for]').forEach(function(node){
+    var keys = node.getAttribute('data-show-for').split(',');
+    node.classList.toggle('is-active', keys.indexOf(scenario)>-1);
+  });
+}
+
+function clearTerm(body){
+  if(!body) return 0;
+  body.innerHTML='';
+  body._gen=(body._gen||0)+1;
+  return body._gen;
+}
+
+function typeBlock(body, cmd, outLines, done, gen){
+  if(!body) return;
+  if(gen===undefined){ gen=body._gen||0; }
+  var cmdEl=document.createElement('div');
+  cmdEl.className='term-line term-cmd';
+  cmdEl.textContent=cmd;
+  if(body._gen!==gen) return;
+  body.appendChild(cmdEl);
+  body.scrollTop=body.scrollHeight;
+  var i=0;
+  function next(){
+    if(body._gen!==gen) return;
+    if(i>=outLines.length){
+      if(done) setTimeout(function(){ if(body._gen===gen) done(); },60);
+      return;
+    }
+    var line=outLines[i];
+    var lEl=document.createElement('div');
+    lEl.className='term-line term-out'+(line.cls?(' '+line.cls):'');
+    lEl.textContent=line.t;
+    body.appendChild(lEl);
+    body.scrollTop=body.scrollHeight;
+    i++;
+    setTimeout(next, 70);
+  }
+  setTimeout(next, 90);
+}
+
+function typeSequence(body, blocks, done, gen){
+  if(!body) return;
+  if(gen===undefined){ gen=body._gen||0; }
+  var i=0;
+  function next(){
+    if(body._gen!==gen) return;
+    if(i>=blocks.length){ if(done) done(); return; }
+    var b=blocks[i];
+    i++;
+    typeBlock(body, b.cmd, b.out, next, gen);
+  }
+  next();
+}
+
+function shortLabel(cmd){
+  var c = cmd.replace(/^#\s*/,'» ');
+  return c.length>26 ? c.slice(0,24)+'…' : c;
+}
+
+/* ===================== LAB CARD BUILDER ===================== */
+function buildStepLab(lab){
+  var card=el('<section class="lab" id="'+lab.id+'"></section>');
+
+  var btns=lab.steps.map(function(s,i){
+    return '<button class="cmd-btn" data-i="'+i+'"><span class="num">'+(i+1)+'</span>'+shortLabel(s.cmd)+'</button>';
+  }).join('');
+
+  card.innerHTML =
+    '<div class="lab-head">'+
+      '<div class="lab-index">LAB '+lab.index+'</div>'+
+      '<h2>'+lab.title+'</h2>'+
+      '<p class="lab-blurb">'+lab.blurb+'</p>'+
+      (lab.goal? '<div class="lab-goal">Goal — '+lab.goal+'</div>':'')+
+    '</div>'+
+    '<div class="lab-controls-top">'+
+      '<div class="flow-label">① pick a command</div>'+
+      '<div class="cmd-row">'+btns+'</div>'+
+    '</div>'+
+    '<div class="lab-body">'+
+      '<div class="terminal-panel">'+
+        '<div class="panel-label">exact terminal output</div>'+
+        '<div class="terminal"><div class="term-topbar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">practice-repo — bash</span></div>'+
+        '<div class="term-body"><div class="term-idle">// pick a command above to run it&nbsp;<span class="term-caret"></span></div></div></div>'+
+      '</div>'+
+      '<div class="diagram-panel">'+
+        '<div class="panel-label">② watch it happen — state diagram</div>'+
+        '<div class="diagram-scroll">'+lab.svg+'</div>'+
+        '<div class="diagram-scroll-hint">&#8596; scroll sideways to see the full diagram</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="explain-panel">'+
+      '<div class="explain-label">③ what just happened</div>'+
+      '<p class="explain-text" id="explain-'+lab.id+'">Click a command to see what it does and why it matters.</p>'+
+    '</div>'+
+    buildNotes(lab);
+
+  var svg=card.querySelector('svg');
+  var body=card.querySelector('.term-body');
+  var buttons=card.querySelectorAll('.cmd-btn');
+  /* FIX: this card is still a DETACHED node at this point (it is only
+     appended to the live document later, in the bootstrap loop below).
+     document.getElementById() only ever matches elements that are already
+     part of the live document tree, so it always returned null here, which
+     meant the explanation panel could never be updated by either branch of
+     the click handler below ("if(explainEl && ...)" and "else if(explainEl)"
+     were both false). card.querySelector() has no such restriction — it
+     searches the subtree regardless of whether that subtree is attached
+     yet — so this now finds the element reliably. */
+  var explainEl=card.querySelector('#explain-'+lab.id);
+
+  updateDiagramStep(svg,0);
+  markRailDone(lab.id, false);
+
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var i=parseInt(btn.getAttribute('data-i'),10);
+      buttons.forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      var g=clearTerm(body);
+      var s=lab.steps[i];
+      typeBlock(body, s.cmd, s.out, null, g);
+      updateDiagramStep(svg, i+1);
+      markRailDone(lab.id, true);
+      if(explainEl && s.explain) { explainEl.innerHTML = s.explain; }
+      else if(explainEl) { explainEl.innerHTML = 'Command executed. (No additional explanation provided for this step.)'; }
+    });
+  });
+
+  return card;
+}
+
+function buildScenarioLab(lab){
+  var card=el('<section class="lab" id="'+lab.id+'"></section>');
+
+  var btns=lab.scenarios.map(function(sc,i){
+    return '<button class="cmd-btn" data-key="'+sc.key+'"'+(i===0?' data-first="1"':'')+'>'+sc.label+'</button>';
+  }).join('');
+
+  card.innerHTML =
+    '<div class="lab-head">'+
+      '<div class="lab-index">LAB '+lab.index+'</div>'+
+      '<h2>'+lab.title+'</h2>'+
+      '<p class="lab-blurb">'+lab.blurb+'</p>'+
+      (lab.goal? '<div class="lab-goal">Goal — '+lab.goal+'</div>':'')+
+    '</div>'+
+    '<div class="lab-controls-top">'+
+      '<div class="flow-label">① pick a scenario</div>'+
+      '<div class="cmd-row">'+btns+'</div>'+
+    '</div>'+
+    '<div class="lab-body">'+
+      '<div class="terminal-panel">'+
+        '<div class="panel-label">exact terminal output</div>'+
+        '<div class="terminal"><div class="term-topbar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">practice-repo — bash</span></div>'+
+        '<div class="term-body"><div class="term-idle">// pick a scenario above to run it&nbsp;<span class="term-caret"></span></div></div></div>'+
+      '</div>'+
+      '<div class="diagram-panel">'+
+        '<div class="panel-label">② watch it happen — state diagram</div>'+
+        '<div class="diagram-scroll">'+lab.svg+'</div>'+
+        '<div class="diagram-scroll-hint">&#8596; scroll sideways to see the full diagram</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="explain-panel">'+
+      '<div class="explain-label">③ what just happened</div>'+
+      '<p class="explain-text" id="explain-'+lab.id+'">Click a scenario to see what it does and why it matters.</p>'+
+    '</div>'+
+    buildNotes(lab);
+
+  var svg=card.querySelector('svg');
+  var body=card.querySelector('.term-body');
+  var buttons=card.querySelectorAll('.cmd-btn');
+  /* Same fix as buildStepLab — see the comment there. */
+  var explainEl=card.querySelector('#explain-'+lab.id);
+
+  updateDiagramScenario(svg, lab.scenarios[0].key);
+  markRailDone(lab.id, false);
+
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var key=btn.getAttribute('data-key');
+      var sc=lab.scenarios.filter(function(s){return s.key===key;})[0];
+      buttons.forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      var g=clearTerm(body);
+      updateDiagramScenario(svg, key);
+      typeSequence(body, sc.blocks, null, g);
+      markRailDone(lab.id, true);
+      if(explainEl && sc.explain) { explainEl.innerHTML = sc.explain; }
+      else if(explainEl) { explainEl.innerHTML = 'Scenario executed. (No additional explanation provided.)'; }
+    });
+  });
+
+  return card;
+}
+
+function buildNotes(lab){
+  if(!lab.doList && !lab.dontList) return '';
+  var doLi=(lab.doList||[]).map(function(t){return '<li>'+t+'</li>';}).join('');
+  var dontLi=(lab.dontList||[]).map(function(t){return '<li>'+t+'</li>';}).join('');
+  return '<div class="lab-notes">'+
+    '<div class="note-col note-do"><h4>do</h4><ul>'+doLi+'</ul></div>'+
+    '<div class="note-col note-dont"><h4>don\'t</h4><ul>'+dontLi+'</ul></div>'+
+  '</div>';
+}
+
+var railDoneState={};
+function markRailDone(id, done){
+  if(railDoneState[id]===done) return;
+  railDoneState[id]=done;
+  var item=document.querySelector('.rail-item[data-target="'+id+'"]');
+  if(item) item.classList.toggle('done', done);
+  var doneCount=Object.values(railDoneState).filter(Boolean).length;
+  var progressEl=document.getElementById('rail-progress-text');
+  if(progressEl) progressEl.textContent=doneCount+'/'+LABS.length+' labs run';
+}
+
+/* ===================== LAB 1 — THE COMMIT SNAPSHOT ===================== */
+var svg1 =
+'<svg viewBox="0 0 640 190">'+
+  '<defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<rect x="20" y="20" width="180" height="150" rx="6" class="node"/>'+
+  '<rect x="240" y="20" width="180" height="150" rx="6" class="node"/>'+
+  '<rect x="460" y="20" width="160" height="150" rx="6" class="node"/>'+
+  '<text x="110" y="40" text-anchor="middle" class="lbl-strong">Working Dir</text>'+
+  '<text x="330" y="40" text-anchor="middle" class="lbl-strong">Staging Area</text>'+
+  '<text x="540" y="40" text-anchor="middle" class="lbl-strong">Repository</text>'+
+
+  '<circle data-show-from="2" cx="110" cy="95" r="15" class="node node-amber"/>'+
+  '<text data-show-from="2" x="110" y="99" text-anchor="middle" style="font-size:9px;fill:#04140b;">.txt</text>'+
+  '<text data-show-from="2" x="110" y="125" text-anchor="middle" class="lbl">untracked</text>'+
+
+  '<circle data-show-from="6" cx="132" cy="82" r="8" class="node node-red"/>'+
+  '<text data-show-from="6" x="132" y="85" text-anchor="middle" style="font-size:8px;fill:#fff;">M</text>'+
+
+  '<line data-show-from="4" data-active-at="4" x1="132" y1="95" x2="313" y2="95" class="edge" marker-end="url(#a1)"/>'+
+  '<circle data-show-from="4" cx="330" cy="95" r="15" class="node node-teal"/>'+
+  '<text data-show-from="4" x="330" y="99" text-anchor="middle" style="font-size:9px;fill:#04140b;">.txt</text>'+
+  '<text data-show-from="4" x="330" y="125" text-anchor="middle" class="lbl">staged</text>'+
+
+  '<line data-show-from="5" data-active-at="5" x1="347" y1="90" x2="518" y2="72" class="edge" marker-end="url(#a1)"/>'+
+  '<circle data-show-from="5" cx="535" cy="70" r="12" class="node node-fill"/>'+
+  '<text data-show-from="5" x="535" y="97" text-anchor="middle" class="lbl">commit A</text>'+
+
+  '<line data-show-from="7" x1="535" y1="82" x2="535" y2="118" class="edge"/>'+
+  '<circle data-show-from="7" data-active-at="7" cx="535" cy="130" r="12" class="node node-fill"/>'+
+  '<text data-show-from="7" x="535" y="157" text-anchor="middle" class="lbl">commit B</text>'+
+'</svg>';
+
+var lab1 = {
+  id:'lab-1', index:'01',
+  title:'The Commit Snapshot',
+  blurb:'A commit is not "saving a file" — it\u2019s a snapshot moving through three distinct areas. Watch one file cross from Working Directory, into Staging, into the permanent Repository history.',
+  goal:'Internalize that Git tracks changes over time, in three areas, not just current file state.',
+  svg:svg1,
+  steps:[
+    {cmd:'git init', out:[{t:"Initialized empty Git repository in ~/practice-repo/.git/"}],
+      explain:'<i>git init</i> creates a new Git repository in the current folder. This is the first command you run to start tracking any project with Git — it sets up the hidden .git directory that stores all history and metadata.'},
+    {cmd:'echo "First line of notes" > notes.txt && git status', out:[
+      {t:'On branch main'},{t:'No commits yet'},{t:'Untracked files:'},{t:'  notes.txt', cls:'hl-red'}
+    ], explain:'<i>git status</i> shows that <i>notes.txt</i> is untracked — Git sees the file but isn\'t watching it yet. This is your chance to review what\'s new before deciding to commit it.'},
+    {cmd:'git add notes.txt', out:[],
+      explain:'<i>git add</i> stages the file, moving it from the working directory to the staging area. This is like selecting which changes will go into the next commit — you\'re curating a snapshot.'},
+    {cmd:'git status', out:[
+      {t:'Changes to be committed:'},{t:'  new file:   notes.txt', cls:'hl-green'}
+    ], explain:'<i>git status</i> now shows the file is staged and ready to commit. This tells you exactly what will be saved in the next snapshot — always check this before committing.'},
+    {cmd:'git commit -m "Add initial notes"', out:[
+      {t:'[main (root-commit) a1c9e02] Add initial notes'},{t:' 1 file changed, 1 insertion(+)'},{t:' create mode 100644 notes.txt'}
+    ], explain:'<i>git commit</i> takes the staged snapshot and permanently saves it to the repository. This is the fundamental unit of Git history — each commit is a complete, immutable snapshot of your project.'},
+    {cmd:'echo "Second line" >> notes.txt && git status', out:[
+      {t:'Changes not staged for commit:'},{t:'  modified:   notes.txt', cls:'hl-amber'}
+    ], explain:'After modifying the file, <i>git status</i> shows it as modified but unstaged. This demonstrates that commits capture <i>staged</i> changes, not all working changes — you control what goes into each snapshot.'},
+    {cmd:'git commit -am "Add second line to notes"', out:[
+      {t:'[main 7f3b118] Add second line to notes'},{t:' 1 file changed, 1 insertion(+)'}
+    ], explain:'<i>git commit -a</i> stages and commits all changes to <i>already tracked</i> files in one step. It\'s a shortcut, but it\'s important to know it only works on tracked files — new untracked files still require <i>git add</i>.'},
+  ],
+  doList:[
+    'Use <b>git status</b> constantly — it always tells you exactly which of the three areas your change currently sits in.',
+    'Remember a deleted working-directory file is <b>not</b> gone if it was ever committed — every prior snapshot still has it.',
+    'Write a real commit message (<b>"Fix off-by-one error in pagination"</b>) even in practice — the habit is the actual skill.'
+  ],
+  dontList:[
+    "Don't think of commit as \"save\" — save happens when you edit the file; commit happens only when you choose to snapshot the staged state.",
+    "Don't skip staging by assuming <b>git commit -a</b> always does what you want — it only stages files Git <i>already tracks</i>, never new untracked ones.",
+    'Don\'t write vague messages ("fix", "wip", "asdf") — they\'re unsearchable the moment your history is more than a day old.'
+  ]
+};
+
+/* ===================== LAB 2 — LOCAL COMMITS STAY LOCAL ===================== */
+var svg2local =
+'<svg viewBox="0 0 640 200">'+
+  '<defs><marker id="a2l" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--amber)"/></marker></defs>'+
+  '<rect x="30" y="30" width="260" height="140" rx="6" class="node"/>'+
+  '<text x="160" y="20" text-anchor="middle" class="lbl-strong">Your computer (local repo)</text>'+
+  '<rect x="400" y="30" width="220" height="140" rx="6" class="node" style="stroke-dasharray:4 4;"/>'+
+  '<text x="510" y="20" text-anchor="middle" class="lbl-strong">GitHub (origin)</text>'+
+
+  '<circle cx="70" cy="100" r="11" class="node node-fill"/>'+
+  '<text x="70" y="125" text-anchor="middle" class="lbl">older</text>'+
+
+  '<circle data-show-from="1" data-active-at="1" cx="130" cy="100" r="11" class="node node-amber"/>'+
+  '<text data-show-from="1" x="130" y="125" text-anchor="middle" class="lbl">A</text>'+
+  '<line data-show-from="1" x1="81" y1="100" x2="119" y2="100" class="edge"/>'+
+
+  '<circle data-show-from="2" data-active-at="2" cx="190" cy="100" r="11" class="node node-amber"/>'+
+  '<text data-show-from="2" x="190" y="125" text-anchor="middle" class="lbl">B</text>'+
+  '<line data-show-from="2" x1="141" y1="100" x2="179" y2="100" class="edge"/>'+
+
+  '<circle data-show-from="3" data-active-at="3" cx="250" cy="100" r="11" class="node node-amber"/>'+
+  '<text data-show-from="3" x="250" y="125" text-anchor="middle" class="lbl">C</text>'+
+  '<line data-show-from="3" x1="201" y1="100" x2="239" y2="100" class="edge"/>'+
+
+  '<text data-show-from="1" data-hide-from="6" x="160" y="155" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">exists only on this machine</text>'+
+
+  '<circle cx="510" cy="100" r="11" class="node" style="stroke-dasharray:3 3;"/>'+
+  '<text x="510" y="125" text-anchor="middle" class="lbl">older</text>'+
+  '<text data-show-from="4" data-hide-from="6" x="510" y="145" text-anchor="middle" class="lbl-strong" style="fill:var(--ink-soft);">still behind — unaware of A, B, C</text>'+
+
+  '<line data-show-from="6" data-active-at="6" x1="291" y1="90" x2="470" y2="90" class="edge-active" marker-end="url(#a2l)"/>'+
+  '<text data-show-from="6" data-active-at="6" x="380" y="75" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">git push</text>'+
+  '<circle data-show-from="6" cx="530" cy="100" r="11" class="node node-teal pulse"/>'+
+  '<text data-show-from="6" x="530" y="180" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">now in sync — A, B, C all arrived together</text>'+
+'</svg>';
+
+var lab2 = {
+  id:'lab-2', index:'02',
+  title:'Local Commits Stay Local — Until You Push',
+  blurb:'This is the single most important mental model in Git: every commit you make lives <b>entirely on your own machine</b>. GitHub does not know a single one of them exists until you deliberately run <code>git push</code>. Watch three separate commits pile up locally while GitHub stays completely unaware — then one push sends all three at once.',
+  goal:'Stop assuming "I committed it" means "GitHub has it" — see exactly which command closes that gap, and that nothing else does.',
+  svg:svg2local,
+  steps:[
+    {cmd:'echo "Feature A" >> app.js && git commit -am "Add feature A"', out:[
+      {t:'[main 1a2b3c4] Add feature A'},{t:' 1 file changed, 1 insertion(+)'},
+      {t:'(this commit exists only on your machine right now)', cls:'hl-amber'}
+    ], explain:'<i>git commit</i> saves the snapshot locally. The commit ID (1a2b3c4) is created and stored in your local repository — GitHub has no knowledge of it yet. This is the default behavior, and it\'s a feature: you can commit offline, as often as you like.'},
+    {cmd:'echo "Feature B" >> app.js && git commit -am "Add feature B"', out:[
+      {t:'[main 5d6e7f8] Add feature B'},{t:' 1 file changed, 1 insertion(+)'}
+    ], explain:'A second commit, still local. Each commit is independent and builds on the previous one. Notice that the repository on the right (GitHub) hasn\'t changed at all — it doesn\'t know about A or B yet.'},
+    {cmd:'echo "Feature C" >> app.js && git commit -am "Add feature C"', out:[
+      {t:'[main 9a0b1c2] Add feature C'},{t:' 1 file changed, 1 insertion(+)'}
+    ], explain:'A third commit, all still local. This shows that you can accumulate many commits locally before ever touching the network. This is the foundation of Git\'s speed and flexibility.'},
+    {cmd:'git log --oneline', out:[
+      {t:'9a0b1c2 Add feature C'},{t:'5d6e7f8 Add feature B'},{t:'1a2b3c4 Add feature A'},{t:'6fa221e Earlier work'}
+    ], explain:'<i>git log</i> shows the local commit history. All three new commits are present and ordered. The diagram highlights that these commits only exist locally — the remote (GitHub) is still on the older commit.'},
+    {cmd:'git status', out:[
+      {t:'On branch main'},
+      {t:"Your branch is ahead of 'origin/main' by 3 commits.", cls:'hl-amber'},
+      {t:'  (use "git push" to publish your local commits)'}
+    ], explain:'<i>git status</i> now gives you the exact, critical information: your local branch is ahead of the remote by 3 commits. This is the signal that you have unpushed work. The command tells you exactly what to do next — <i>git push</i>.'},
+    {cmd:'git push origin main', out:[
+      {t:'Enumerating objects: 9, done.'},{t:'Writing objects: 100% (9/9), done.'},
+      {t:'To github.com:you/practice-repo.git'},
+      {t:'   6fa221e..9a0b1c2  main -> main', cls:'hl-green'},
+      {t:'GitHub now has A, B, and C — all three, in one push', cls:'hl-green'}
+    ], explain:'<i>git push</i> transfers all three commits to GitHub in one operation. This is the only command that shares your commits with the remote. The diagram shows the remote now caught up — all three commits arrived together, preserving the exact same history.'},
+  ],
+  doList:[
+    'Commit locally as often as you want — small, frequent commits cost nothing and touch nothing outside your machine.',
+    'Read the exact line <code>git status</code> gives you — "ahead of &#39;origin/main&#39; by N commits" tells you precisely how much local work hasn\u2019t reached GitHub yet.',
+    'Push deliberately, when you actually want the work visible, backed up, or shared — not on some assumed automatic schedule.'
+  ],
+  dontList:[
+    "Don't assume a commit is backed up anywhere except your machine until it's actually been pushed — a local-only commit is exactly as vulnerable as an unsaved file if your disk dies.",
+    "Don't confuse \"committed\" with \"shared\" — a teammate can't see, review, or build on a commit that only exists in your local repo.",
+    "Don't think you need an internet connection to commit — commits are 100% local and offline; only push, pull, fetch, and clone ever touch the network."
+  ]
+};
+
+/* ===================== LAB 3 — GIT DIFF VS. GIT DIFF --STAGED ===================== */
+var lab3 = {
+  id:'lab-3', index:'03',
+  title:'git diff vs. git diff --staged',
+  blurb:'Two commands, two completely different comparisons. Plain <code>git diff</code> compares Working Directory against Staging; <code>--staged</code> compares Staging against the last commit.',
+  goal:'Never again wonder why git diff "shows nothing" right after staging a change.',
+  svg:svg1, /* reuse the three-area diagram */
+  steps:[
+    {cmd:'echo "Third line" >> notes.txt && git diff', out:[
+      {t:'diff --git a/notes.txt b/notes.txt'},{t:'+Third line', cls:'hl-green'}
+    ], explain:'<i>git diff</i> shows you the changes in your working directory that are <i>not yet staged</i>. Here, it shows the new line you added to notes.txt. This is your chance to review exactly what you\'ll be staging.'},
+    {cmd:'git add notes.txt && git diff', out:[
+      {t:'(nothing — the diff moved to --staged)', cls:'hl-amber'}
+    ], explain:'After staging, <i>git diff</i> shows nothing because there are no differences between the working directory and the staging area. The change is now in the staging area, ready to be committed.'},
+    {cmd:'git diff --staged', out:[
+      {t:'diff --git a/notes.txt b/notes.txt'},{t:'+Third line', cls:'hl-green'}
+    ], explain:'<i>git diff --staged</i> compares the staging area against the last commit. This shows you exactly what will be included in the next commit — it\'s the final review before you snapshot the changes.'},
+  ],
+  doList:[
+    'Run plain <b>git diff</b> right before staging, to review exactly what you\u2019re about to add.',
+    'Run <b>git diff --staged</b> right before committing, as a final check on what will actually be snapshotted.'
+  ],
+  dontList:[
+    "Don't assume <b>git diff</b> showing nothing means you have no changes — it might mean they're already staged.",
+    "Don't stage and commit in one motion out of habit if you haven't reviewed the staged diff at least once."
+  ]
+};
+
+/* ===================== LAB 4 — UNDOING A CHANGE (scenario) ===================== */
+var svg3 =
+'<svg viewBox="0 0 640 190">'+
+  '<defs><marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<rect x="20" y="20" width="170" height="150" rx="6" class="node"/>'+
+  '<rect x="235" y="20" width="170" height="150" rx="6" class="node"/>'+
+  '<rect x="450" y="20" width="170" height="150" rx="6" class="node"/>'+
+  '<text x="105" y="40" text-anchor="middle" class="lbl-strong">Working Dir</text>'+
+  '<text x="320" y="40" text-anchor="middle" class="lbl-strong">Staging Area</text>'+
+  '<text x="535" y="40" text-anchor="middle" class="lbl-strong">Repository</text>'+
+
+  '<circle cx="105" cy="100" r="14" class="node node-amber"/>'+
+  '<circle cx="320" cy="100" r="14" class="node" style="stroke-dasharray:3 3;"/>'+
+  '<circle cx="500" cy="100" r="11" class="node node-fill"/>'+
+  '<circle cx="555" cy="100" r="11" class="node node-fill"/>'+
+  '<line x1="511" y1="100" x2="544" y2="100" class="edge"/>'+
+
+  /* restore */
+  '<g data-show-for="restore">'+
+  '  <line x1="105" y1="86" x2="105" y2="60" style="stroke:var(--red);stroke-width:2.5;" marker-end="url(#a3)"/>'+
+  '  <text x="105" y="55" text-anchor="middle" class="lbl" style="fill:var(--red);font-weight:700;">discarded — gone for good</text>'+
+  '</g>'+
+
+  /* reset */
+  '<g data-show-for="reset">'+
+  '  <line x1="305" y1="100" x2="122" y2="100" class="edge-active" marker-end="url(#a3)"/>'+
+  '  <text x="215" y="88" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">reset — kept, unstaged</text>'+
+  '</g>'+
+
+  /* amend */
+  '<g data-show-for="amend">'+
+  '  <circle cx="555" cy="100" r="15" class="node node-amber pulse"/>'+
+  '  <text x="555" y="128" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">rewritten in place</text>'+
+  '</g>'+
+
+  /* revert */
+  '<g data-show-for="revert">'+
+  '  <circle cx="610" cy="100" r="11" class="node node-teal pulse"/>'+
+  '  <line x1="566" y1="100" x2="597" y2="100" class="edge"/>'+
+  '  <text x="610" y="128" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">new commit undoes it</text>'+
+  '</g>'+
+'</svg>';
+
+var lab4 = {
+  id:'lab-4', index:'04',
+  title:'Undoing a Change — Four Different Tools',
+  blurb:'"Undo" in Git is not one command — it\u2019s four, and each one operates on a different area or has a completely different consequence. Pick one below and watch exactly what it touches.',
+  goal:'Stop reaching for the wrong undo command out of habit — know which one to use before you need it.',
+  svg:svg3,
+  scenarios:[
+    {key:'restore', label:'git restore — discard a working-dir change', blocks:[
+      {cmd:'echo "oops, bad edit" >> notes.txt', out:[]},
+      {cmd:'git restore notes.txt', out:[{t:'(the bad edit is gone — permanently)', cls:'hl-red'}]}
+    ], explain:'<i>git restore</i> discards the working directory change completely. The file reverts to the state of the last commit. This is a destructive operation — the change is gone for good. Use this only when you\'re certain you don\'t want the change.'},
+    {key:'reset', label:'git reset — unstage, but keep the change', blocks:[
+      {cmd:'git add notes.txt', out:[]},
+      {cmd:'git reset notes.txt', out:[{t:'Unstaged changes after reset:'},{t:'M       notes.txt', cls:'hl-amber'},{t:'(still in working dir — check with git diff)'}]}
+    ], explain:'<i>git reset</i> moves a file from the staging area back to the working directory. The change is <i>not</i> discarded — it\'s just unstaged. This is useful when you accidentally stage something and want to review it again before committing.'},
+    {key:'amend', label:'git commit --amend — rewrite the last commit', blocks:[
+      {cmd:'git commit --amend -m "Add third line to notes.txt"', out:[{t:'[main 9b2f120] Add third line to notes.txt', cls:'hl-amber'}]}
+    ], explain:'<i>git commit --amend</i> rewrites the most recent commit. It replaces the previous commit with a new one that includes the staged changes. This is useful for fixing small mistakes or updating the commit message, but only if you haven\'t pushed the commit yet.'},
+    {key:'revert', label:'git revert — undo with a new commit', blocks:[
+      {cmd:'git revert 9b2f120', out:[{t:'[main 3aa701c] Revert "Add third line to notes.txt"', cls:'hl-green'},{t:' 1 file changed, 1 deletion(-)'}]}
+    ], explain:'<i>git revert</i> creates a <i>new commit</i> that undoes the changes from a previous commit. This is the safe way to undo commits that have already been pushed and shared — it adds history rather than rewriting it.'},
+  ],
+  doList:[
+    'Use <b>revert</b> on anything already pushed/shared — it undoes safely by adding history, never rewriting what others have.',
+    'Use <b>restore</b>/<b>reset</b> freely on local, not-yet-shared changes — nobody else\u2019s history depends on them yet.',
+    'Use <b>--amend</b> only on your last commit, and only before you\u2019ve pushed it anywhere.'
+  ],
+  dontList:[
+    "Don't confuse <b>reset</b> (keeps the change, just unstages it) with <b>restore</b> (discards it permanently) — this exact confusion is how people lose real work.",
+    "Don't <b>--amend</b> or rebase a commit that's already been pushed and pulled by a teammate — you'll rewrite history out from under them."
+  ]
+};
+
+/* ===================== LAB 5 — BRANCHING & MERGE CONFLICT ===================== */
+var svg4 =
+'<svg viewBox="0 0 640 190">'+
+  '<defs><marker id="a4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<text x="20" y="45" class="lbl-strong">main</text>'+
+  '<text x="20" y="145" class="lbl-strong">feature-a</text>'+
+  '<circle cx="90" cy="45" r="11" class="node node-fill"/>'+
+  '<line x1="90" y1="55" x2="90" y2="135" class="edge"/>'+
+  '<circle data-show-from="1" cx="90" cy="145" r="11" class="node node-fill"/>'+
+
+  '<line data-show-from="1" x1="101" y1="45" x2="260" y2="45" class="edge" style="stroke-dasharray:2 4;"/>'+
+  '<line data-show-from="2" x1="101" y1="145" x2="260" y2="145" class="edge"/>'+
+  '<circle data-show-from="2" data-active-at="2" cx="270" cy="145" r="11" class="node node-teal"/>'+
+  '<text data-show-from="2" x="270" y="172" text-anchor="middle" class="lbl">edit line 1 (A)</text>'+
+
+  '<line data-show-from="4" x1="101" y1="45" x2="410" y2="45" class="edge"/>'+
+  '<circle data-show-from="4" data-active-at="4" cx="420" cy="45" r="11" class="node node-amber"/>'+
+  '<text data-show-from="4" x="420" y="30" text-anchor="middle" class="lbl">edit line 1 (main)</text>'+
+
+  '<line data-show-from="5" x1="270" y1="134" x2="490" y2="60" class="edge"/>'+
+  '<line data-show-from="5" x1="420" y1="56" x2="490" y2="60" class="edge"/>'+
+  '<circle data-show-from="5" data-active-at="5" cx="500" cy="60" r="13" class="node node-red pulse"/>'+
+  '<text data-show-from="5" x="500" y="40" text-anchor="middle" class="lbl-strong" style="fill:var(--red);">CONFLICT</text>'+
+
+  '<circle data-show-from="6" cx="500" cy="60" r="13" class="node node-fill"/>'+
+  '<text data-show-from="6" x="500" y="90" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">resolved &amp; merged</text>'+
+
+  '<text data-show-from="7" x="270" y="163" text-anchor="middle" class="lbl" style="fill:var(--ink-soft);text-decoration:line-through;">feature-a (deleted)</text>'+
+'</svg>';
+
+var lab5 = {
+  id:'lab-5', index:'05',
+  title:'Branching &amp; a Real Merge Conflict',
+  blurb:'Most juniors panic the first time conflict markers appear. This causes one on purpose — the same line, edited on two branches — so resolving it stops being scary.',
+  goal:'See exactly what condition forces a conflict, and that resolving one is just editing a file.',
+  svg:svg4,
+  steps:[
+    {cmd:'git checkout -b feature-a', out:[{t:"Switched to a new branch 'feature-a'"}],
+      explain:'<i>git checkout -b</i> creates and switches to a new branch called feature-a. Branches are lightweight pointers to commits. This creates a parallel line of development that doesn\'t affect the main branch.'},
+    {cmd:'git commit -am "Rewrite line 1 for feature-a"', out:[{t:'[feature-a e5c210f] Rewrite line 1 for feature-a'}],
+      explain:'A commit on the feature-a branch. The branch pointer moves forward, but the main branch stays where it was. This is how parallel work happens — each branch has its own independent history.'},
+    {cmd:'git checkout main', out:[{t:"Switched to branch 'main'"}],
+      explain:'Switching back to the main branch. Your working directory now reflects the state of main, and the feature-a commit is isolated. This is how you context-switch between different lines of work.'},
+    {cmd:'git commit -am "Update line 1 on main"', out:[{t:'[main 1c88a02] Update line 1 on main'}],
+      explain:'A commit on main that changes the exact same line as the feature-a commit. Now both branches have a different version of the same line. When we try to merge them, Git won\'t know which one to keep — this is the precise condition that causes a conflict.'},
+    {cmd:'git merge feature-a', out:[
+      {t:'Auto-merging notes.txt'},
+      {t:'CONFLICT (content): Merge conflict in notes.txt', cls:'hl-red'},
+      {t:'Automatic merge failed; fix conflicts and then commit the result.'}
+    ], explain:'The merge fails with a conflict because the same line was modified on both branches. Git stops and asks you to manually resolve the conflict. The conflict markers (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>) show both versions side by side so you can decide what to keep.'},
+    {cmd:'git add notes.txt && git commit', out:[{t:"[main 9f0a221] Merge branch 'feature-a'", cls:'hl-green'}],
+      explain:'After editing the file to resolve the conflict (choosing the right version or combining them), you stage the resolved file and commit. The merge is now complete, and history shows both branches\' work coming together.'},
+    {cmd:'git branch -D feature-a', out:[{t:"Deleted branch feature-a (was e5c210f)."}],
+      explain:'Once a branch is merged, you can delete it. The commits are still in the history (via the merge commit), but the branch label is removed. Keeping branches clean and deleted after merging is a good habit.'},
+  ],
+  doList:[
+    'Open the file and read the <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code>=======</code> / <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> markers calmly — they show both versions side by side, nothing is lost.',
+    'Delete the marker lines entirely once you\u2019ve picked/combined the content — Git won\u2019t let you commit while they remain.',
+    'Practice causing a conflict on purpose in a throwaway repo until resolving one feels boring, not scary.'
+  ],
+  dontList:[
+    "Don't run <b>git merge --abort</b> out of panic and then avoid branching altogether — that just delays the same lesson.",
+    "Don't assume conflicts happen on every merge — changes to different files, or different lines of the same file, merge automatically with zero interaction."
+  ]
+};
+
+/* ===================== LAB 6 — LOCAL <-> GITHUB (scenario) ===================== */
+var svg5 =
+'<svg viewBox="0 0 640 170">'+
+  '<defs><marker id="a5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--amber)"/></marker></defs>'+
+  '<rect x="40" y="40" width="200" height="90" rx="6" class="node"/>'+
+  '<rect x="400" y="40" width="200" height="90" rx="6" class="node"/>'+
+  '<text x="140" y="30" text-anchor="middle" class="lbl-strong">Local repo</text>'+
+  '<text x="500" y="30" text-anchor="middle" class="lbl-strong">origin (GitHub)</text>'+
+  '<circle cx="140" cy="85" r="16" class="node node-fill"/>'+
+  '<circle cx="500" cy="85" r="16" class="node node-fill"/>'+
+
+  '<g data-show-for="push">'+
+  '  <line x1="242" y1="70" x2="398" y2="70" class="edge-active" marker-end="url(#a5)"/>'+
+  '  <text x="320" y="58" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">push</text>'+
+  '</g>'+
+
+  '<g data-show-for="fetch">'+
+  '  <line x1="398" y1="100" x2="242" y2="100" class="edge-active" style="stroke-dasharray:4 4;" marker-end="url(#a5)"/>'+
+  '  <text x="320" y="118" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">fetch (downloads only)</text>'+
+  '</g>'+
+
+  '<g data-show-for="pull">'+
+  '  <line x1="398" y1="100" x2="242" y2="100" class="edge-active" marker-end="url(#a5)"/>'+
+  '  <text x="320" y="118" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">pull = fetch + merge</text>'+
+  '</g>'+
+'</svg>';
+
+var lab6 = {
+  id:'lab-6', index:'06',
+  title:'Local &#8644; GitHub: fetch, pull &amp; push',
+  blurb:'GitHub is not a special tool — it\u2019s just one remote copy of your repository. These three commands are the entire relationship between your machine and it.',
+  goal:'Never treat push as "save to the cloud" without understanding it can be rejected.',
+  svg:svg5,
+  scenarios:[
+    {key:'push', label:'git push — send local commits to GitHub', blocks:[
+      {cmd:'git push -u origin main', out:[
+        {t:'Enumerating objects: 12, done.'},{t:'Writing objects: 100% (12/12), done.'},
+        {t:'To github.com:you/practice-repo.git'},{t:' * [new branch]      main -> main', cls:'hl-green'},
+        {t:"Branch 'main' set up to track 'origin/main'."}
+      ]}
+    ], explain:'<i>git push</i> sends your local commits to the remote repository. The -u flag sets up tracking so future pushes can be done with just <i>git push</i>. This is the moment your work becomes shared and backed up.'},
+    {key:'fetch', label:'git fetch — check what changed remotely (no merge)', blocks:[
+      {cmd:'git fetch', out:[
+        {t:'remote: Counting objects: 3, done.'},
+        {t:'   9b2f120..a44e871  main -> origin/main', cls:'hl-blue'}
+      ]},
+      {cmd:'git log origin/main -1 --oneline', out:[{t:'a44e871 Edit via GitHub web UI'}]},
+      {cmd:'git log -1 --oneline', out:[{t:'9b2f120 Revert "Add third line..." ← local main doesn\u2019t have it yet', cls:'hl-amber'}]}
+    ], explain:'<i>git fetch</i> downloads new commits from the remote without merging them into your working directory. It updates the remote-tracking branches (like origin/main) so you can see what\'s changed, but your working files stay untouched. This is a safe way to check for updates.'},
+    {key:'pull', label:'git pull — fetch AND merge in one step', blocks:[
+      {cmd:'git pull origin main', out:[
+        {t:'Updating 9b2f120..a44e871'},{t:'Fast-forward', cls:'hl-green'},
+        {t:' notes.txt | 1 +'},{t:' 1 file changed, 1 insertion(+)'}
+      ]}
+    ], explain:'<i>git pull</i> is shorthand for <i>git fetch</i> followed by <i>git merge</i>. It downloads the remote changes and immediately merges them into your current branch. This is the most common way to update your local repository with work done by others.'},
+  ],
+  doList:[
+    'Run <b>git fetch</b> first when you just want to see what\u2019s changed remotely, without touching your working files yet.',
+    'Deliberately trigger a rejected push once (commit locally, edit the same file via GitHub\u2019s web UI, then push) so the recovery — pull, then push again — isn\u2019t a surprise the first real time it happens.'
+  ],
+  dontList:[
+    "Don't assume <b>push</b> always succeeds — it's rejected whenever the remote has commits your local repo doesn't.",
+    "Don't confuse <b>fetch</b> (downloads, doesn't touch your files) with <b>pull</b> (downloads AND merges immediately)."
+  ]
+};
+
+/* ===================== LAB 7 — PULL REQUEST WORKFLOW ===================== */
+var svg6 =
+'<svg viewBox="0 0 640 200">'+
+  '<defs><marker id="a6" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<text x="20" y="30" class="lbl-strong">feature/add-changelog</text>'+
+  '<circle cx="40" cy="60" r="11" class="node node-fill"/>'+
+  '<line data-show-from="2" x1="51" y1="60" x2="185" y2="60" class="edge"/>'+
+  '<rect data-show-from="2" x="190" y="35" width="110" height="50" rx="6" class="node node-amber"/>'+
+  '<text data-show-from="2" x="245" y="65" text-anchor="middle" style="font-size:10px;fill:#04140b;font-weight:700;">pushed</text>'+
+
+  '<line data-show-from="3" x1="300" y1="60" x2="405" y2="60" class="edge"/>'+
+  '<rect data-show-from="3" data-active-at="3" x="410" y="35" width="90" height="50" rx="6" class="node node-teal"/>'+
+  '<text data-show-from="3" x="455" y="65" text-anchor="middle" style="font-size:10px;fill:#04140b;font-weight:700;">PR #14</text>'+
+
+  '<line data-show-from="4" x1="500" y1="60" x2="595" y2="60" class="edge" marker-end="url(#a6)"/>'+
+  '<circle data-show-from="4" data-active-at="4" cx="610" cy="60" r="14" class="node node-fill pulse"/>'+
+  '<text data-show-from="4" x="610" y="85" text-anchor="middle" class="lbl">merged into main</text>'+
+
+  '<line data-show-from="5" x1="610" y1="75" x2="610" y2="130" class="edge"/>'+
+  '<circle data-show-from="5" cx="610" cy="145" r="12" class="node node-teal"/>'+
+  '<text data-show-from="5" x="610" y="172" text-anchor="middle" class="lbl">local main synced</text>'+
+
+  '<g data-show-from="4">'+
+  '  <text x="40" y="130" class="lbl-strong" style="fill:var(--red);">meanwhile: direct push to main</text>'+
+  '  <line x1="40" y1="145" x2="130" y2="145" class="edge" style="stroke:var(--red);"/>'+
+  '  <text x="150" y="149" class="lbl-strong" style="fill:var(--red);">&#10005; rejected — protected branch</text>'+
+  '</g>'+
+'</svg>';
+
+var lab7 = {
+  id:'lab-7', index:'07',
+  title:'The Pull Request Workflow',
+  blurb:'The sequence used at almost every real company: branch, push, open a PR, get it reviewed and merged, then sync back. The diagram also shows why a direct push to main gets rejected once branch protection is on.',
+  goal:'Practice the full sequence and reasoning, not just the individual commands.',
+  svg:svg6,
+  steps:[
+    {cmd:'git checkout -b feature/add-changelog', out:[{t:"Switched to a new branch 'feature/add-changelog'"}],
+      explain:'<i>git checkout -b</i> creates and switches to a new branch. This is the first step of the pull request workflow: isolate your work in a feature branch so main stays clean.'},
+    {cmd:'git commit -am "Add changelog entry"', out:[{t:'[feature/add-changelog 3c81a9] Add changelog entry'}],
+      explain:'You make a commit on the feature branch. This commit is still local and hasn\'t been shared yet. The next step will push it to GitHub.'},
+    {cmd:'git push origin feature/add-changelog', out:[{t:'... branch pushed', cls:'hl-green'},{t:"remote: Create a pull request for 'feature/add-changelog' on GitHub"}],
+      explain:'<i>git push</i> sends the feature branch to GitHub. The output even provides a suggestion to create a pull request. This is the moment your work becomes visible to collaborators.'},
+    {cmd:'# opened PR #14 on GitHub: feature/add-changelog → main', out:[{t:'Pull request #14 opened', cls:'hl-blue'},{t:'CI checks running…'},{t:'✓ All checks passed', cls:'hl-green'}],
+      explain:'Opening a pull request (PR) on GitHub creates a discussion and review space. The PR shows that you\'re proposing to merge the feature branch into main. Automated CI checks run here to ensure the changes are safe.'},
+    {cmd:'# merged PR #14 via GitHub UI', out:[{t:'Merged! main now includes the changelog.', cls:'hl-green'}],
+      explain:'The PR is merged via the GitHub UI (or command line). This adds the changes to the main branch and closes the PR. The diagram shows that main now includes the new commits, and the feature branch is no longer needed.'},
+    {cmd:'git checkout main && git pull origin main', out:[{t:'Fast-forward'},{t:' CHANGELOG.md | 1 +'},{t:' 1 file changed, 1 insertion(+)'}],
+      explain:'After the PR is merged, you switch back to main and pull the latest changes. This brings your local main in sync with GitHub, and you can now delete the feature branch locally.'},
+  ],
+  doList:[
+    'Write a real PR description — what changed and why — even when the change is small.',
+    'Enable branch protection on <code>main</code> so this sequence is the <i>only</i> way in, enforced by the platform, not memory.',
+    'Delete the feature branch (locally and on GitHub) once its PR is merged — keeps <code>git branch</code> readable.'
+  ],
+  dontList:[
+    "Don't merge your own PR without at least glancing at \"Files changed\" — the review interface catches things a quick self-scan won't.",
+    "Don't rely on \"I'll always remember to open a PR\" — that's exactly the discipline branch protection replaces with an actual enforced rule."
+  ]
+};
+
+/* ===================== LAB 8 — ADVANCED TOOLKIT (scenario) ===================== */
+var svg7 =
+'<svg viewBox="0 0 640 190">'+
+  '<defs><marker id="a7" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+
+  /* stash */
+  '<g data-show-for="stash">'+
+  '  <rect x="60" y="60" width="120" height="70" rx="8" class="node node-amber"/>'+
+  '  <text x="120" y="100" text-anchor="middle" style="font-size:10px;fill:#04140b;font-weight:700;">stash pouch</text>'+
+  '  <line x1="180" y1="95" x2="270" y2="95" class="edge" marker-end="url(#a7)"/>'+
+  '  <circle cx="290" cy="95" r="14" class="node"/>'+
+  '  <text x="290" y="99" text-anchor="middle" style="font-size:9px;">br B</text>'+
+  '  <line x1="304" y1="95" x2="380" y2="95" class="edge" marker-end="url(#a7)"/>'+
+  '  <line x1="180" y1="70" x2="380" y2="70" class="edge" style="stroke-dasharray:3 3;" marker-end="url(#a7)"/>'+
+  '  <circle cx="400" cy="95" r="14" class="node node-amber pulse"/>'+
+  '  <text x="400" y="120" text-anchor="middle" class="lbl">pop — work restored</text>'+
+  '</g>'+
+
+  /* cherry-pick */
+  '<g data-show-for="cherry-pick">'+
+  '  <text x="60" y="45" class="lbl-strong">feature-b</text>'+
+  '  <circle cx="90" cy="70" r="11" class="node node-fill"/>'+
+  '  <circle cx="170" cy="70" r="11" class="node node-teal"/>'+
+  '  <line x1="101" y1="70" x2="159" y2="70" class="edge"/>'+
+  '  <text x="170" y="55" text-anchor="middle" class="lbl">fix (wanted)</text>'+
+  '  <circle cx="250" cy="70" r="11" class="node"/>'+
+  '  <line x1="181" y1="70" x2="239" y2="70" class="edge"/>'+
+  '  <text x="250" y="55" text-anchor="middle" class="lbl">unrelated</text>'+
+  '  <text x="60" y="140" class="lbl-strong">main</text>'+
+  '  <circle cx="90" cy="160" r="11" class="node node-fill"/>'+
+  '  <line x1="170" y1="81" x2="220" y2="150" class="edge" style="stroke-dasharray:3 3;" marker-end="url(#a7)"/>'+
+  '  <circle cx="230" cy="160" r="11" class="node node-teal pulse"/>'+
+  '  <text x="230" y="185" text-anchor="middle" class="lbl">copied — only the fix</text>'+
+  '</g>'+
+
+  /* rebase */
+  '<g data-show-for="rebase">'+
+  '  <circle cx="80" cy="90" r="9" class="node node-amber"/>'+
+  '  <circle cx="130" cy="90" r="9" class="node node-amber"/>'+
+  '  <circle cx="180" cy="90" r="9" class="node node-amber"/>'+
+  '  <circle cx="230" cy="90" r="9" class="node node-amber"/>'+
+  '  <text x="155" y="115" text-anchor="middle" class="lbl">4 sloppy commits</text>'+
+  '  <line x1="245" y1="90" x2="330" y2="90" class="edge" marker-end="url(#a7)"/>'+
+  '  <circle cx="360" cy="90" r="16" class="node node-teal pulse"/>'+
+  '  <text x="360" y="120" text-anchor="middle" class="lbl">1 clean commit</text>'+
+  '</g>'+
+
+  /* bisect */
+  '<g data-show-for="bisect">'+
+  '  <line x1="60" y1="90" x2="580" y2="90" class="edge"/>'+
+  '  <circle cx="60" cy="90" r="9" class="node node-teal"/><text x="60" y="112" text-anchor="middle" class="lbl">good</text>'+
+  '  <circle cx="580" cy="90" r="9" class="node node-red"/><text x="580" y="112" text-anchor="middle" class="lbl">bad (now)</text>'+
+  '  <circle cx="320" cy="90" r="10" class="node node-amber pulse"/><text x="320" y="70" text-anchor="middle" class="lbl-strong">test mid</text>'+
+  '  <circle cx="450" cy="90" r="9" class="node" style="stroke-dasharray:2 2;"/>'+
+  '  <text x="320" y="140" text-anchor="middle" class="lbl">Git narrows log₂(n) — a handful of tests finds the exact commit</text>'+
+  '</g>'+
+'</svg>';
+
+var lab8 = {
+  id:'lab-8', index:'08',
+  title:'Advanced Toolkit — Stash, Cherry-Pick, Rebase, Bisect',
+  blurb:'Four commands that separate "I know Git" from "I can get myself out of trouble with Git." Each solves one specific real situation — pick a situation below.',
+  goal:'Know which of these four to reach for, before you need it under pressure.',
+  svg:svg7,
+  scenarios:[
+    {key:'stash', label:'Stash — "I need to switch branches right now"', blocks:[
+      {cmd:'git stash', out:[{t:'Saved working directory and index state WIP on main: 6de881a', cls:'hl-green'}]},
+      {cmd:'git checkout other-branch', out:[{t:"Switched to branch 'other-branch'"}]},
+      {cmd:'git checkout main', out:[{t:"Switched to branch 'main'"}]},
+      {cmd:'git stash pop', out:[{t:'Dropped stash@{0} — your unfinished edit is back, exactly as you left it', cls:'hl-green'}]}
+    ], explain:'<i>git stash</i> saves your uncommitted changes and reverts your working directory to the last commit. This lets you switch branches without committing half-done work. <i>git stash pop</i> restores the stashed changes. This is invaluable when you need to context-switch quickly.'},
+    {key:'cherry-pick', label:'Cherry-pick — "I need just that one fix"', blocks:[
+      {cmd:'git log feature-b --oneline', out:[{t:'c4a119e Unrelated feature start'},{t:'7dd2a01 Fix null-check bug in parser'}]},
+      {cmd:'git checkout main', out:[{t:"Switched to branch 'main'"}]},
+      {cmd:'git cherry-pick 7dd2a01', out:[{t:'[main 8ea310b] Fix null-check bug in parser', cls:'hl-green'},{t:'(original author date preserved)'}]}
+    ], explain:'<i>git cherry-pick</i> takes a specific commit from another branch and applies it to the current branch. This is useful when you want to bring in a single fix or feature without merging the entire branch. The original commit\'s author and date are preserved.'},
+    {key:'rebase', label:'Interactive rebase — "clean up before I share this"', blocks:[
+      {cmd:'git rebase -i HEAD~4', out:[{t:'pick e2a910c wip'},{t:'squash 1b7f004 fix typo'},{t:'squash 9c8e120 actually fix it'},{t:'squash 4d0a2f1 done'}]},
+      {cmd:'# editor prompts for one combined message', out:[{t:'"Add pagination to results list"'}]},
+      {cmd:'git log --oneline', out:[{t:'a90cd33 Add pagination to results list', cls:'hl-green'},{t:'← 4 messy commits are now 1 clean one'}]}
+    ], explain:'<i>git rebase -i</i> (interactive rebase) lets you rewrite history. Here, we combine (squash) four sloppy commits into one clean commit. This is essential for keeping a clean, understandable history before sharing your work. The diagram shows 4 commits becoming 1.'},
+    {key:'bisect', label:'Bisect — "which of 50 commits broke it"', blocks:[
+      {cmd:'git bisect start && git bisect bad', out:[{t:'current commit marked bad', cls:'hl-red'}]},
+      {cmd:'git bisect good a1c9e02', out:[{t:'Bisecting: 5 revisions left to test (roughly 3 steps)', cls:'hl-blue'}]},
+      {cmd:'# test, then: git bisect good', out:[{t:'Bisecting: 2 revisions left to test (roughly 1 step)', cls:'hl-blue'}]},
+      {cmd:'# test, then: git bisect bad', out:[{t:'c88de41 is the first bad commit', cls:'hl-red'}]},
+      {cmd:'git bisect reset', out:[{t:'back to the original HEAD'}]}
+    ], explain:'<i>git bisect</i> is a binary search through your commit history to find the commit that introduced a bug. You mark a known good commit and a known bad commit, then Git repeatedly checks out a midpoint commit for you to test. After a few tests, it identifies the exact commit where the bug was introduced.'},
+  ],
+  doList:[
+    'Reach for <b>stash</b> the instant you need to context-switch without a half-finished commit.',
+    'Use <b>rebase -i</b> only on local commits nobody has pulled yet — clean them up before, not after, sharing.',
+    'Trust <b>bisect</b> on long histories — it finds a bad commit in ~log&#8322;(n) tests, not a linear scan.'
+  ],
+  dontList:[
+    "Don't rebase commits that are already pushed and shared — you'll rewrite history out from under a teammate.",
+    "Don't forget a stash sitting in <code>git stash list</code> — it's easy to forget it exists and lose track of unfinished work."
+  ]
+};
+
+/* ===================== LAB 9 — HOTFIX CAPSTONE ===================== */
+var svg8 =
+'<svg viewBox="0 0 640 210">'+
+  '<defs><marker id="a8" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<text x="20" y="35" class="lbl-strong">main (production)</text>'+
+  '<text x="20" y="105" class="lbl-strong">develop</text>'+
+  '<text x="20" y="175" class="lbl-strong">hotfix/fix-critical-error</text>'+
+
+  '<circle cx="90" cy="45" r="11" class="node node-fill"/>'+
+  '<line data-show-from="1" x1="90" y1="55" x2="90" y2="95" class="edge"/>'+
+  '<circle data-show-from="1" cx="90" cy="105" r="11" class="node"/>'+
+
+  '<line data-show-from="2" x1="101" y1="45" x2="220" y2="45" class="edge"/>'+
+  '<circle data-show-from="2" data-active-at="2" cx="230" cy="45" r="12" class="node node-red pulse"/>'+
+  '<text data-show-from="2" x="230" y="28" text-anchor="middle" class="lbl-strong" style="fill:var(--red);">bug ships</text>'+
+
+  '<line data-show-from="3" x1="230" y1="56" x2="230" y2="165" class="edge" style="stroke-dasharray:3 3;"/>'+
+  '<circle data-show-from="3" cx="230" cy="175" r="11" class="node node-amber"/>'+
+  '<text data-show-from="3" x="230" y="195" text-anchor="middle" class="lbl">branched from main</text>'+
+
+  '<line data-show-from="4" x1="241" y1="175" x2="330" y2="175" class="edge"/>'+
+  '<circle data-show-from="4" data-active-at="4" cx="340" cy="175" r="11" class="node node-teal"/>'+
+  '<text data-show-from="4" x="340" y="195" text-anchor="middle" class="lbl">fix committed</text>'+
+
+  '<line data-show-from="5" x1="340" y1="164" x2="440" y2="60" class="edge" marker-end="url(#a8)"/>'+
+  '<circle data-show-from="5" data-active-at="5" cx="450" cy="45" r="13" class="node node-fill pulse"/>'+
+  '<text data-show-from="5" x="450" y="28" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">PR merged</text>'+
+
+  '<circle data-show-from="6" cx="520" cy="45" r="10" class="node node-amber"/>'+
+  '<line data-show-from="6" x1="461" y1="45" x2="509" y2="45" class="edge"/>'+
+  '<text data-show-from="6" x="520" y="28" text-anchor="middle" class="lbl-strong">v1.0.1</text>'+
+
+  '<line data-show-from="7" x1="450" y1="56" x2="230" y2="94" class="edge-active" marker-end="url(#a8)"/>'+
+  '<text data-show-from="7" data-active-at="7" x="330" y="120" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">merge main → develop (backport)</text>'+
+'</svg>';
+
+var lab9 = {
+  id:'lab-9', index:'09',
+  title:'Capstone — Simulating a Real Production Hotfix',
+  blurb:'Everything above, combined into one realistic incident: a bug ships to production, gets branched off, fixed, merged back through a real PR — and then backported into ongoing work so it doesn\u2019t regress.',
+  goal:'Internalize the one step almost everyone forgets: merging the fix back into develop.',
+  svg:svg8,
+  steps:[
+    {cmd:'git checkout -b develop', out:[{t:"Switched to a new branch 'develop'"}],
+      explain:'<i>git checkout -b develop</i> creates a develop branch. In a real workflow, this branch contains ongoing work for the next release. It\'s separate from main (production) so you can continue work while main receives hotfixes.'},
+    {cmd:'git checkout main && git commit -am "Ship v1.0"', out:[{t:'[main 44d9a12] Ship v1.0'},{t:'⚠ this release contains an undetected bug', cls:'hl-red'}],
+      explain:'A release is shipped from main, but it contains a bug. In the diagram, the bug is marked on the main branch. This sets up the hotfix scenario: main has a critical error that needs to be fixed urgently.'},
+    {cmd:'git checkout -b hotfix/fix-critical-error main', out:[{t:"Switched to a new branch 'hotfix/fix-critical-error'"}],
+      explain:'A hotfix branch is created from main. This is crucial: hotfixes should be based on the production code (main) to ensure the fix is applied to the deployed version, not to the ongoing work in develop.'},
+    {cmd:'git commit -am "Fix critical error in payment calc"', out:[{t:'[hotfix/fix-critical-error 7ab221f] Fix critical error in payment calc'}],
+      explain:'The fix is committed on the hotfix branch. This commit addresses the specific bug that shipped. The diagram shows the commit on the hotfix branch, isolated from both main and develop.'},
+    {cmd:'# PR opened + merged into main (protection rules + CI, from Lab 7)', out:[{t:'Merged pull request #22 into main', cls:'hl-green'}],
+      explain:'A pull request is opened and merged into main. This follows the PR workflow from Lab 7: the fix is reviewed and merged through the proper process. The diagram shows the merge commit on main, with the bug resolved.'},
+    {cmd:'git tag -a v1.0.1 -m "Hotfix: critical error in payment calc" && git push origin v1.0.1', out:[{t:'Release v1.0.1 tagged and pushed', cls:'hl-blue'}],
+      explain:'Tagging the release (<code>v1.0.1</code>) creates a permanent marker for the fixed version. This is essential for deployments and for knowing exactly which commit is in production. The tag is pushed to GitHub so everyone can see it.'},
+    {cmd:'git checkout develop && git merge main', out:[
+      {t:"Merge made by the 'recursive' strategy."},{t:' app.js | 1 +'},{t:' 1 file changed, 1 insertion(+)', cls:'hl-green'}
+    ], explain:'The hotfix is merged back into develop. This is the critical, often-forgotten step: without this, the bug would be reintroduced when develop is merged into main later. The diagram shows the merge from main to develop, ensuring the fix is carried forward.'},
+  ],
+  doList:[
+    'Branch a hotfix off <code>main</code> (production), never off <code>develop</code> — the fix needs to ship independent of in-progress work.',
+    'Tag the release the moment the hotfix merges — <code>v1.0.1</code> is a permanent, reachable marker for "this exact fixed state."',
+    'Always merge the fix back into every ongoing branch (<code>develop</code> and any other long-lived branch) — this is the step this whole exercise is built to drill.'
+  ],
+  dontList:[
+    "Don't skip the backport merge — without it, <code>develop</code> silently reintroduces the exact bug you just fixed the next time it merges into main.",
+    "Don't bypass the PR + protection process for a hotfix just because it's urgent — the guardrails exist precisely for high-pressure moments like this one."
+  ]
+};
+
+/* ===================== LAB 10 — CLONE, REMOTES & .GITIGNORE ===================== */
+var svg9 =
+'<svg viewBox="0 0 640 210">'+
+  '<defs><marker id="a9" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<rect x="30" y="20" width="180" height="80" rx="6" class="node" style="stroke-dasharray:4 4;"/>'+
+  '<text x="120" y="12" text-anchor="middle" class="lbl-strong">GitHub (origin)</text>'+
+  '<circle cx="75" cy="60" r="11" class="node node-fill"/>'+
+  '<circle cx="120" cy="60" r="11" class="node node-fill"/>'+
+  '<circle cx="165" cy="60" r="11" class="node node-fill"/>'+
+  '<line x1="86" y1="60" x2="109" y2="60" class="edge"/>'+
+  '<line x1="131" y1="60" x2="154" y2="60" class="edge"/>'+
+
+  '<line data-show-from="1" data-active-at="1" x1="210" y1="55" x2="330" y2="55" class="edge-active" marker-end="url(#a9)"/>'+
+  '<text data-show-from="1" data-active-at="1" x="270" y="42" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">clone</text>'+
+
+  '<rect data-show-from="1" x="335" y="20" width="220" height="170" rx="6" class="node"/>'+
+  '<text data-show-from="1" x="445" y="12" text-anchor="middle" class="lbl-strong">Local repo (myproject)</text>'+
+  '<circle data-show-from="1" cx="380" cy="60" r="11" class="node node-fill"/>'+
+  '<circle data-show-from="1" cx="425" cy="60" r="11" class="node node-fill"/>'+
+  '<circle data-show-from="1" cx="470" cy="60" r="11" class="node node-fill"/>'+
+  '<line data-show-from="1" x1="391" y1="60" x2="414" y2="60" class="edge"/>'+
+  '<line data-show-from="1" x1="436" y1="60" x2="459" y2="60" class="edge"/>'+
+  '<text data-show-from="1" x="445" y="82" text-anchor="middle" class="lbl">full history included</text>'+
+
+  '<text data-show-from="2" x="445" y="105" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">origin → points back at GitHub automatically</text>'+
+
+  '<rect data-show-from="3" x="355" y="120" width="80" height="34" rx="4" class="node" style="fill:var(--paper);stroke:var(--ink-soft);stroke-dasharray:3 3;"/>'+
+  '<text data-show-from="3" x="395" y="141" text-anchor="middle" style="font-size:9px;fill:var(--ink-soft);">node_modules/</text>'+
+  '<text data-show-from="3" x="395" y="167" text-anchor="middle" class="lbl" style="fill:var(--ink-soft);">ignored — Git never sees it</text>'+
+  '<rect data-show-from="4" x="450" y="120" width="80" height="34" rx="4" class="node node-teal"/>'+
+  '<text data-show-from="4" x="490" y="141" text-anchor="middle" style="font-size:9px;fill:#04140b;font-weight:700;">.gitignore</text>'+
+  '<text data-show-from="4" x="490" y="167" text-anchor="middle" class="lbl">tracked, committed</text>'+
+
+  '<circle data-show-from="5" data-active-at="5" cx="120" cy="150" r="11" class="node node-amber pulse"/>'+
+  '<text data-show-from="5" x="120" y="130" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">upstream</text>'+
+  '<text data-show-from="5" x="120" y="178" text-anchor="middle" class="lbl">second remote — original repo you forked from</text>'+
+'</svg>';
+
+var lab10 = {
+  id:'lab-10', index:'10',
+  title:'Cloning, Remotes &amp; .gitignore',
+  blurb:'Almost nobody starts a real project with <code>git init</code> — they start with <code>git clone</code>. This lab covers the other 90% starting point: cloning an existing repo, understanding what "origin" actually is, adding a second remote, and keeping junk files out of history entirely.',
+  goal:'Stop treating clone/remote/.gitignore as mysterious setup steps — see exactly what each one does.',
+  svg:svg9,
+  steps:[
+    {cmd:'git clone https://github.com/acme/myproject.git', out:[
+      {t:"Cloning into 'myproject'..."},{t:'remote: Enumerating objects: 142, done.'},{t:'Receiving objects: 100% (142/142), done.'}
+    ], explain:'<i>git clone</i> downloads a full copy of a remote repository — every commit, branch, and tag — onto your machine. Unlike <i>git init</i>, cloning starts you off already connected to a remote. This is how you begin working on almost any existing project.'},
+    {cmd:'cd myproject && git remote -v', out:[
+      {t:'origin\thttps://github.com/acme/myproject.git (fetch)'},
+      {t:'origin\thttps://github.com/acme/myproject.git (push)'}
+    ], explain:'<i>git remote -v</i> lists the remotes your repo knows about. Cloning automatically creates one named <i>origin</i> pointing at the URL you cloned from — that name is just a convention, not a keyword, but almost everyone keeps it.'},
+    {cmd:'git log --oneline -3', out:[
+      {t:'8c1f0a2 Add README'},{t:'4e2b119 Initial commit'},{t:'(full project history — not just the latest snapshot)'}
+    ], explain:'Because clone copies the entire history, you have every past commit locally, not just the current files. You can explore, branch from, or check out any point in the project\'s history offline.'},
+    {cmd:'echo "node_modules/" > .gitignore && echo "*.log" >> .gitignore && git status', out:[
+      {t:'On branch main'},{t:'Untracked files:'},{t:'  .gitignore', cls:'hl-red'},
+      {t:'(node_modules/ and *.log do not appear — they\'re excluded)', cls:'hl-blue'}
+    ], explain:'A <code>.gitignore</code> file tells Git which paths to never track — dependency folders, build output, log files, secrets. Anything matching a pattern in it simply disappears from <i>git status</i> and can\'t be accidentally committed.'},
+    {cmd:'git add .gitignore && git commit -m "Add .gitignore"', out:[
+      {t:'[main 9d41a02] Add .gitignore'},{t:' 1 file changed, 2 insertions(+)'}
+    ], explain:'The <code>.gitignore</code> file itself gets committed like any other file, so the exclusion rules travel with the repo — every clone of this project going forward respects the same ignore list automatically.'},
+    {cmd:'git remote add upstream https://github.com/original-owner/myproject.git', out:[
+      {t:'(no output — the remote is added silently)'}
+    ], explain:'<i>git remote add</i> attaches a second remote. This is the standard setup after forking a repo on GitHub: <i>origin</i> is your fork, <i>upstream</i> is the original project, so you can pull in other people\'s changes without losing your own remote.'},
+    {cmd:'git fetch upstream && git log upstream/main -1 --oneline', out:[
+      {t:'remote: Enumerating objects: 6, done.'},{t:'a90bb31 upstream/main Fix typo in docs', cls:'hl-blue'}
+    ], explain:'Fetching from <i>upstream</i> downloads the original project\'s latest work without touching your own branches. You can now merge or rebase your fork onto it whenever you\'re ready, on your own schedule.'},
+  ],
+  doList:[
+    'Add a <code>.gitignore</code> before your first commit on any new project — patterns are far easier to set up before junk files are already tracked.',
+    'Keep <code>origin</code> as your fork and <code>upstream</code> as the original repo — this two-remote setup is the standard contributor pattern on GitHub.',
+    'Run <code>git remote -v</code> whenever you\'re unsure which URL a push or pull will actually hit.'
+  ],
+  dontList:[
+    "Don't add a file to <code>.gitignore</code> after it's already tracked and expect it to vanish — you must <code>git rm --cached &lt;file&gt;</code> first, then the ignore rule takes over.",
+    "Don't assume clone gives you every branch checked out locally — it gives you the history, but you still <code>git checkout</code> or <code>git switch</code> to work on a non-default branch."
+  ]
+};
+
+/* ===================== LAB 11 — REFLOG & RECOVERING "LOST" WORK ===================== */
+var svg10 =
+'<svg viewBox="0 0 640 200">'+
+  '<defs><marker id="a10" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+  '<line x1="60" y1="60" x2="500" y2="60" class="edge"/>'+
+  '<circle cx="90" cy="60" r="11" class="node node-fill"/><text x="90" y="45" text-anchor="middle" class="lbl">A</text>'+
+  '<circle cx="150" cy="60" r="11" class="node node-fill"/><text x="150" y="45" text-anchor="middle" class="lbl">B</text>'+
+  '<circle cx="210" cy="60" r="11" class="node node-fill"/><text x="210" y="45" text-anchor="middle" class="lbl">C</text>'+
+  '<text x="150" y="85" text-anchor="middle" class="lbl-strong">HEAD is here — 3 commits exist</text>'+
+
+  '<g data-show-from="1">'+
+  '  <line x1="150" y1="60" x2="210" y2="60" style="stroke:var(--red);stroke-width:3;"/>'+
+  '  <text x="180" y="105" text-anchor="middle" class="lbl-strong" style="fill:var(--red);">git reset --hard HEAD~2 — B and C look gone</text>'+
+  '  <circle cx="150" cy="60" r="14" class="node node-red pulse"/>'+
+  '  <text x="150" y="130" text-anchor="middle" class="lbl" style="fill:var(--red);">HEAD moved back — commits unreachable, not deleted</text>'+
+  '</g>'+
+
+  '<g data-show-from="3">'+
+  '  <rect x="330" y="140" width="260" height="50" rx="6" class="node node-amber"/>'+
+  '  <text x="460" y="160" text-anchor="middle" style="font-size:10px;fill:#04140b;font-weight:700;">git reflog — every HEAD move ever recorded</text>'+
+  '  <text x="460" y="178" text-anchor="middle" style="font-size:9px;fill:#04140b;">...even the reset itself is one of the entries</text>'+
+  '</g>'+
+
+  '<g data-show-from="4">'+
+  '  <line x1="460" y1="140" x2="215" y2="72" class="edge-active" marker-end="url(#a10)"/>'+
+  '  <circle cx="210" cy="60" r="14" class="node node-teal pulse"/>'+
+  '  <text x="210" y="110" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">reset --hard C — fully recovered</text>'+
+  '</g>'+
+'</svg>';
+
+var lab11 = {
+  id:'lab-11', index:'11',
+  title:'Reflog &amp; Recovering "Lost" Work',
+  blurb:'The single most useful safety-net command in Git, and the one beginners never learn until the day they desperately need it. A hard reset makes commits look gone — <code>git reflog</code> proves they almost never actually are.',
+  goal:'Know the exact recovery sequence before the panic moment happens, not during it.',
+  svg:svg10,
+  steps:[
+    {cmd:'git log --oneline', out:[
+      {t:'210abc3 Commit C'},{t:'150def4 Commit B'},{t:'90aa112 Commit A'}
+    ], explain:'Three commits exist on main. This is the normal, healthy state before anything goes wrong — keep this in mind as the "before" picture.'},
+    {cmd:'git reset --hard HEAD~2', out:[
+      {t:'HEAD is now at 90aa112 Commit A'}
+    ], explain:'<i>git reset --hard</i> moves the branch pointer backward and rewrites your working directory to match. This is destructive-looking: B and C now appear to be gone from your history and your files.'},
+    {cmd:'git log --oneline', out:[
+      {t:'90aa112 Commit A'},{t:'(B and C no longer appear here — but they still exist in Git\'s object database)', cls:'hl-red'}
+    ], explain:'<i>git log</i> only walks backward from the current HEAD, so commits B and C are invisible from here. This is the moment that causes panic — but "invisible from log" is very different from "deleted."'},
+    {cmd:'git reflog', out:[
+      {t:'90aa112 HEAD@{0}: reset: moving to HEAD~2', cls:'hl-amber'},
+      {t:'210abc3 HEAD@{1}: commit: Commit C', cls:'hl-blue'},
+      {t:'150def4 HEAD@{2}: commit: Commit B', cls:'hl-blue'},
+      {t:'90aa112 HEAD@{3}: commit: Commit A'}
+    ], explain:'<i>git reflog</i> is a private, local log of every place HEAD has pointed — commits, resets, checkouts, rebases, all of it. Unlike <code>git log</code>, it shows the reset itself as an entry, and every commit hash that existed before it. Nothing here has been deleted yet.'},
+    {cmd:'git reset --hard 210abc3', out:[
+      {t:'HEAD is now at 210abc3 Commit C'}
+    ], explain:'Using the hash you just found in the reflog, a second <i>git reset --hard</i> moves HEAD forward again, right back to Commit C. B and C are fully restored — the reflog turned an apparent disaster into a two-command fix.'},
+    {cmd:'git log --oneline', out:[
+      {t:'210abc3 Commit C'},{t:'150def4 Commit B'},{t:'90aa112 Commit A'},{t:'(fully recovered)', cls:'hl-green'}
+    ], explain:'History is back to exactly where it was. The key lesson: reflog entries expire eventually (default ~90 days) and only exist locally on the machine where the commits were made — but for almost any real "I lost my work" moment, it\'s there.'},
+  ],
+  doList:[
+    'Run <code>git reflog</code> the instant something looks wrong, before doing anything else — it costs nothing and shows you every recent HEAD position.',
+    'Copy the exact hash from the reflog entry you want, then <code>git reset --hard &lt;hash&gt;</code> to jump straight back to it.',
+    'Remember reflog is <b>local only</b> — it lives in your machine\'s <code>.git</code> folder and isn\'t shared by cloning or fetching.'
+  ],
+  dontList:[
+    "Don't panic-Google \"how to undo git reset\" before trying <code>git reflog</code> first — it's almost always the fastest path back.",
+    "Don't run <code>git push --force</code> to \"fix\" a mistake that's already been pushed and pulled by teammates — it overwrites the remote history under them. Use <code>git push --force-with-lease</code> instead, which refuses if someone else has pushed since you last fetched.",
+    "Don't assume reflog is permanent — it eventually prunes old entries, so recover promptly rather than treating it as permanent backup."
+  ]
+};
+
+/* ===================== LAB 12 — FORK WORKFLOW, LOG TOOLS & DETACHED HEAD (scenario) ===================== */
+var svg11 =
+'<svg viewBox="0 0 640 200">'+
+  /* fork */
+  '<g data-show-for="fork">'+
+  '  <rect x="30" y="20" width="140" height="60" rx="6" class="node" style="stroke-dasharray:4 4;"/>'+
+  '  <text x="100" y="12" text-anchor="middle" class="lbl-strong">original/repo</text>'+
+  '  <circle cx="100" cy="50" r="11" class="node node-fill"/>'+
+  '  <line x1="170" y1="45" x2="260" y2="45" class="edge" marker-end="url(#a11)"/>'+
+  '  <text x="215" y="35" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">fork (on GitHub)</text>'+
+  '  <rect x="265" y="20" width="140" height="60" rx="6" class="node node-amber"/>'+
+  '  <text x="335" y="12" text-anchor="middle" class="lbl-strong">you/repo</text>'+
+  '  <circle cx="335" cy="50" r="11" class="node node-fill"/>'+
+  '  <line x1="405" y1="45" x2="490" y2="45" class="edge" marker-end="url(#a11)"/>'+
+  '  <text x="447" y="35" text-anchor="middle" class="lbl-strong" style="fill:var(--teal);">clone</text>'+
+  '  <rect x="495" y="20" width="120" height="60" rx="6" class="node node-teal"/>'+
+  '  <text x="555" y="12" text-anchor="middle" class="lbl-strong">local</text>'+
+  '  <circle cx="555" cy="50" r="11" class="node node-fill"/>'+
+  '  <line x1="335" y1="80" x2="100" y2="80" class="edge" style="stroke-dasharray:3 3;" marker-end="url(#a11)"/>'+
+  '  <text x="217" y="100" text-anchor="middle" class="lbl">upstream — fetch original\'s new commits into your fork</text>'+
+  '</g>'+
+  /* blame */
+  '<g data-show-for="blame">'+
+  '  <rect x="60" y="30" width="480" height="110" rx="6" class="node"/>'+
+  '  <text x="90" y="55" style="font-size:10px;fill:var(--ink-soft);">a1c9e02  (Mina, 3 weeks ago)  1) function total(items) {</text>'+
+  '  <text x="90" y="75" style="font-size:10px;fill:var(--amber);">7f3b118  (Dev,  2 weeks ago)  2)   return items.reduce(sum);</text>'+
+  '  <text x="90" y="95" style="font-size:10px;fill:var(--ink-soft);">a1c9e02  (Mina, 3 weeks ago)  3) }</text>'+
+  '  <text x="300" y="125" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">every line traced to the commit &amp; author that last touched it</text>'+
+  '</g>'+
+  /* show */
+  '<g data-show-for="show">'+
+  '  <circle cx="140" cy="80" r="16" class="node node-fill pulse"/>'+
+  '  <text x="140" y="110" text-anchor="middle" class="lbl-strong">commit 9f0a221</text>'+
+  '  <line x1="160" y1="80" x2="260" y2="80" class="edge" marker-end="url(#a11)"/>'+
+  '  <rect x="265" y="40" width="300" height="80" rx="6" class="node"/>'+
+  '  <text x="290" y="65" style="font-size:10px;fill:var(--term-green);">+  added line(s)</text>'+
+  '  <text x="290" y="85" style="font-size:10px;fill:var(--term-red);">−  removed line(s)</text>'+
+  '  <text x="290" y="105" style="font-size:9px;fill:var(--ink-soft);">full diff for this ONE commit, message included</text>'+
+  '</g>'+
+  /* detached */
+  '<g data-show-for="detached">'+
+  '  <line x1="60" y1="80" x2="500" y2="80" class="edge"/>'+
+  '  <circle cx="100" cy="80" r="10" class="node node-fill"/>'+
+  '  <circle cx="200" cy="80" r="10" class="node node-fill"/>'+
+  '  <circle cx="300" cy="80" r="13" class="node node-amber pulse"/>'+
+  '  <text x="300" y="60" text-anchor="middle" class="lbl-strong" style="fill:var(--amber);">HEAD → here directly, not on a branch</text>'+
+  '  <circle cx="400" cy="80" r="10" class="node node-fill"/>'+
+  '  <text x="100" y="105" text-anchor="middle" class="lbl">main (branch pointer stayed at the tip)</text>'+
+  '  <text x="300" y="130" text-anchor="middle" class="lbl">new commits here would be orphaned if you switch away without a branch</text>'+
+  '</g>'+
+  '<defs><marker id="a11" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker></defs>'+
+'</svg>';
+
+var lab12 = {
+  id:'lab-12', index:'12',
+  title:'Fork Workflow, git blame/show &amp; Detached HEAD',
+  blurb:'Four situations that come up constantly once you\'re working on GitHub with other people: contributing to a project you don\'t own, tracing who wrote a line and why, inspecting one commit in isolation, and the confusing "detached HEAD" state most people hit by accident at least once.',
+  goal:'Recognize each of these on sight instead of guessing what\'s happening.',
+  svg:svg11,
+  scenarios:[
+    {key:'fork', label:'Fork workflow — contributing to someone else\'s repo', blocks:[
+      {cmd:'# clicked "Fork" on GitHub: original/repo → you/repo', out:[{t:'Fork created: github.com/you/repo', cls:'hl-blue'}]},
+      {cmd:'git clone https://github.com/you/repo.git && cd repo', out:[{t:"Cloning into 'repo'..."},{t:'done.'}]},
+      {cmd:'git remote add upstream https://github.com/original/repo.git', out:[{t:'(remote added)'}]},
+      {cmd:'git fetch upstream && git merge upstream/main', out:[{t:'Already up to date.'},{t:'(run this periodically to stay current with the original project)'}]},
+    ], explain:'Forking creates your own copy of someone else\'s repo on GitHub. You clone <i>your</i> fork, add the original as <code>upstream</code>, and periodically merge upstream\'s changes in. Your contributions go back via a pull request from your fork into the original.'},
+    {key:'blame', label:'git blame — "who wrote this line, and when"', blocks:[
+      {cmd:'git blame utils.js', out:[
+        {t:'a1c9e02 (Mina  2026-08-01 1) function total(items) {'},
+        {t:'7f3b118 (Dev   2026-08-20 2)   return items.reduce(sum);', cls:'hl-amber'},
+        {t:'a1c9e02 (Mina  2026-08-01 3) }'}
+      ]}
+    ], explain:'<i>git blame</i> annotates every line of a file with the commit and author who last changed it. This is invaluable for understanding *why* a confusing line exists — you can take the commit hash straight into <code>git show</code> to read the full reasoning in the commit message.'},
+    {key:'show', label:'git show — inspect exactly one commit', blocks:[
+      {cmd:'git show 9f0a221', out:[
+        {t:"Merge branch 'feature-a'"},{t:''},
+        {t:'diff --git a/notes.txt b/notes.txt'},
+        {t:'-old line', cls:'hl-red'},{t:'+new line', cls:'hl-green'}
+      ]}
+    ], explain:'<i>git show</i> displays everything about a single commit: its message, author, date, and the full diff it introduced. This is the fastest way to answer "what exactly did this commit change" without scrolling through a whole log.'},
+    {key:'detached', label:'Detached HEAD — checking out an old commit directly', blocks:[
+      {cmd:'git checkout 210abc3', out:[
+        {t:'Note: switching to \'210abc3\'.'},
+        {t:"You are in 'detached HEAD' state.", cls:'hl-amber'},
+        {t:'You can look around, make experimental changes...'}
+      ]},
+      {cmd:'git checkout -b explore-old-code', out:[{t:"Switched to a new branch 'explore-old-code'"},{t:'(any new commits are now safely on a real branch)', cls:'hl-green'}]},
+      {cmd:'git checkout main', out:[{t:"Switched to branch 'main'"},{t:'(back to normal — no longer detached)'}]},
+    ], explain:'Checking out a specific commit hash (instead of a branch name) puts you in "detached HEAD" — you\'re looking at that exact snapshot, but you\'re not on any branch. If you commit here and then switch away without creating a branch first, those commits become hard to find. The fix is simple: run <code>git checkout -b &lt;name&gt;</code> before making changes, which anchors your work to a real branch.'},
+  ],
+  doList:[
+    'Use <code>git blame</code> then <code>git show &lt;hash&gt;</code> together — blame finds the commit, show explains it.',
+    'Set up <code>upstream</code> right after forking, and sync from it regularly so your fork doesn\'t drift far behind.',
+    'The moment Git tells you "you are in detached HEAD state," run <code>git checkout -b some-name</code> before committing anything you want to keep.'
+  ],
+  dontList:[
+    "Don't commit meaningful work in detached HEAD and then casually <code>git checkout main</code> — without a branch pointing at it, that work becomes very hard to find again (reflog can still help, per Lab 11).",
+    "Don't open a pull request straight from your fork's <code>main</code> branch — use a feature branch on your fork, same as Lab 7, so your fork's main stays a clean mirror of upstream."
+  ]
+};
+
+var LABS = [lab1, lab2, lab3, lab4, lab5, lab6, lab7, lab8, lab9, lab10, lab11, lab12];
+
+/* ===================== BOOTSTRAP ===================== */
+document.addEventListener('DOMContentLoaded', function(){
+  var railTrack = document.getElementById('rail-track');
+  var root = document.getElementById('labs-root');
+
+  LABS.forEach(function(lab){
+    var railItem = document.createElement('a');
+    railItem.className = 'rail-item';
+    railItem.href = '#' + lab.id;
+    railItem.setAttribute('data-target', lab.id);
+    railItem.innerHTML = '<span class="rail-dot"></span>' + lab.index + ' — ' + lab.title.replace(/<[^>]+>/g,'');
+    railTrack.appendChild(railItem);
+
+    var card = lab.steps ? buildStepLab(lab) : buildScenarioLab(lab);
+    root.appendChild(card);
+  });
+
+  document.getElementById('rail-progress-text').textContent = '0/' + LABS.length + ' labs run';
+});
+</script>
+</body>
+</html>
