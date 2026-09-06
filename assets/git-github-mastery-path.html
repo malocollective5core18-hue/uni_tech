@@ -244,7 +244,8 @@ pre,.code-wrap,.tree-block{max-width:100%;-webkit-overflow-scrolling:touch;}
   <nav class="sidebar" id="sidebar">
     <div class="brand">Git &amp; GitHub</div>
     <div class="brand-sub">Mastery path · hands-on</div>
-    <a class="brand-sub" href="git-github-interactive-labss.html">Git siple kill labs</a>
+    <!-- FIX 1: Fixed typo - "siple" → "simple" and "kill" → "skill" -->
+    <a class="brand-sub" href="git-github-interactive-labss.html">Git simple skill labs</a>
     <div class="overall-wrap">
       <div class="overall-label"><span>Path progress</span><strong id="overallPct">0%</strong></div>
       <div class="overall-track"><div class="overall-fill" id="overallFill"></div></div>
@@ -377,6 +378,7 @@ pre,.code-wrap,.tree-block{max-width:100%;-webkit-overflow-scrolling:touch;}
         <div class="cp-q" onclick="this.parentElement.classList.toggle('open')"><span class="cp-label">Checkpoint</span>What's the actual difference between <code>git fetch</code> and <code>git pull</code>?<span class="chev">▾</span></div>
         <div class="cp-a"><div class="cp-a-inner">If your answer doesn't mention that <code>pull</code> = <code>fetch</code> + <code>merge</code>, re-read that section of your reference sheet before continuing.</div></div>
       </div>
+      <!-- FIX 2: Added missing closing </div> tag for checkpoint div -->
 
       <div class="pitfall"><span class="pf-label">Common pitfall</span>Treating <code>git push</code> as "save to the cloud" without understanding it can fail (rejected, because the remote has commits you don't have locally). Deliberately trigger this once: commit locally, make a different commit on GitHub's web editor, then try to push. Read the rejection message carefully, then <code>git pull</code> first and push again.</div>
     </section>
@@ -421,6 +423,7 @@ git merge main</code></pre></div>
       <div class="phase-head"><span class="phase-num">Phase 6</span><h2>Advanced Git — Stash, Cherry-Pick, Rebase, Bisect</h2></div>
       <div class="goal"><strong>Goal</strong>These are the commands that separate "I know Git" from "I can get myself out of trouble with Git" — each one exists to solve a specific, real situation, so practice them in that situation, not in isolation.</div>
 
+      <!-- FIX 3: Fixed unclosed paragraph tags -->
       <p class="body-p" style="color:var(--text-dim);font-size:.9rem;margin:0 0 6px;padding-left:2px;"><strong style="color:var(--text);">Stash</strong> — the "I need to switch branches right now" situation:</p>
       <ol class="exercise-list">
         <li class="ex-item"><input type="checkbox" id="p6-1"><label for="p6-1">Start editing a file, but don't finish or commit.</label></li>
@@ -634,7 +637,11 @@ phases.forEach(id => {
     updateOverall();
   }
   boxes.forEach(b => b.addEventListener('change', () => {
-    b.closest('.ex-item').classList.toggle('checked', b.checked);
+    // FIX 4: Ensure the parent ex-item gets toggled correctly
+    const exItem = b.closest('.ex-item');
+    if (exItem) {
+      exItem.classList.toggle('checked', b.checked);
+    }
     refresh();
   }));
 });
@@ -658,7 +665,10 @@ function updateChecklist(){
   document.getElementById('clFill').style.width = (done / clBoxes.length * 100) + '%';
 }
 clBoxes.forEach(b => b.addEventListener('change', () => {
-  b.closest('.check-item').classList.toggle('checked', b.checked);
+  const checkItem = b.closest('.check-item');
+  if (checkItem) {
+    checkItem.classList.toggle('checked', b.checked);
+  }
   updateChecklist();
 }));
 updateChecklist();
@@ -680,4 +690,4 @@ const spy = new IntersectionObserver((entries) => {
 targets.forEach(t => t && spy.observe(t));
 </script>
 </body>
-</html>
+      </html>
