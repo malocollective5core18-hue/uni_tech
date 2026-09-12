@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Networking, Access Points &amp; MikroTik Multi-Site Deployment — Field Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF1F2;
+    --panel: #FFFFFF;
+    --ink: #17222E;
+    --ink-soft: #4A5568;
+    --line: #D7DEE2;
+    --accent: #0E7C86;
+    --accent-deep: #0A5C64;
+    --amber: #B9720C;
+    --danger: #A3402E;
+    --mono-bg: #101A22;
+    --mono-ink: #CDE8E9;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',-apple-system,sans-serif;line-height:1.55;font-size:16px;}
+  code,.mono,kbd{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+  a{color:var(--accent-deep);}
+  .shell{display:grid;grid-template-columns:290px minmax(0,1fr);max-width:1180px;margin:0 auto;}
+  header.top{grid-column:1/-1;padding:56px 40px 28px;border-bottom:1px solid var(--line);}
+  header.top .kicker{font-family:'IBM Plex Mono';font-size:13px;color:var(--accent-deep);letter-spacing:0.02em;}
+  header.top h1{font-size:clamp(28px,4vw,42px);margin:10px 0 12px;max-width:840px;letter-spacing:-0.01em;}
+  header.top p{max-width:680px;color:var(--ink-soft);font-size:17px;margin:0 0 8px;}
+  header.top .parts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  header.top .parts span{font-family:'IBM Plex Mono';font-size:12px;background:#DEF0F1;color:var(--accent-deep);padding:5px 10px;border-radius:999px;}
+  nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:32px 20px 60px 40px;border-right:1px solid var(--line);}
+  nav.toc .label{font-family:'IBM Plex Mono';font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+  nav.toc .label.second{margin-top:24px;}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:sec;}
+  nav.toc li{counter-increment:sec;margin-bottom:2px;}
+  nav.toc a{display:flex;gap:10px;text-decoration:none;color:var(--ink);font-size:14.5px;padding:7px 8px;border-radius:var(--radius);}
+  nav.toc a::before{content:counter(sec,decimal-leading-zero);font-family:'IBM Plex Mono';font-size:12px;color:var(--ink-soft);padding-top:1px;}
+  nav.toc a:hover{background:#E4EAEC;}
+  nav.toc a.active{background:var(--accent);color:#fff;}
+  nav.toc a.active::before{color:#DFF3F4;}
+  main{padding:8px 44px 120px;min-width:0;}
+  section{padding:52px 0 8px;border-bottom:1px solid var(--line);}
+  section:last-child{border-bottom:none;}
+  section.divider{padding-top:64px;}
+  section h2{font-size:26px;margin:0 0 6px;display:flex;align-items:baseline;gap:12px;}
+  section h2 .n{font-family:'IBM Plex Mono';font-size:15px;color:var(--accent-deep);}
+  section .dek{color:var(--ink-soft);max-width:670px;margin-bottom:26px;font-size:15.5px;}
+  .part-label{font-family:'IBM Plex Mono';font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-deep);margin-bottom:6px;}
+  h3{font-size:17px;margin:30px 0 10px;color:var(--ink);}
+  h4.sub{font-size:15px;margin:24px 0 8px;color:var(--ink);}
+  p{max-width:720px;}
+  ul,ol{max-width:700px;padding-left:22px;}
+  li{margin-bottom:6px;}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:20px 0 8px;}
+  .card{border:1px solid var(--line);background:var(--panel);padding:18px 18px 16px;border-radius:var(--radius);}
+  .card h4{margin:0 0 6px;font-size:15px;}
+  .card p{margin:0;font-size:14px;color:var(--ink-soft);}
+  .card .tag{display:inline-block;font-family:'IBM Plex Mono';font-size:11px;color:var(--accent-deep);background:#DEF0F1;padding:2px 7px;border-radius:999px;margin-bottom:8px;}
+  table{border-collapse:collapse;width:100%;max-width:780px;margin:18px 0 26px;font-size:14.5px;}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-family:'IBM Plex Mono';font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);border-bottom:2px solid var(--ink);}
+  td .mono{color:var(--accent-deep);}
+  .term{background:var(--mono-bg);color:var(--mono-ink);border-radius:var(--radius);padding:16px 20px;font-size:13.5px;line-height:1.7;margin:16px 0 24px;overflow-x:auto;max-width:740px;white-space:pre-wrap;}
+  .term .c{color:#7FA9AC;}
+  .term .k{color:#E7B65E;}
+  .callout{border-left:3px solid var(--accent);background:#E4F1F2;padding:14px 18px;max-width:690px;margin:18px 0;font-size:14.5px;border-radius:0 var(--radius) var(--radius) 0;}
+  .callout.warn{border-left-color:var(--amber);background:#F6EAD6;}
+  .callout.danger{border-left-color:var(--danger);background:#F5E1DC;}
+  .callout strong{display:block;margin-bottom:3px;font-size:13px;text-transform:uppercase;letter-spacing:0.03em;font-family:'IBM Plex Mono';}
+  .diagram{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:26px 0 30px;max-width:780px;}
+  .dbox{border:1.5px solid var(--ink);background:var(--panel);padding:14px 16px;min-width:110px;text-align:center;border-radius:var(--radius);}
+  .dbox .t{font-family:'IBM Plex Mono';font-size:11px;color:var(--ink-soft);text-transform:uppercase;}
+  .dbox .v{font-weight:600;font-size:14px;margin-top:3px;}
+  .darrow{flex:0 0 auto;padding:0 8px;color:var(--ink-soft);font-size:18px;}
+  .checklist{max-width:700px;margin:18px 0 10px;}
+  .checklist li{list-style:none;display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14.5px;}
+  .checklist li:before{content:"□";color:var(--accent-deep);font-size:16px;line-height:1.3;}
+  .glossary dt{font-family:'IBM Plex Mono';font-weight:600;color:var(--accent-deep);margin-top:16px;}
+  .glossary dd{margin:4px 0 0;color:var(--ink-soft);max-width:690px;}
+  footer{grid-column:1/-1;padding:40px 44px 60px;color:var(--ink-soft);font-size:13.5px;border-top:1px solid var(--line);}
+  @media (max-width:880px){
+    .shell{grid-template-columns:1fr;}
+    nav.toc{position:relative;border-right:none;border-bottom:1px solid var(--line);max-height:none;padding:24px 24px 12px;}
+    header.top{padding:36px 24px 24px;}
+    main{padding:8px 24px 90px;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div class="kicker">INTERNAL REFERENCE — FULL SCOPE</div>
+    <h1>From what a router does, to what your company builds.</h1>
+    <p>Part one covers the underlying concepts behind any router or access point's settings page — NAT, DHCP, wireless security, segmentation. Part two builds directly on that to cover how your team actually deploys: MikroTik RouterOS, CAPsMAN across many access points, wireless backhaul to bus stands, and hotspot access for the public.</p>
+    <div class="parts">
+      <span>Part 1 — Fundamentals</span>
+      <span>Part 2 — MikroTik multi-site deployment</span>
+    </div>
+  </header>
+
+  <nav class="toc" id="toc">
+    <div class="label">Part 1 — Fundamentals</div>
+    <ol>
+      <li><a href="#boxes">The boxes on the network</a></li>
+      <li><a href="#modes">Operation modes explained</a></li>
+      <li><a href="#addressing">IP addressing &amp; DHCP</a></li>
+      <li><a href="#nat">NAT, forwarding &amp; DMZ</a></li>
+      <li><a href="#wireless">Wireless fundamentals</a></li>
+      <li><a href="#security">Wireless security</a></li>
+      <li><a href="#segmentation">Segmentation &amp; isolation</a></li>
+      <li><a href="#firewall">Firewall &amp; threat basics</a></li>
+      <li><a href="#public">Deploying public Wi-Fi</a></li>
+      <li><a href="#hardening">Admin access &amp; hardening</a></li>
+    </ol>
+    <div class="label second">Part 2 — MikroTik &amp; multi-site</div>
+    <ol start="11">
+      <li><a href="#routeros">RouterOS &amp; MikroTik hardware</a></li>
+      <li><a href="#topology">Designing the multi-site topology</a></li>
+      <li><a href="#backhaul">Wireless backhaul between sites</a></li>
+      <li><a href="#capsman">CAPsMAN — centralized APs</a></li>
+      <li><a href="#addressing2">Addressing &amp; VLANs at scale</a></li>
+      <li><a href="#hotspot">Hotspot / captive portal</a></li>
+      <li><a href="#bandwidth">Bandwidth management</a></li>
+      <li><a href="#firewall2">Firewall &amp; segmentation at scale</a></li>
+      <li><a href="#monitoring">Monitoring a distributed network</a></li>
+      <li><a href="#checklists">Deployment checklists</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ==================== PART 1 ==================== -->
+
+    <section id="boxes">
+      <div class="part-label">Part 1 — Fundamentals</div>
+      <h2><span class="n">01</span> The boxes on the network</h2>
+      <p class="dek">Titles get used loosely in the field. A "router" people hand you is often doing three or four jobs at once. Separating the jobs makes any device's settings page make sense immediately.</p>
+
+      <div class="grid-3">
+        <div class="card"><span class="tag">Layer 1–2</span><h4>Modem</h4><p>Translates the ISP's signal (fibre, coax, cellular) into Ethernet. Doesn't route, doesn't do Wi-Fi, doesn't assign local addresses. One WAN connection in, one Ethernet port out.</p></div>
+        <div class="card"><span class="tag">Layer 3</span><h4>Router</h4><p>Sits between two networks (your LAN and the ISP's WAN) and decides how traffic moves between them. Runs NAT, usually runs DHCP, usually has a firewall.</p></div>
+        <div class="card"><span class="tag">Layer 2</span><h4>Switch</h4><p>Joins wired devices on the <em>same</em> network. No routing, no NAT, no DHCP of its own. Just extends the number of wired ports.</p></div>
+        <div class="card"><span class="tag">Layer 2</span><h4>Access Point (AP)</h4><p>The wireless equivalent of a switch: extends an existing network over radio. Doesn't create a new network, doesn't route, doesn't (normally) run DHCP.</p></div>
+        <div class="card"><span class="tag">Layer 2</span><h4>Repeater / Extender</h4><p>Rebroadcasts an existing wireless signal further, over the air, usually at reduced throughput because it must receive and resend on the same radio.</p></div>
+        <div class="card"><span class="tag">System</span><h4>Mesh node</h4><p>A repeater with a brain: multiple nodes coordinate, use a dedicated backhaul channel where possible, and hand devices between nodes automatically.</p></div>
+      </div>
+
+      <div class="callout">
+        <strong>The one-liner that matters most</strong>
+        A consumer "router" is a router + switch + AP + firewall in one box. When you put a second one on the network purely for Wi-Fi coverage, you want the switch+AP half only — which is exactly what "run it as an AP" means, even when the device has no AP mode in its firmware.
+      </div>
+    </section>
+
+    <section id="modes">
+      <h2><span class="n">02</span> Operation modes explained</h2>
+      <p class="dek">"Operation Mode" pages vary a lot between vendors and even between models from the same vendor. Some spell out Access Point as a menu option; others don't have the concept at all and you build it manually. Know the underlying scenario, not the label.</p>
+
+      <table>
+        <tr><th>Scenario</th><th>What it means</th><th>How it's usually built</th></tr>
+        <tr><td class="mono">Router</td><td>Creates a new LAN, does NAT between it and the WAN, hands out addresses.</td><td>WAN port connected to modem/ISP, DHCP server on — the default state of most routers out of the box.</td></tr>
+        <tr><td class="mono">Access Point</td><td>Extends an existing LAN over Wi-Fi. No new subnet, no second NAT layer.</td><td>Uplink into a LAN port (not WAN), DHCP server off, static LAN IP in the host network's range.</td></tr>
+        <tr><td class="mono">Bridge / WDS</td><td>Wirelessly joins two access points into one Layer-2 network, extending a LAN without a cable run.</td><td>Both ends configured with each other's SSID/MAC under WDS settings. Throughput is shared across the link.</td></tr>
+        <tr><td class="mono">Repeater</td><td>Receives and rebroadcasts an existing SSID to widen coverage.</td><td>Associates to the parent SSID as a client, then rebroadcasts it. Same subnet, no new DHCP scope.</td></tr>
+        <tr><td class="mono">WISP Client</td><td>Uses Wi-Fi itself as the WAN connection and routes/NATs a private LAN behind it.</td><td>The router's WAN-equivalent radio joins someone else's Wi-Fi as a client. Everything downstream is NATed as normal.</td></tr>
+      </table>
+
+      <p>Manufacturer language for the "Access Point" scenario varies: "AP Mode," "Wireless Bridge," "Wireless Ethernet Client," or no explicit mode at all — just a manual DHCP-off plus LAN-uplink configuration.</p>
+    </section>
+
+    <section id="addressing">
+      <h2><span class="n">03</span> IP addressing &amp; DHCP</h2>
+      <p class="dek">Almost every home-network problem — devices that "can't see each other," a second router that "breaks" the internet, a static device that stops responding after a reboot — traces back to addressing.</p>
+
+      <h3>Private address ranges (RFC 1918)</h3>
+      <table>
+        <tr><th>Range</th><th>Size</th><th>Typical use</th></tr>
+        <tr><td class="mono">10.0.0.0 – 10.255.255.255</td><td>16.7M addresses</td><td>Large or segmented business networks</td></tr>
+        <tr><td class="mono">172.16.0.0 – 172.31.255.255</td><td>1M addresses</td><td>Mid-size networks, common in enterprise gear defaults</td></tr>
+        <tr><td class="mono">192.168.0.0 – 192.168.255.255</td><td>65K addresses</td><td>Home and small-office routers</td></tr>
+      </table>
+
+      <h3>How DHCP actually works — DORA</h3>
+      <div class="term">
+<span class="c">// A device joining the network, in order</span>
+<span class="k">1. DISCOVER</span>  — client broadcasts "is there a DHCP server here?"
+<span class="k">2. OFFER</span>     — server proposes an address + lease time
+<span class="k">3. REQUEST</span>   — client asks to actually use that address
+<span class="k">4. ACK</span>       — server confirms; client configures itself
+      </div>
+      <p>This is exactly why two DHCP servers on one network cause chaos: two OFFERs can arrive for the same broadcast, and different devices end up with addresses assigned by different authorities that don't agree on gateway or DNS.</p>
+
+      <div class="callout warn">
+        <strong>Field symptom to remember</strong>
+        Intermittent connectivity that "fixes itself on reboot," duplicate IP warnings, or some devices reaching the internet while others on the same Wi-Fi can't — check for a second live DHCP server before anything else.
+      </div>
+
+      <h3>Static vs. reserved vs. dynamic</h3>
+      <ul>
+        <li><strong>Dynamic</strong> — DHCP assigns it, can change on lease renewal. Fine for phones, laptops, guests.</li>
+        <li><strong>Reserved</strong> — still handed out by DHCP, but the server always gives the same address to that MAC. Best practice for printers, cameras, and anything a firewall rule points at.</li>
+        <li><strong>Static</strong> — set by hand on the device itself, outside DHCP's control entirely. Necessary for an AP's own management address once its own DHCP server is disabled.</li>
+      </ul>
+    </section>
+
+    <section id="nat">
+      <h2><span class="n">04</span> NAT, port forwarding &amp; DMZ</h2>
+      <p class="dek">These three sit together because they all answer the same question in different ways: how does something outside the LAN reach something inside it?</p>
+
+      <div class="diagram">
+        <div class="dbox"><div class="t">Internet</div><div class="v">203.0.113.9</div></div>
+        <div class="darrow">→</div>
+        <div class="dbox"><div class="t">Router / NAT</div><div class="v">Public ↔ Private</div></div>
+        <div class="darrow">→</div>
+        <div class="dbox"><div class="t">LAN host</div><div class="v">192.168.1.42</div></div>
+      </div>
+
+      <h3>NAT (Network Address Translation)</h3>
+      <p>Lets many private LAN addresses share one public IP by rewriting the source address of outgoing packets and tracking the mapping to route replies back correctly. This is also why a home LAN is invisible from the outside by default — unsolicited inbound traffic has no mapping to follow, so it's dropped.</p>
+
+      <h3>Port forwarding / virtual servers</h3>
+      <p>A deliberate hole punched in that default-closed behavior: traffic to the router's public IP on a specific port gets forwarded to one specific internal host and port.</p>
+
+      <h3>DMZ host</h3>
+      <p>The blunt version of port forwarding — <em>all</em> unmatched inbound ports go to one internal host, unfiltered. That host loses the router's protection entirely, so it should never be a general-purpose PC.</p>
+
+      <h3>UPnP</h3>
+      <p>Lets applications open their own port forwards automatically. Convenient, but it means any device or piece of malware on the LAN can ask the router to open a hole.</p>
+
+      <div class="callout danger">
+        <strong>Rule of thumb</strong>
+        Port forward the specific port a specific service needs. Reach for DMZ only for isolated test/lab hosts, and never leave UPnP on for a network you don't control end to end.
+      </div>
+    </section>
+
+    <section id="wireless">
+      <h2><span class="n">05</span> Wireless fundamentals</h2>
+      <p class="dek">The physics and the standards behind every "which band," "which channel," "which mode" decision on a wireless settings page.</p>
+
+      <h3>802.11 standards</h3>
+      <table>
+        <tr><th>Standard</th><th>Marketing name</th><th>Band(s)</th><th>Practical note</th></tr>
+        <tr><td class="mono">802.11b</td><td>—</td><td>2.4 GHz</td><td>Legacy; slows every network it joins if still allowed</td></tr>
+        <tr><td class="mono">802.11g</td><td>—</td><td>2.4 GHz</td><td>Up to 54 Mbps; still common as a compatibility floor</td></tr>
+        <tr><td class="mono">802.11n</td><td>Wi-Fi 4</td><td>2.4 &amp; 5 GHz</td><td>Introduced MIMO</td></tr>
+        <tr><td class="mono">802.11ac</td><td>Wi-Fi 5</td><td>5 GHz</td><td>Wide channels, higher throughput, less legacy baggage</td></tr>
+        <tr><td class="mono">802.11ax</td><td>Wi-Fi 6 / 6E</td><td>2.4, 5, 6 GHz</td><td>OFDMA improves performance with many simultaneous clients</td></tr>
+        <tr><td class="mono">802.11be</td><td>Wi-Fi 7</td><td>2.4, 5, 6 GHz</td><td>Multi-link operation — a client can use more than one band at once</td></tr>
+      </table>
+
+      <h3>2.4 GHz vs. 5 GHz vs. 6 GHz</h3>
+      <div class="grid-3">
+        <div class="card"><h4>2.4 GHz</h4><p>Longest range and best wall penetration, but only 3 non-overlapping channels (1, 6, 11) and heavy contention.</p></div>
+        <div class="card"><h4>5 GHz</h4><p>Far more non-overlapping channels, higher throughput, shorter range and worse wall penetration.</p></div>
+        <div class="card"><h4>6 GHz (Wi-Fi 6E/7)</h4><p>Wide-open spectrum with far less legacy interference, but the shortest range of the three.</p></div>
+      </div>
+
+      <h3>Channel width</h3>
+      <p>Wider channels (40/80/160 MHz vs. 20 MHz) move more data per unit time but occupy more spectrum and overlap more with neighboring networks. In dense environments, narrower channels with less overlap often outperform wide ones on paper-spec throughput.</p>
+
+      <h3>SSID broadcast &amp; hidden networks</h3>
+      <p>Disabling SSID broadcast stops the name appearing in a casual scan, but it is not a security control — the SSID is still sent in cleartext when a known client tries to connect. Treat it as air-traffic tidiness, not protection.</p>
+    </section>
+
+    <section id="security">
+      <h2><span class="n">06</span> Wireless security</h2>
+      <p class="dek">The list every client and every audit will ask about. Know which protocols are obsolete and why.</p>
+
+      <table>
+        <tr><th>Protocol</th><th>Status</th><th>Notes</th></tr>
+        <tr><td class="mono">Open / no security</td><td>Situational</td><td>Correct only for a deliberately public network — never for anything with private traffic behind it.</td></tr>
+        <tr><td class="mono">WEP</td><td>Broken</td><td>Crackable in minutes with freely available tools. Never deploy.</td></tr>
+        <tr><td class="mono">WPA / WPA-Personal (TKIP)</td><td>Deprecated</td><td>Superseded by WPA2; keep only if a legacy device truly requires it.</td></tr>
+        <tr><td class="mono">WPA2-Personal (AES)</td><td>Current baseline</td><td>Pre-shared key, shared by everyone on the network — a reasonable minimum today.</td></tr>
+        <tr><td class="mono">WPA2/WPA3-Enterprise</td><td>Business standard</td><td>Every user authenticates individually against a RADIUS server — no shared password to leak.</td></tr>
+        <tr><td class="mono">WPA3-Personal</td><td>Current best (home/SMB)</td><td>Resistant to offline dictionary attacks against a captured handshake, which WPA2-Personal is not.</td></tr>
+      </table>
+
+      <h3>Personal vs. Enterprise, in plain terms</h3>
+      <p>Personal mode means one password for every device. Enterprise mode means every person logs in with their own credentials against a RADIUS/AAA server — higher setup cost, but a departing employee's access can be revoked without touching anyone else's.</p>
+
+      <h3>WPS</h3>
+      <p>Designed to simplify pairing, but the PIN method has a well-known brute-force weakness. Leave it off on anything internet-facing or physically reachable by the public.</p>
+    </section>
+
+    <section id="segmentation">
+      <h2><span class="n">07</span> Segmentation &amp; isolation</h2>
+      <p class="dek">The difference between "everyone shares one flat network" and "traffic only goes where it needs to" — the single biggest lever for both security and troubleshooting sanity.</p>
+
+      <h3>VLANs</h3>
+      <p>A VLAN splits one physical network into multiple logical ones — devices on VLAN 10 can't see VLAN 20 traffic even though they share the same switch, unless a router explicitly permits it.</p>
+
+      <h3>Guest networks</h3>
+      <p>A separate SSID mapped to its own VLAN/subnet with no route back to the main LAN.</p>
+
+      <h3>AP Isolation</h3>
+      <p>Within a single wireless network, stops client devices from talking directly to each other. Non-negotiable on any open or public SSID.</p>
+
+      <div class="callout">
+        <strong>Mental model</strong>
+        VLANs separate networks from each other. AP Isolation separates devices from each other <em>within</em> the same network. A public Wi-Fi deployment usually wants both.
+      </div>
+    </section>
+
+    <section id="firewall">
+      <h2><span class="n">08</span> Firewall &amp; threat basics</h2>
+      <p class="dek">What the toggles under "Security" are actually defending against.</p>
+
+      <div class="grid-3">
+        <div class="card"><h4>SPI (Stateful Packet Inspection)</h4><p>Tracks connection state and only allows inbound traffic that's a legitimate reply to something the LAN initiated.</p></div>
+        <div class="card"><h4>DoS / flood filtering</h4><p>Watches for abnormal volumes of SYN, UDP, or ICMP packets in a short window and starts blocking the source.</p></div>
+        <div class="card"><h4>VPN passthrough</h4><p>PPTP/L2TP/IPSec passthrough lets VPN tunnels traverse a NAT router correctly.</p></div>
+      </div>
+
+      <h3>Access control vs. parental control</h3>
+      <p>Functionally similar under the hood — both build a rule from a host, a target, and a schedule — but framed differently as security policy vs. time/content management.</p>
+    </section>
+
+    <section id="public">
+      <h2><span class="n">09</span> Deploying public Wi-Fi</h2>
+      <p class="dek">Turning off the password is the easy 10% of a public hotspot. This is the other 90%.</p>
+
+      <h3>Open vs. captive portal</h3>
+      <p>A fully open SSID is simplest to deploy but has no acceptance-of-terms step and no way to differentiate users. A captive portal adds a landing page users must interact with before getting online.</p>
+
+      <h3>Isolation is not optional</h3>
+      <p>On an open network, any two connected strangers can otherwise see each other's file shares and sometimes intercept traffic. AP Isolation must be on, and any nearby private network needs a separate subnet/VLAN with no route to it.</p>
+
+      <h3>Bandwidth control</h3>
+      <p>An unmanaged public SSID lets one device starve everyone else. Per-client or per-rule bandwidth caps keep the hotspot usable under load.</p>
+
+      <h3>Logging &amp; liability</h3>
+      <p>Operators of public internet access may have retention obligations, or at least a strong practical interest in keeping connection logs. This is legal/policy territory worth flagging to ownership rather than deciding unilaterally.</p>
+
+      <div class="callout warn">
+        <strong>What to tell a client who says "just make it open"</strong>
+        Open is fine as the authentication model. It is not an excuse to skip AP isolation, network segregation, and a bandwidth policy.
+      </div>
+    </section>
+
+    <section id="hardening">
+      <h2><span class="n">10</span> Admin access &amp; hardening</h2>
+      <p class="dek">The settings that protect the router itself, independent of anything it's serving to clients.</p>
+      <ul>
+        <li><strong>Change default admin credentials</strong> — "admin/admin" is the first thing any scanner tries.</li>
+        <li><strong>Disable remote management</strong> unless specifically needed; if it must stay on, restrict it to a source IP and change the default port.</li>
+        <li><strong>Restrict local management by MAC</strong> where supported.</li>
+        <li><strong>Keep firmware current</strong> — updates are disproportionately security patches.</li>
+        <li><strong>Turn off services you're not using</strong> — UPnP, WPS, USB sharing, remote management.</li>
+        <li><strong>Set DNS deliberately</strong>, not by accident — DNS redirection is a common attack surface on compromised routers.</li>
+      </ul>
+    </section>
+
+    <!-- ==================== PART 2 ==================== -->
+
+    <section id="routeros" class="divider">
+      <div class="part-label">Part 2 — MikroTik &amp; multi-site deployment</div>
+      <h2><span class="n">11</span> RouterOS &amp; MikroTik hardware</h2>
+      <p class="dek">MikroTik's advantage over consumer gear is that one operating system, RouterOS, scales from a $30 access point to a core router handling tens of gigabits — which is why it fits a school-plus-bus-stand deployment better than stacking consumer boxes.</p>
+
+      <h3>Access &amp; configuration tools</h3>
+      <ul>
+        <li><strong>Winbox</strong> — the standard desktop GUI, connects over MAC or IP even before the device has a usable address.</li>
+        <li><strong>WebFig</strong> — the same configuration surface, in-browser.</li>
+        <li><strong>CLI / terminal</strong> — scriptable, and the only practical way to push identical config to many sites without repeating manual clicks.</li>
+        <li><strong>The Dude</strong> — MikroTik's own network monitoring tool.</li>
+      </ul>
+
+      <h3>Typical hardware roles in this kind of deployment</h3>
+      <table>
+        <tr><th>Device class</th><th>Role</th></tr>
+        <tr><td class="mono">CCR / CRS series</td><td>Core router/switch at the main site (school), routing between VLANs and the internet uplink.</td></tr>
+        <tr><td class="mono">hAP / RB series</td><td>Smaller routers at secondary buildings or a bus stand's local cabinet.</td></tr>
+        <tr><td class="mono">wAP / cAP</td><td>Indoor/outdoor access points, ideally managed under CAPsMAN rather than individually.</td></tr>
+        <tr><td class="mono">LtAP / Wireless Wire / SXT</td><td>Directional or point-to-point radios — for reaching a bus stand with no fiber run.</td></tr>
+      </table>
+
+      <div class="callout">
+        <strong>Why this matters for you as manager</strong>
+        A tech who can configure one wAP by hand but doesn't know CAPsMAN will not scale past a handful of sites without either burning huge hours or creating configuration drift between them.
+      </div>
+    </section>
+
+    <section id="topology">
+      <h2><span class="n">12</span> Designing the multi-site topology</h2>
+      <p class="dek">A school-plus-bus-stands network is really several physical sites that need to behave like one logical network — or, just as often, need to be deliberately kept apart depending on who's using which part.</p>
+
+      <div class="diagram">
+        <div class="dbox"><div class="t">ISP</div><div class="v">Uplink</div></div>
+        <div class="darrow">→</div>
+        <div class="dbox"><div class="t">Core router</div><div class="v">School building</div></div>
+        <div class="darrow">→</div>
+        <div class="dbox"><div class="t">Backhaul link</div><div class="v">PtP wireless</div></div>
+        <div class="darrow">→</div>
+        <div class="dbox"><div class="t">Edge AP</div><div class="v">Bus stand</div></div>
+      </div>
+
+      <h3>Questions to settle before configuring anything</h3>
+      <ul>
+        <li>Does the bus stand's public Wi-Fi need to reach the same internet uplink as the school, or is it better as its own independent connection?</li>
+        <li>Is the software your clients use hosted centrally (needs routing back to a central server) or per-site (each location is self-contained)?</li>
+        <li>Do school staff/admin networks need to stay isolated from student and public-facing networks? In almost every case: yes.</li>
+      </ul>
+
+      <div class="callout warn">
+        <strong>A pattern worth adopting as policy</strong>
+        Treat "the school network" and "the bus stand public network" as separate logical networks that happen to share infrastructure — not as one flat LAN. Segment first, then decide what's allowed to cross between them.
+      </div>
+    </section>
+
+    <section id="backhaul">
+      <h2><span class="n">13</span> Wireless backhaul between sites</h2>
+      <p class="dek">Bus stands rarely have convenient fiber runs. This is where MikroTik's PtP (point-to-point) and PtMP (point-to-multipoint) wireless gear earns its keep.</p>
+
+      <div class="grid-3">
+        <div class="card"><span class="tag">1:1</span><h4>Point-to-Point</h4><p>One dedicated link between two fixed locations. Highest throughput and most predictable performance per link.</p></div>
+        <div class="card"><span class="tag">1:many</span><h4>Point-to-Multipoint</h4><p>One base station serves several remote sites at once. More efficient hardware use, but shared bandwidth across all of them.</p></div>
+      </div>
+
+      <h3>Practical siting concerns</h3>
+      <ul>
+        <li><strong>Line of sight</strong> — trees, buildings, and seasonal foliage growth can degrade a link that tested fine at install.</li>
+        <li><strong>Fresnel zone clearance</strong> — visual line of sight isn't enough if the calculated Fresnel zone is obstructed.</li>
+        <li><strong>Frequency choice</strong> — 5 GHz is license-exempt in most regions but faces more contention; licensed bands or 60 GHz suit tight, high-value links.</li>
+        <li><strong>Power &amp; mounting</strong> — bus stand infrastructure often has weaker power and less secure mounting than a school building.</li>
+      </ul>
+
+      <div class="callout danger">
+        <strong>Common failure mode</strong>
+        A backhaul link aligned and tested once, then never revisited. Wind, thermal expansion, and nesting birds shift alignment over months — build periodic link-health checks into your maintenance schedule.
+      </div>
+    </section>
+
+    <section id="capsman">
+      <h2><span class="n">14</span> CAPsMAN — managing many APs centrally</h2>
+      <p class="dek">CAPsMAN (Controlled Access Point system Manager) turns "a pile of individually configured access points" into "one wireless network you manage from one place." The single highest-leverage MikroTik feature for a deployment with this many APs.</p>
+
+      <h3>How it works, conceptually</h3>
+      <ul>
+        <li>One device (or a redundant pair) runs the CAPsMAN <strong>manager</strong> role — holding the actual SSID, security, and channel configuration.</li>
+        <li>Every physical access point runs in <strong>CAP</strong> (Controlled Access Point) mode — fetching its settings from the manager instead of holding its own.</li>
+        <li>Change the SSID password once on the manager, and every CAP across every building and bus stand picks it up.</li>
+      </ul>
+
+      <h3>Why this matters specifically for your topology</h3>
+      <p>Seamless roaming is the practical payoff: a device moving from inside the school building to the bus stand outside can hand off between APs on the same SSID without dropping, because CAPsMAN coordinates channel and client information across all of them.</p>
+
+      <div class="callout">
+        <strong>Manager placement</strong>
+        The CAPsMAN manager role can live on the core router itself for a small deployment, or on a dedicated device once you're managing dozens of APs across many sites.
+      </div>
+    </section>
+
+    <section id="addressing2">
+      <h2><span class="n">15</span> Addressing &amp; VLANs at scale</h2>
+      <p class="dek">The private-address and DHCP fundamentals from Part 1 still apply — the difference is you're now planning address space for multiple sites and traffic types deliberately, not just avoiding one collision.</p>
+
+      <h3>A workable subnet pattern</h3>
+      <div class="term">
+<span class="c"># Illustrative scheme only — adapt to your actual scale</span>
+10.10.0.0/16    → whole deployment, one school district
+10.10.1.0/24    → school admin/staff VLAN
+10.10.2.0/24    → school student/lab VLAN
+10.10.10.0/24   → public Wi-Fi, bus stand A
+10.10.11.0/24   → public Wi-Fi, bus stand B
+10.10.99.0/24   → management VLAN (router/AP admin interfaces only)
+      </div>
+      <p>The third octet becomes "which site/purpose," making a stray IP in a log immediately meaningful — worth enforcing across your whole tech team rather than letting each install improvise its own scheme.</p>
+
+      <h3>A dedicated management VLAN</h3>
+      <p>Put every router and AP's own admin interface on a VLAN that ordinary client traffic can never reach, so a compromised device on the public Wi-Fi has no path to even attempt logging into your infrastructure.</p>
+    </section>
+
+    <section id="hotspot">
+      <h2><span class="n">16</span> Hotspot / captive portal for public access</h2>
+      <p class="dek">This is the piece consumer routers simply don't have, and it's usually exactly what a bus stand's public Wi-Fi needs: a proper login/landing page rather than a bare open SSID.</p>
+
+      <h3>What MikroTik's Hotspot feature gives you</h3>
+      <ul>
+        <li>A walled-garden landing page shown before internet access is granted — terms of use, a login form, or a voucher code entry.</li>
+        <li>Per-user or per-voucher time and data limits.</li>
+        <li>Built-in user management — vouchers can be generated in batches rather than a single shared password.</li>
+        <li>A walled garden list of sites reachable without logging in — useful for your own client software's login/health-check endpoints.</li>
+      </ul>
+
+      <h3>Where this connects back to your client software</h3>
+      <p>If your software authenticates or phones home before a user should get broader internet access, the walled garden list is exactly the mechanism to let that specific traffic through pre-login. Worth documenting the exact hostnames/IPs it needs so every site's config is consistent.</p>
+    </section>
+
+    <section id="bandwidth">
+      <h2><span class="n">17</span> Bandwidth management</h2>
+      <p class="dek">A single school building can absorb a lot of simultaneous streaming before anyone notices. A bus stand serving a queue of riders on shared backhaul cannot.</p>
+
+      <table>
+        <tr><th>Tool</th><th>Best for</th></tr>
+        <tr><td class="mono">Simple Queue</td><td>Quick per-IP or per-subnet caps — e.g. "the bus stand subnet gets no more than X Mbps."</td></tr>
+        <tr><td class="mono">Queue Tree + PCQ</td><td>Fair, automatic per-user sharing — PCQ dynamically splits available bandwidth among however many active users there are at that moment.</td></tr>
+      </table>
+
+      <p>For a public hotspot with an unpredictable number of simultaneous users, PCQ is usually the right tool: it doesn't require knowing in advance how many devices will be connected.</p>
+
+      <div class="callout">
+        <strong>Protect the uplink, not just the client</strong>
+        Even with per-user fairness inside a subnet, cap the subnet's total consumption against the site's actual uplink capacity, or a fully-loaded bus stand can still saturate a shared backhaul link and degrade the school's own traffic.
+      </div>
+    </section>
+
+    <section id="firewall2">
+      <h2><span class="n">18</span> Firewall &amp; segmentation at scale</h2>
+      <p class="dek">The same SPI/NAT/DMZ concepts from Part 1 apply, but at this scale the firewall's real job is enforcing which of your VLANs can talk to which — not just protecting the LAN from the internet.</p>
+      <ul>
+        <li><strong>Default-deny between VLANs</strong> — explicitly allow only the specific traffic that needs to cross, rather than allowing everything and blocking exceptions.</li>
+        <li><strong>Address lists</strong> — group related subnets (all bus-stand subnets, all school-admin subnets) so rules stay readable as you add more sites.</li>
+        <li><strong>Management-plane protection</strong> — restrict who can reach RouterOS's own services (Winbox, API, SSH) by source address/VLAN, on every device.</li>
+        <li><strong>Logging on drop rules</strong> — sample-log denied cross-VLAN attempts; often the first sign of a misconfigured device or an intrusion attempt.</li>
+      </ul>
+    </section>
+
+    <section id="monitoring">
+      <h2><span class="n">19</span> Monitoring a distributed network</h2>
+      <p class="dek">Once you have more than two or three sites, "wait for someone to complain" stops being an acceptable monitoring strategy.</p>
+
+      <div class="grid-3">
+        <div class="card"><h4>Link health</h4><p>Signal strength, CCQ, and throughput on every wireless backhaul link, tracked over time.</p></div>
+        <div class="card"><h4>Device reachability</h4><p>Basic up/down monitoring for every router and AP across every site.</p></div>
+        <div class="card"><h4>Capacity trends</h4><p>Bandwidth usage per site over weeks/months shows which site is outgrowing its current link.</p></div>
+      </div>
+
+      <p>For a team of techs, a shared monitoring dashboard also gives you, as manager, a way to see the state of the whole deployment without relying on each tech's individual memory of how a given site is doing.</p>
+    </section>
+
+    <section id="checklists">
+      <h2><span class="n">20</span> Deployment checklists</h2>
+      <p class="dek">Two checklists — general practice for any router/AP job, and MikroTik-specific rollout for a new site.</p>
+
+      <h4 class="sub">General router / AP deployment</h4>
+      <ul class="checklist">
+        <li>Confirmed whether the box is acting as router, AP, bridge, repeater, or WISP client — and configured the matching WAN/LAN/DHCP state, not just the label</li>
+        <li>Exactly one DHCP server active on the network segment</li>
+        <li>Static/reserved addressing on management interfaces and anything a firewall rule points at</li>
+        <li>WPA2-Personal (AES) minimum, WPA3 where supported — never WEP, never open unless deliberately public</li>
+        <li>AP Isolation on for any open or public SSID</li>
+        <li>Default admin credentials changed; remote management off or restricted</li>
+        <li>WPS off unless actively needed that day; firmware checked and current</li>
+      </ul>
+
+      <h4 class="sub">MikroTik multi-site rollout</h4>
+      <ul class="checklist">
+        <li>Site added to the addressing plan with its own consistent subnet(s) before any hardware is configured</li>
+        <li>Management VLAN configured and confirmed unreachable from client-facing VLANs</li>
+        <li>CAPsMAN CAP mode applied to every AP at the site — no AP left in standalone config</li>
+        <li>Backhaul link tested for both signal quality and actual throughput, not just "connected"</li>
+        <li>Hotspot walled garden includes every hostname/IP your client software needs pre-login</li>
+        <li>PCQ or equivalent bandwidth fairness applied to any shared public subnet</li>
+        <li>Cross-VLAN firewall rules follow default-deny, with only required exceptions added</li>
+        <li>Device added to the monitoring system before the crew leaves site</li>
+        <li>Site documented — diagram, subnet list, device inventory — in the team's shared system</li>
+      </ul>
+    </section>
+
+    <section id="glossary">
+      <h2><span class="n">21</span> Glossary</h2>
+      <dl class="glossary">
+        <dt>AP Isolation</dt><dd>Prevents wireless clients on the same SSID from communicating directly with each other.</dd>
+        <dt>CAP</dt><dd>Controlled Access Point — an AP running in managed mode, taking its configuration from a CAPsMAN manager rather than holding its own.</dd>
+        <dt>CAPsMAN</dt><dd>Controlled Access Point system Manager — MikroTik's centralized wireless management system for configuring and coordinating many APs from one place.</dd>
+        <dt>CCQ</dt><dd>Client Connection Quality — a MikroTik wireless metric estimating how efficiently a link is using available airtime, useful for spotting a degrading backhaul link.</dd>
+        <dt>DHCP</dt><dd>Dynamic Host Configuration Protocol — automatically assigns IP addresses and network parameters to devices joining a network.</dd>
+        <dt>DMZ (host)</dt><dd>A LAN host exposed to all unmatched inbound traffic from the WAN, bypassing normal firewall filtering.</dd>
+        <dt>DNS</dt><dd>Domain Name System — resolves human-readable names (example.com) to IP addresses.</dd>
+        <dt>Fresnel zone</dt><dd>The three-dimensional region around the direct line between two wireless antennas that must be substantially clear of obstructions for the link to perform at its rated capacity.</dd>
+        <dt>Hotspot (MikroTik)</dt><dd>RouterOS's built-in captive-portal feature: intercepts new connections with a login/terms page before granting broader internet access.</dd>
+        <dt>MAC address</dt><dd>A hardware address burned into a network interface, used for addressing at Layer 2 (as opposed to an IP address at Layer 3).</dd>
+        <dt>MTU</dt><dd>Maximum Transmission Unit — the largest packet size a network link will carry without fragmenting it.</dd>
+        <dt>NAT</dt><dd>Network Address Translation — rewrites private addresses to a shared public one (and back) so many devices can share one internet connection.</dd>
+        <dt>PCQ</dt><dd>Per Connection Queue — a queuing method that automatically and fairly splits available bandwidth among however many active connections exist, without pre-configuring a fixed number of users.</dd>
+        <dt>PtP / PtMP</dt><dd>Point-to-Point / Point-to-Multipoint — wireless link topologies for connecting one site to another (PtP) or one base station to several remote sites at once (PtMP).</dd>
+        <dt>RADIUS</dt><dd>A protocol for centralized authentication — the backbone of WPA-Enterprise, where each user has individual login credentials instead of a shared password.</dd>
+        <dt>RouterOS</dt><dd>MikroTik's operating system, running on hardware from small home routers up to core-grade routers, unified under one configuration model.</dd>
+        <dt>SPI Firewall</dt><dd>Stateful Packet Inspection — tracks connection state so only legitimate replies to outbound traffic are allowed back in.</dd>
+        <dt>SSID</dt><dd>Service Set Identifier — the human-readable name of a wireless network.</dd>
+        <dt>The Dude</dt><dd>MikroTik's free network monitoring and mapping tool.</dd>
+        <dt>UPnP</dt><dd>Universal Plug and Play — lets applications automatically open their own port forwards on the router.</dd>
+        <dt>VLAN</dt><dd>Virtual LAN — logically separates one physical network into multiple isolated broadcast domains.</dd>
+        <dt>Walled garden</dt><dd>A list of destinations a hotspot user can reach without first completing login/authentication — used for a client's own pre-login endpoints, terms pages, or payment gateways.</dd>
+        <dt>WDS</dt><dd>Wireless Distribution System — lets access points bridge to each other over Wi-Fi to extend a LAN without cabling.</dd>
+        <dt>Winbox</dt><dd>MikroTik's native desktop configuration utility, able to connect via MAC address even before a device has a usable IP.</dd>
+        <dt>WISP client mode</dt><dd>A router mode where its uplink to the internet is itself a Wi-Fi connection to someone else's network, rather than a wired WAN.</dd>
+        <dt>WPS</dt><dd>Wi-Fi Protected Setup — a simplified pairing method (push-button or PIN) with a known PIN-brute-force weakness.</dd>
+      </dl>
+    </section>
+
+  </main>
+
+  <footer>
+    Built as a working reference, not a finished exam — the fastest way to actually retain this is to keep matching each section back to a real device or site the next time you're configuring one.
+  </footer>
+
+</div>
+
+<script>
+  const links = document.querySelectorAll('nav.toc a');
+  const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+  function onScroll(){
+    let idx = 0;
+    const y = window.scrollY + 120;
+    sections.forEach((s,i) => { if (s && s.offsetTop <= y) idx = i; });
+    links.forEach((a,i) => a.classList.toggle('active', i === idx));
+  }
+  document.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+</script>
+
+</body>
+</html>
