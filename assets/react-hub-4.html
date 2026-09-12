@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlearn React. Then Learn the 20% That Matters.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#0C0B14;
+  --panel:#151425;
+  --panel-2:#1B1930;
+  --border:#2A283F;
+  --border-soft:#211F36;
+  --text:#EDEBFA;
+  --text-dim:#948FB3;
+  --text-faint:#5C5877;
+  --cyan:#5EEAD4;
+  --cyan-dim:#1F6E62;
+  --coral:#FF7A85;
+  --coral-dim:#7A2F35;
+  --violet:#A78BFA;
+  --yellow:#FBCB6B;
+  --disp:'Plus Jakarta Sans',sans-serif;
+  --body:'Inter',sans-serif;
+  --mono:'Fira Code',monospace;
+  --shadow-lg:0 26px 64px -26px rgba(0,0,0,.7);
+  --shadow-sm:0 8px 22px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--body);
+  line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;top:-8%;left:50%;transform:translateX(-50%);
+  width:1000px;height:620px;
+  background:radial-gradient(ellipse at center, rgba(94,234,212,.09) 0%, rgba(255,122,133,.05) 42%, transparent 72%);
+  pointer-events:none;z-index:0;filter:blur(8px);
+}
+a{color:var(--cyan);text-decoration:none;}
+code{font-family:var(--mono);}
+::selection{background:var(--cyan);color:#0C0B14;}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:3px;}
+
+.scroll-progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--coral),var(--cyan));z-index:100;width:0%;transition:width .1s linear;}
+
+/* ============ NAV ============ */
+.topnav{
+  position:sticky;top:2px;z-index:50;
+  background:rgba(12,11,20,.85);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:12px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:13.5px;letter-spacing:.01em;}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:blink 2.4s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.navlinks{display:flex;gap:2px;flex-wrap:wrap;}
+.navlinks a{
+  font-family:var(--mono);font-size:10.5px;color:var(--text-dim);
+  padding:6px 9px;border-radius:5px;border:1px solid transparent;transition:all .18s ease;white-space:nowrap;
+}
+.navlinks a:hover{color:var(--cyan);background:var(--panel);}
+.navlinks a.active{color:var(--cyan);border-color:var(--border);background:var(--panel);}
+
+/* ============ HERO ============ */
+.hero{position:relative;z-index:1;padding:60px 26px 42px;max-width:1140px;margin:0 auto;}
+.hero-eyebrow{
+  font-family:var(--mono);font-size:11px;color:var(--coral);letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:16px;display:flex;align-items:center;gap:9px;
+}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:linear-gradient(90deg,var(--coral),transparent);}
+.hero h1{
+  font-family:var(--disp);font-weight:800;font-size:clamp(29px,4.6vw,49px);line-height:1.1;letter-spacing:-.015em;
+  color:#fff;max-width:760px;
+}
+.hero h1 span{
+  background:linear-gradient(90deg,var(--cyan),#B8FFF0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p.lede{font-size:15.5px;color:var(--text-dim);max-width:600px;margin-top:18px;}
+.hero-meta{display:flex;gap:0;margin-top:28px;flex-wrap:wrap;border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden;width:fit-content;}
+.hero-meta .stat{font-family:var(--mono);padding:13px 20px;border-right:1px solid var(--border);}
+.hero-meta .stat:last-child{border-right:none;}
+.hero-meta .stat b{display:block;color:var(--cyan);font-size:20px;font-family:var(--disp);line-height:1.1;}
+.hero-meta .stat span{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
+
+/* ============ LIVE REACT SANDBOX (signature element) ============ */
+.sandbox{margin-top:34px;background:#08070E;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-lg);}
+.sandbox-bar{display:flex;align-items:center;gap:8px;padding:11px 15px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.sdot{width:10px;height:10px;border-radius:50%;}
+.sandbox-bar .stitle{margin-left:8px;font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+.sandbox-bar .sstatus{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--cyan);display:flex;align-items:center;gap:6px;}
+.sandbox-bar .sstatus .lidot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 1.4s infinite;}
+.sandbox-split{display:grid;grid-template-columns:1fr 1fr;min-width:0;}
+@media(max-width:760px){.sandbox-split{grid-template-columns:1fr;}}
+.sandbox-code{border-right:1px solid var(--border);min-width:0;}
+@media(max-width:760px){.sandbox-code{border-right:none;border-bottom:1px solid var(--border);}}
+.sandbox-preview{padding:20px;background:#0F0E1A;min-height:180px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;overflow-x:auto;}
+.sandbox-preview *{max-width:100%;box-sizing:border-box;}
+@media(max-width:480px){
+  .sandbox-preview{overflow-x:hidden;}
+}
+
+/* ============ SECTIONS ============ */
+.stage{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:70px 26px 70px 92px;border-top:1px solid var(--border);}
+.stage::before{content:'';position:absolute;left:52px;top:0;bottom:0;width:1px;background:linear-gradient(var(--border-soft),var(--border-soft) 90%,transparent);z-index:1;}
+.stage:first-of-type::before{top:70px;}
+.stage:last-of-type::before{bottom:calc(100% - 110px);}
+.stage-head{display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap;}
+.stage-num{
+  font-family:var(--mono);font-weight:600;font-size:13px;
+  border:1px solid var(--border);border-radius:8px;padding:8px 9px;min-width:46px;text-align:center;
+  background:var(--bg);position:relative;z-index:2;margin-left:-92px;box-shadow:0 0 0 6px var(--bg);
+  color:var(--text-faint);
+}
+.stage-num .br{color:var(--cyan);}
+#unlearn .stage-num .br{color:var(--coral);}
+#s5 .stage-num .br, #s6 .stage-num .br, #s7 .stage-num .br{color:var(--violet);}
+#roadmap .stage-num .br, #habits .stage-num .br{color:var(--yellow);}
+.stage-head h2{font-family:var(--disp);font-weight:700;font-size:clamp(22px,3vw,30px);color:#fff;letter-spacing:-.01em;}
+.stage-sub{color:var(--text-dim);max-width:700px;margin:16px 0 30px;font-size:14.5px;}
+@media(max-width:640px){.stage{padding-left:62px;}.stage::before{left:32px;}.stage-num{margin-left:-62px;min-width:38px;font-size:11px;padding:6px 7px;}}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:22px;transition:border-color .2s ease, transform .2s ease, box-shadow .2s ease;}
+.card:hover{border-color:var(--border-soft);box-shadow:var(--shadow-sm);transform:translateY(-2px);}
+.card h3{font-family:var(--disp);font-size:15.5px;color:#fff;margin-bottom:10px;font-weight:600;display:flex;align-items:center;gap:9px;}
+.card h3 .icon{width:7px;height:7px;border-radius:2px;background:var(--cyan);flex-shrink:0;transform:rotate(45deg);}
+.card p{color:var(--text-dim);font-size:13.5px;margin-bottom:10px;}
+
+pre{background:#08070E !important;border:1px solid var(--border);border-radius:9px;padding:15px 17px !important;font-family:var(--mono) !important;font-size:12.5px !important;overflow-x:auto;margin:12px 0;}
+pre code{font-family:var(--mono) !important;}
+.inline-code{background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:12px;color:var(--cyan);}
+
+.btn{font-family:var(--mono);font-size:12px;font-weight:500;background:var(--cyan);color:#081310;border:1px solid var(--cyan);border-radius:7px;padding:9px 16px;cursor:pointer;transition:all .16s ease;}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 16px -6px rgba(94,234,212,.4);}
+.btn:active{transform:translateY(0);}
+.btn.alt{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn.alt:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:none;}
+.btn.coral{background:var(--coral);border-color:var(--coral);color:#2A0508;}
+.btn.coral:hover{box-shadow:0 6px 16px -6px rgba(255,122,133,.4);}
+.btn.small{padding:6px 13px;font-size:11px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+.callout{border-left:3px solid var(--cyan);background:var(--panel);border-radius:0 9px 9px 0;padding:15px 19px;margin:18px 0;}
+.callout.coral{border-left-color:var(--coral);}
+.callout.violet{border-left-color:var(--violet);}
+.callout .label{font-family:var(--mono);font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.callout.coral .label{color:var(--coral);}
+.callout.violet .label{color:var(--violet);}
+.callout p{color:var(--text-dim);font-size:13.5px;margin:0;}
+
+/* ============ REACT CELLS (live code + preview + console) ============ */
+.cell{background:#08070E;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:14px 0;transition:border-color .2s ease, box-shadow .2s ease;}
+.cell:focus-within{border-color:#463F66;box-shadow:0 0 0 3px rgba(94,234,212,.1);}
+.cell-bar{display:flex;align-items:center;gap:10px;padding:9px 13px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.cell-lang{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:7px;}
+.cell-lang::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--cyan);}
+.cell-bar .run-btn{margin-left:auto;}
+
+.cell-body{display:grid;grid-template-columns:1fr 1fr;min-width:0;}
+@media(max-width:700px){.cell-body{grid-template-columns:1fr;}}
+.cell-editor{border-right:1px solid var(--border);min-width:0;}
+@media(max-width:700px){.cell-editor{border-right:none;border-bottom:1px solid var(--border);}}
+
+.cell-input-wrap{position:relative;min-width:0;}
+.cell-highlight{
+  position:absolute !important;inset:0 !important;margin:0 !important;z-index:0;
+  background:#08070E !important;border:none !important;border-radius:0 !important;
+  padding:14px 16px !important;font-family:var(--mono) !important;font-size:12px !important;
+  line-height:1.65 !important;white-space:pre-wrap !important;word-break:break-word !important;
+  overflow:hidden;pointer-events:none;
+}
+.cell-highlight code.hljs{background:transparent !important;padding:0 !important;display:block;font-family:var(--mono) !important;font-size:12px !important;line-height:1.65 !important;white-space:pre-wrap !important;word-break:break-word !important;}
+.cell-input{
+  position:relative;z-index:1;width:100%;
+  background:transparent !important;border:none;color:transparent;caret-color:#fff;
+  font-family:var(--mono);font-size:12px;padding:14px 16px;resize:none;outline:none;
+  line-height:1.65;min-height:44px;display:block;overflow:hidden;
+}
+.cell-input::selection{background:rgba(94,234,212,.3);color:transparent;}
+
+.cell-preview{
+  background:#0F0E1A;padding:18px;min-height:150px;display:flex;flex-direction:column;flex-wrap:wrap;
+  align-items:center;justify-content:center;gap:10px;overflow-x:auto;
+}
+.cell-preview *{max-width:100%;box-sizing:border-box;}
+.cell-preview-inner{width:100%;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;}
+@media(max-width:480px){
+  .cell-preview{overflow-x:hidden;}
+}
+.cell-console{
+  width:100%;border-top:1px solid var(--border-soft);padding:9px 13px;font-family:var(--mono);
+  font-size:11px;color:var(--text-faint);max-height:70px;overflow-y:auto;
+}
+.cell-console .log-line{color:var(--text-dim);white-space:pre-wrap;word-break:break-word;}
+.cell-console .err-line{color:var(--coral);white-space:pre-wrap;word-break:break-word;}
+.cell-placeholder{color:var(--text-faint);font-family:var(--mono);font-size:12px;}
+
+/* ============ UNLEARN COMPARISON ============ */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:16px 0;}
+@media(max-width:700px){.compare{grid-template-columns:1fr;}}
+.compare-old, .compare-new{padding:0;min-width:0;}
+.compare-old{border-right:1px solid var(--border);background:rgba(255,122,133,.03);}
+@media(max-width:700px){.compare-old{border-right:none;border-bottom:1px solid var(--border);}}
+.compare-new{background:rgba(94,234,212,.03);}
+.compare-label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:10px 16px;display:flex;align-items:center;gap:7px;}
+.compare-old .compare-label{color:var(--coral);border-bottom:1px solid var(--border);}
+.compare-new .compare-label{color:var(--cyan);border-bottom:1px solid var(--border);}
+.compare-label::before{content:'✕';font-weight:700;}
+.compare-new .compare-label::before{content:'✓';}
+.compare pre{margin:0 !important;border:none !important;border-radius:0 !important;background:transparent !important;}
+.compare-body{padding:14px 16px;color:var(--text-dim);font-size:13px;}
+
+/* ============ ROADMAP ============ */
+.roadmap{position:relative;margin-top:10px;}
+.road-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--border-soft);cursor:pointer;}
+.road-item:last-child{border-bottom:none;}
+.road-check{
+  width:26px;height:26px;border-radius:50%;border:1px solid var(--border);flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--text-faint);
+  transition:all .2s ease;
+}
+.road-item.done .road-check{background:var(--cyan);border-color:var(--cyan);color:#081310;}
+.road-body h4{font-family:var(--disp);font-size:14.5px;color:#fff;font-weight:600;margin-bottom:4px;}
+.road-item.done .road-body h4{color:var(--text-dim);text-decoration:line-through;text-decoration-color:var(--border-soft);}
+.road-body p{color:var(--text-dim);font-size:13px;}
+
+/* ============ HABITS ============ */
+.habit-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.habit-item{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:14px 17px;cursor:pointer;transition:border-color .2s ease;}
+.habit-item:hover{border-color:var(--border-soft);}
+.habit-item.done{border-color:var(--cyan-dim);}
+.habit-box{width:18px;height:18px;border-radius:5px;border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s ease;}
+.habit-item.done .habit-box{background:var(--cyan);border-color:var(--cyan);}
+.habit-item.done .habit-box::after{content:'✓';color:#081310;font-size:12px;font-weight:700;}
+.habit-item span.txt{font-size:13.5px;color:var(--text-dim);}
+.habit-item.done span.txt{color:var(--text-faint);text-decoration:line-through;text-decoration-color:var(--border-soft);}
+
+footer{text-align:center;padding:50px 26px 70px;color:var(--text-faint);font-size:12px;font-family:var(--mono);position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav class="topnav">
+  <div class="brand"><span class="dot"></span> UNLEARN REACT</div>
+  <div class="navlinks">
+    <a href="#s0">Mindset</a>
+    <a href="#unlearn">Unlearn</a>
+    <a href="#jsx">JSX</a>
+    <a href="#s1">Components</a>
+    <a href="#s2">State</a>
+    <a href="#s3">Events</a>
+    <a href="#s4">Lists</a>
+    <a href="#s5">Lifting</a>
+    <a href="#s6">Effects</a>
+    <a href="#s7">Hooks</a>
+    <a href="#thinking">Thinking in React</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#habits">Habits</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">Zero → professional · the real 20%</div>
+  <h1>Most React devs never unlearn<br>jQuery. <span>That's the whole gap.</span></h1>
+  <p class="lede">React isn't a bigger toolbox — it's a different mental model. This page runs real React, compiled live in your browser with Babel, so every example is complete, correct, and actually executes — read it, run it, change it, and watch what happens. Nothing here is a fill-in-the-blank exercise; it's the full, working thing.</p>
+  <div class="hero-meta">
+    <div class="stat"><b>6</b><span>Habits to unlearn</span></div>
+    <div class="stat"><b>Live</b><span>Real React + JSX</span></div>
+    <div class="stat"><b>12</b><span>Full sections</span></div>
+    <div class="stat"><b>8</b><span>Roadmap milestones</span></div>
+  </div>
+
+  <div class="sandbox">
+    <div class="sandbox-bar">
+      <div class="sdot" style="background:#FF7A85"></div>
+      <div class="sdot" style="background:#FBCB6B"></div>
+      <div class="sdot" style="background:#5EEAD4"></div>
+      <span class="stitle">live.jsx — compiled with Babel, rendered with React 18</span>
+      <span class="sstatus"><span class="lidot"></span>ready</span>
+    </div>
+    <div class="sandbox-split">
+      <div class="sandbox-code">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="hero-code"></code></pre>
+<textarea class="cell-input" id="hero-input" spellcheck="false">function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  return (
+    <div style={{textAlign: 'center'}}>
+      <p style={{fontSize: 32, margin: '0 0 12px'}}>{count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        click me
+      </button>
+    </div>
+  );
+}
+
+render(<Counter />);</textarea>
+        </div>
+      </div>
+      <div class="sandbox-preview" id="hero-preview"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="stage" id="s0">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>00<span class="br">/&gt;</span></span><h2>The mental model shift</h2></div>
+  <p class="stage-sub">Every framework war aside, React asks you to think about UI in one specific way. Get this one idea right and almost everything else below is just vocabulary for it.</p>
+
+  <div class="grid2">
+    <div class="card"><h3><span class="icon"></span>Old model: steps</h3><p>"Find the button. Add a click listener. When clicked, find the counter element. Read its text. Add one. Write it back." You describe <em>how</em> to change the page, one instruction at a time.</p></div>
+    <div class="card"><h3><span class="icon"></span>React model: description</h3><p>"The counter's text is always <code class="inline-code">count</code>." You describe <em>what</em> the UI looks like for any given data — React figures out which instructions to run to get there.</p></div>
+  </div>
+
+  <div class="callout">
+    <span class="label">The one sentence that explains 90% of React</span>
+    <p>UI = a function of state. Change the state, call the function again (React does this for you), get new UI. You almost never touch the DOM yourself — you just describe what it should look like right now.</p>
+  </div>
+</section>
+
+<section class="stage" id="unlearn">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>01<span class="br">/&gt;</span></span><h2>Unlearn these six habits first</h2></div>
+  <p class="stage-sub">If you came from jQuery, vanilla JS, or even just "React but still thinking imperatively," these are the habits actively working against you. Each has a live, working React version on the right.</p>
+
+  <h4 style="font-family:var(--disp);color:#fff;font-size:15px;margin-bottom:6px;">1. Querying and mutating the DOM directly</h4>
+  <div class="compare">
+    <div class="compare-old">
+      <div class="compare-label">Unlearn</div>
+      <pre><code class="language-javascript">const btn = document.getElementById("btn");
+const label = document.getElementById("count");
+let count = 0;
+
+btn.addEventListener("click", () => {
+  count++;
+  label.textContent = count;   // you manually sync the DOM
+});</code></pre>
+    </div>
+    <div class="compare-new">
+      <div class="compare-label">React way</div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('ru1')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="ru1-code"></code></pre>
+<textarea class="cell-input" id="ru1-input" spellcheck="false">function Counter() {
+  const [count, setCount] = React.useState(0);
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      {count}
+    </button>
+  );
+}
+render(<Counter />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="ru1-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="ru1-console"></div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:var(--disp);color:#fff;font-size:15px;margin:26px 0 6px;">2. Mutating state directly</h4>
+  <div class="compare">
+    <div class="compare-old">
+      <div class="compare-label">Unlearn</div>
+      <pre><code class="language-javascript">// this LOOKS like it should work — it won't re-render
+todos.push("new task");
+setTodos(todos);
+
+user.name = "Bob";
+setUser(user);</code></pre>
+      <div class="compare-body">React compares the old and new value by reference. Mutating the same array or object in place means the reference never changes, so React thinks nothing happened.</div>
+    </div>
+    <div class="compare-new">
+      <div class="compare-label">React way</div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('ru2')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="ru2-code"></code></pre>
+<textarea class="cell-input" id="ru2-input" spellcheck="false">function TodoAdder() {
+  const [todos, setTodos] = React.useState(["wash car"]);
+
+  function addTodo() {
+    // create a NEW array instead of mutating the old one
+    setTodos([...todos, "task " + (todos.length + 1)]);
+  }
+
+  return (
+    <div>
+      <button onClick={addTodo}>Add task</button>
+      <ul>{todos.map((t, i) => <li key={i}>{t}</li>)}</ul>
+    </div>
+  );
+}
+render(<TodoAdder />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="ru2-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="ru2-console"></div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:var(--disp);color:#fff;font-size:15px;margin:26px 0 6px;">3. Classes and lifecycle methods by default</h4>
+  <div class="compare">
+    <div class="compare-old">
+      <div class="compare-label">Unlearn</div>
+      <pre><code class="language-javascript">class Timer extends React.Component {
+  state = { seconds: 0 };
+  componentDidMount() {
+    this.id = setInterval(() => {
+      this.setState({ seconds: this.state.seconds + 1 });
+    }, 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.id);
+  }
+  render() {
+    return <p>{this.state.seconds}s</p>;
+  }
+}</code></pre>
+      <div class="compare-body">Not wrong, historically — but three separate lifecycle methods to express one idea ("run this, clean it up") is exactly the ceremony hooks were built to remove.</div>
+    </div>
+    <div class="compare-new">
+      <div class="compare-label">React way</div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('ru3')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="ru3-code"></code></pre>
+<textarea class="cell-input" id="ru3-input" spellcheck="false">function Timer() {
+  const [seconds, setSeconds] = React.useState(0);
+
+  React.useEffect(() => {
+    const id = setInterval(() => setSeconds(s => s + 1), 1000);
+    return () => clearInterval(id);   // cleanup, right next to setup
+  }, []);
+
+  return <p>{seconds}s</p>;
+}
+render(<Timer />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="ru3-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="ru3-console"></div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:var(--disp);color:#fff;font-size:15px;margin:26px 0 6px;">4. useEffect as a general-purpose hammer</h4>
+  <div class="compare">
+    <div class="compare-old">
+      <div class="compare-label">Unlearn</div>
+      <pre><code class="language-javascript">const [firstName, setFirstName] = useState("Ada");
+const [lastName, setLastName] = useState("Lovelace");
+const [fullName, setFullName] = useState("");
+
+// an effect just to compute a value from other state
+useEffect(() => {
+  setFullName(firstName + " " + lastName);
+}, [firstName, lastName]);</code></pre>
+      <div class="compare-body">This causes an extra render every time, just to compute something you already had everything you needed for.</div>
+    </div>
+    <div class="compare-new">
+      <div class="compare-label">React way</div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('ru4')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="ru4-code"></code></pre>
+<textarea class="cell-input" id="ru4-input" spellcheck="false">function NameTag() {
+  const [firstName, setFirstName] = React.useState("Ada");
+  const [lastName, setLastName] = React.useState("Lovelace");
+
+  // just compute it during render — no effect, no extra state
+  const fullName = firstName + " " + lastName;
+
+  return (
+    <div>
+      <p>{fullName}</p>
+      <button onClick={() => setFirstName("Grace")}>
+        Change first name
+      </button>
+    </div>
+  );
+}
+render(<NameTag />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="ru4-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="ru4-console"></div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:var(--disp);color:#fff;font-size:15px;margin:26px 0 6px;">5. Prop drilling through layers that don't care</h4>
+  <div class="compare">
+    <div class="compare-old">
+      <div class="compare-label">Unlearn</div>
+      <pre><code class="language-javascript">&lt;Page theme={theme} /&gt;
+  &lt;Sidebar theme={theme} /&gt;
+    &lt;Nav theme={theme} /&gt;
+      &lt;Button theme={theme} /&gt;
+// three components pass "theme" through
+// just to hand it to a fourth</code></pre>
+      <div class="compare-body">Every middle component now has to know about a prop it never uses, just to relay it. Rename it, and you edit four files instead of one.</div>
+    </div>
+    <div class="compare-new">
+      <div class="compare-label">React way</div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('ru5')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="ru5-code"></code></pre>
+<textarea class="cell-input" id="ru5-input" spellcheck="false">// composition: pass the finished element as "children"
+// instead of passing the raw data down through every layer
+function Panel({ children }) {
+  return <div style={{border: "1px solid #5EEAD4", padding: 12}}>{children}</div>;
+}
+
+function App() {
+  return (
+    <Panel>
+      <button>I don't need Panel to know I exist</button>
+    </Panel>
+  );
+}
+render(<App />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="ru5-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="ru5-console"></div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:var(--disp);color:#fff;font-size:15px;margin:26px 0 6px;">6. Skipping (or faking) the key prop on lists</h4>
+  <div class="compare">
+    <div class="compare-old">
+      <div class="compare-label">Unlearn</div>
+      <pre><code class="language-javascript">{items.map((item, index) =>
+  &lt;Row key={index} data={item} /&gt;
+)}
+// using the array INDEX as key —
+// looks fine until the list gets reordered</code></pre>
+      <div class="compare-body">Index-as-key works only while order never changes. The moment items are inserted, removed, or reordered, React matches the wrong internal state to the wrong row — inputs and checkboxes visibly attach to the wrong item.</div>
+    </div>
+    <div class="compare-new">
+      <div class="compare-label">React way</div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('ru6')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="ru6-code"></code></pre>
+<textarea class="cell-input" id="ru6-input" spellcheck="false">const items = [
+  { id: "a1", name: "Wireless Mouse" },
+  { id: "a2", name: "Keyboard" },
+  { id: "a3", name: "Monitor" },
+];
+
+function List() {
+  // key uses the item's own stable id, not its position
+  return (
+    <ul>
+      {items.map(item => <li key={item.id}>{item.name}</li>)}
+    </ul>
+  );
+}
+render(<List />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="ru6-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="ru6-console"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stage" id="jsx">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>02<span class="br">/&gt;</span></span><h2>JSX fundamentals</h2></div>
+  <p class="stage-sub">Before components make sense, JSX itself needs to stop looking strange. It compiles down to plain JavaScript function calls — every rule below exists because of that one fact.</p>
+
+  <div class="card">
+    <h3><span class="icon"></span>JSX is JavaScript wearing HTML's clothes</h3>
+    <p><code class="inline-code">&lt;h1&gt;Hello&lt;/h1&gt;</code> isn't a string and isn't real HTML — Babel compiles it into <code class="inline-code">React.createElement("h1", null, "Hello")</code>. Everything below follows from that: since it's really a function call, it has to obey JavaScript's rules, not HTML's.</p>
+    <div class="cell" data-cell>
+      <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('rj1')">▶ Run</button></div>
+      <div class="cell-body">
+        <div class="cell-editor">
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="rj1-code"></code></pre>
+<textarea class="cell-input" id="rj1-input" spellcheck="false">// These two lines produce the exact same result.
+const withJsx = <h1>Hello</h1>;
+const withoutJsx = React.createElement("h1", null, "Hello");
+
+function App() {
+  return (
+    <div>
+      {withJsx}
+      {withoutJsx}
+    </div>
+  );
+}
+render(<App />);</textarea>
+          </div>
+        </div>
+        <div class="cell-preview" id="rj1-preview"><span class="cell-placeholder">Click Run</span></div>
+      </div>
+      <div class="cell-console" id="rj1-console"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Curly braces drop into JavaScript</h3>
+      <p>Anywhere inside JSX, <code class="inline-code">{ }</code> means "stop reading this as markup, evaluate this as a JS expression." Only expressions — no <code class="inline-code">if</code> statements or <code class="inline-code">for</code> loops directly inside braces, only things that produce a value.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('rj2')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="rj2-code"></code></pre>
+<textarea class="cell-input" id="rj2-input" spellcheck="false">function Price() {
+  const price = 24.99;
+  const currency = "$";
+  return <p>{currency}{price.toFixed(2)} — total for {2 + 1} items</p>;
+}
+render(<Price />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="rj2-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="rj2-console"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon"></span>className, not class — style is an object</h3>
+      <p><code class="inline-code">class</code> is a reserved JavaScript keyword, so JSX uses <code class="inline-code">className</code> instead. And since <code class="inline-code">style</code> takes a JS expression, it's a plain object — <code class="inline-code">{{ }}</code> is just an object literal <code class="inline-code">{ }</code> sitting inside the expression braces <code class="inline-code">{ }</code>, not special syntax.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('rj3')">▶ Run</button></div>
+        <div class="cell-body">
+          <div class="cell-editor">
+            <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="rj3-code"></code></pre>
+<textarea class="cell-input" id="rj3-input" spellcheck="false">function Alert() {
+  return (
+    <p
+      className="alert-box"
+      style={{ color: "#FF7A85", fontWeight: 600, padding: 8 }}
+    >
+      Something needs attention
+    </p>
+  );
+}
+render(<Alert />);</textarea>
+            </div>
+          </div>
+          <div class="cell-preview" id="rj3-preview"><span class="cell-placeholder">Click Run</span></div>
+        </div>
+        <div class="cell-console" id="rj3-console"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3><span class="icon"></span>One root element — or a Fragment</h3>
+    <p>A component can only <code class="inline-code">return</code> one element, because it compiles to one function call. To return sibling elements without adding an extra wrapper <code class="inline-code">&lt;div&gt;</code> to the actual page, wrap them in <code class="inline-code">&lt;&gt;...&lt;/&gt;</code> — a Fragment, which renders nothing itself.</p>
+    <div class="cell" data-cell>
+      <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('rj4')">▶ Run</button></div>
+      <div class="cell-body">
+        <div class="cell-editor">
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="rj4-code"></code></pre>
+<textarea class="cell-input" id="rj4-input" spellcheck="false">function UserInfo() {
+  return (
+    <>
+      <dt>Name</dt>
+      <dd>Alice</dd>
+      <dt>Role</dt>
+      <dd>Engineer</dd>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <dl>
+      <UserInfo />
+    </dl>
+  );
+}
+render(<App />);</textarea>
+          </div>
+        </div>
+        <div class="cell-preview" id="rj4-preview"><span class="cell-placeholder">Click Run</span></div>
+      </div>
+      <div class="cell-console" id="rj4-console"></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="label">Quick reference — the four rules above</span>
+    <p>1) JSX compiles to <code class="inline-code">React.createElement</code> calls. 2) <code class="inline-code">{ }</code> holds any JS expression. 3) <code class="inline-code">className</code> not <code class="inline-code">class</code>; <code class="inline-code">style</code> is an object. 4) One root element per return, or use <code class="inline-code">&lt;&gt;&lt;/&gt;</code>. Everything else about JSX follows from these.</p>
+  </div>
+</section>
+
+<section class="stage" id="s1">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>03<span class="br">/&gt;</span></span><h2>Components &amp; props</h2></div>
+  <p class="stage-sub">A component is just a function that returns JSX. Props are the arguments you pass it — read-only, flowing one direction: parent to child.</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r1')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r1-code"></code></pre>
+<textarea class="cell-input" id="r1-input" spellcheck="false">function ServerCard({ name, status }) {
+  const color = status === "running" ? "#5EEAD4" : "#FF7A85";
+  return (
+    <div style={{border: "1px solid #333", padding: 10, borderRadius: 8, marginBottom: 8}}>
+      <strong>{name}</strong> —{" "}
+      <span style={{color}}>{status}</span>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <ServerCard name="web-01" status="running" />
+      <ServerCard name="db-01" status="stopped" />
+    </div>
+  );
+}
+render(<App />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r1-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r1-console"></div>
+  </div>
+
+  <div class="callout">
+    <span class="label">The rule that matters</span>
+    <p>Props flow down, never up. A child never reaches into its parent and changes something. If a child needs to affect its parent, the parent passes it a <em>function</em> to call — see "lifting state up" below.</p>
+  </div>
+
+  <p style="color:var(--text-dim);font-size:13.5px;margin:18px 0 4px;">One more idiom you'll see in almost every component: <code class="inline-code">{ label }</code> in the function signature is just destructuring — it pulls <code class="inline-code">props.label</code> out directly instead of writing <code class="inline-code">props.label</code> everywhere in the body. You can also give a prop a default value with <code class="inline-code">=</code>, exactly like a normal function parameter.</p>
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r1b')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r1b-code"></code></pre>
+<textarea class="cell-input" id="r1b-input" spellcheck="false">function Badge({ label, tone = "neutral" }) {
+  const colors = {
+    neutral: { bg: "#333", fg: "#fff" },
+    success: { bg: "#5EEAD4", fg: "#081310" },
+    danger:  { bg: "#FF7A85", fg: "#2A0508" },
+  };
+  const { bg, fg } = colors[tone];
+  return (
+    <span style={{
+      background: bg, color: fg,
+      padding: "3px 12px", borderRadius: 999, fontSize: 12, marginRight: 6
+    }}>
+      {label}
+    </span>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <Badge label="draft" />
+      <Badge label="deployed" tone="success" />
+      <Badge label="failed" tone="danger" />
+    </div>
+  );
+}
+render(<App />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r1b-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r1b-console"></div>
+  </div>
+</section>
+
+<section class="stage" id="s2">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>04<span class="br">/&gt;</span></span><h2>State — useState</h2></div>
+  <p class="stage-sub">State is data a component remembers between renders. Calling the setter doesn't just store a new value — it tells React "re-render this component now."</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r2')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r2-code"></code></pre>
+<textarea class="cell-input" id="r2-input" spellcheck="false">function Toggle() {
+  const [isOn, setIsOn] = React.useState(false);
+
+  return (
+    <button
+      onClick={() => setIsOn(!isOn)}
+      style={{
+        background: isOn ? "#5EEAD4" : "#333",
+        color: isOn ? "#081310" : "#fff",
+        border: "none", padding: "10px 18px", borderRadius: 8
+      }}
+    >
+      {isOn ? "ON" : "OFF"}
+    </button>
+  );
+}
+render(<Toggle />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r2-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r2-console"></div>
+  </div>
+
+  <div class="callout coral">
+    <span class="label">Each component's state is private</span>
+    <p>Two <code class="inline-code">&lt;Toggle /&gt;</code> instances on the same page each get their own independent <code class="inline-code">isOn</code> — state belongs to the component instance, not the function definition.</p>
+  </div>
+
+  <p style="color:var(--text-dim);font-size:13.5px;margin:18px 0 4px;">There are two ways to update state: <code class="inline-code">setValue(value + 1)</code> uses the value from the current render, while <code class="inline-code">setValue(v => v + 1)</code> — a <strong>functional update</strong> — always gets the freshest value, even if several updates happen before React re-renders. When the new value depends on the old one, prefer the function form.</p>
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r2b')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r2b-code"></code></pre>
+<textarea class="cell-input" id="r2b-input" spellcheck="false">function Stepper() {
+  const [value, setValue] = React.useState(0);
+
+  function decrement() {
+    // functional update — safe even if called rapidly
+    setValue(v => Math.max(0, v - 1));
+  }
+
+  return (
+    <div style={{display: "flex", alignItems: "center", gap: 12}}>
+      <button onClick={decrement}>-</button>
+      <span style={{fontSize: 20, minWidth: 24, textAlign: "center"}}>{value}</span>
+      <button onClick={() => setValue(v => v + 1)}>+</button>
+    </div>
+  );
+}
+render(<Stepper />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r2b-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r2b-console"></div>
+  </div>
+</section>
+
+<section class="stage" id="s3">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>05<span class="br">/&gt;</span></span><h2>Events &amp; controlled inputs</h2></div>
+  <p class="stage-sub">In React, form inputs usually have their value driven by state, not by the browser's own internal input state — that's what "controlled" means.</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r3')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r3-code"></code></pre>
+<textarea class="cell-input" id="r3-input" spellcheck="false">function NameForm() {
+  const [name, setName] = React.useState("");
+
+  return (
+    <div>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Type your name"
+        style={{padding: 8, borderRadius: 6, border: "1px solid #444"}}
+      />
+      <p>Hello, {name || "stranger"}!</p>
+    </div>
+  );
+}
+render(<NameForm />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r3-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r3-console"></div>
+  </div>
+
+  <div class="callout">
+    <span class="label">Why "controlled"</span>
+    <p>The input's <code class="inline-code">value</code> is always exactly whatever <code class="inline-code">name</code> is. React — not the DOM — is the single source of truth. This is what makes validation, formatting, and "clear this field" trivial: you just change state.</p>
+  </div>
+
+  <p style="color:var(--text-dim);font-size:13.5px;margin:18px 0 4px;">Because the input is controlled, live validation is just an ordinary variable computed from state during render — no separate "validate on submit" step required, and the feedback updates on every keystroke for free.</p>
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r3b')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r3b-code"></code></pre>
+<textarea class="cell-input" id="r3b-input" spellcheck="false">function EmailField() {
+  const [email, setEmail] = React.useState("");
+  const isValid = email.includes("@");
+
+  return (
+    <div>
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        style={{padding: 8, borderRadius: 6, border: "1px solid #444"}}
+      />
+      {email.length > 0 && (
+        <p style={{color: isValid ? "#5EEAD4" : "#FF7A85", fontSize: 13}}>
+          {isValid ? "looks valid" : "needs an @"}
+        </p>
+      )}
+    </div>
+  );
+}
+render(<EmailField />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r3b-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r3b-console"></div>
+  </div>
+</section>
+
+<section class="stage" id="s4">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>06<span class="br">/&gt;</span></span><h2>Lists &amp; keys</h2></div>
+  <p class="stage-sub"><code class="inline-code">.map()</code> turns data into elements. <code class="inline-code">key</code> tells React which element is which across re-renders — get it wrong and state silently attaches to the wrong row.</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r4')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r4-code"></code></pre>
+<textarea class="cell-input" id="r4-input" spellcheck="false">const servers = [
+  { id: "s1", name: "web-01" },
+  { id: "s2", name: "web-02" },
+  { id: "s3", name: "db-01" },
+];
+
+function ServerList() {
+  return (
+    <ul>
+      {servers.map(server => (
+        <li key={server.id}>{server.name}</li>
+      ))}
+    </ul>
+  );
+}
+render(<ServerList />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r4-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r4-console"></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon"></span>See the key bug for yourself</h3>
+    <p>This renders a list of checkboxes, then shuffles it. One version keys by array index; the other keys by stable id. Check a couple of boxes, hit shuffle, and watch which one keeps the checkmarks attached to the right label.</p>
+    <div class="cell" data-cell>
+      <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r4b')">▶ Run</button></div>
+      <div class="cell-body">
+        <div class="cell-editor">
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r4b-code"></code></pre>
+<textarea class="cell-input" id="r4b-input" spellcheck="false">const initial = [
+  { id: "a", label: "Apple" },
+  { id: "b", label: "Banana" },
+  { id: "c", label: "Cherry" },
+];
+
+function Row({ label }) {
+  const [checked, setChecked] = React.useState(false);
+  return (
+    <label style={{display: "block"}}>
+      <input type="checkbox" checked={checked}
+             onChange={() => setChecked(!checked)} /> {label}
+    </label>
+  );
+}
+
+function Demo({ useIndexAsKey }) {
+  const [items, setItems] = React.useState(initial);
+  function shuffle() {
+    setItems([...items].reverse());
+  }
+  return (
+    <div>
+      <button onClick={shuffle}>Shuffle</button>
+      {items.map((item, i) => (
+        <Row key={useIndexAsKey ? i : item.id} label={item.label} />
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div style={{display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center"}}>
+      <div>
+        <p style={{color: "#FF7A85"}}>index as key</p>
+        <Demo useIndexAsKey={true} />
+      </div>
+      <div>
+        <p style={{color: "#5EEAD4"}}>stable id as key</p>
+        <Demo useIndexAsKey={false} />
+      </div>
+    </div>
+  );
+}
+render(<App />);</textarea>
+          </div>
+        </div>
+        <div class="cell-preview" id="r4b-preview"><span class="cell-placeholder">Click Run</span></div>
+      </div>
+      <div class="cell-console" id="r4b-console"></div>
+    </div>
+  </div>
+
+  <p style="color:var(--text-dim);font-size:13.5px;margin:22px 0 4px;"><code class="inline-code">.filter()</code> and <code class="inline-code">.map()</code> chain together constantly: narrow the data down first, then turn what's left into elements. Nothing React-specific here — it's the same array methods you already know, just producing JSX instead of new data.</p>
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r4c')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r4c-code"></code></pre>
+<textarea class="cell-input" id="r4c-input" spellcheck="false">const users = [
+  { id: 1, name: "Alice", active: true },
+  { id: 2, name: "Bob", active: false },
+  { id: 3, name: "Carol", active: true },
+];
+
+function UserList() {
+  const activeUsers = users.filter(u => u.active);
+  return (
+    <ul>
+      {activeUsers.map(u => <li key={u.id}>{u.name}</li>)}
+    </ul>
+  );
+}
+render(<UserList />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r4c-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r4c-console"></div>
+  </div>
+</section>
+
+<section class="stage" id="s5">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>07<span class="br">/&gt;</span></span><h2>Lifting state up</h2></div>
+  <p class="stage-sub">Two sibling components can't talk to each other directly. The fix is always the same: move the shared state to their common parent, then pass it down as props.</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r5')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r5-code"></code></pre>
+<textarea class="cell-input" id="r5-input" spellcheck="false">// TempInput and TempDisplay are siblings — they can't share state directly.
+// So the PARENT (App) owns the state, and passes it down both ways.
+
+function TempInput({ value, onChange }) {
+  return (
+    <input type="number" value={value}
+           onChange={(e) => onChange(Number(e.target.value))} />
+  );
+}
+
+function TempDisplay({ celsius }) {
+  const fahrenheit = (celsius * 9) / 5 + 32;
+  return <p>{celsius}°C is {fahrenheit}°F</p>;
+}
+
+function App() {
+  const [celsius, setCelsius] = React.useState(20);
+  return (
+    <div>
+      <TempInput value={celsius} onChange={setCelsius} />
+      <TempDisplay celsius={celsius} />
+    </div>
+  );
+}
+render(<App />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r5-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r5-console"></div>
+  </div>
+
+  <div class="callout violet">
+    <span class="label">How to know where state belongs</span>
+    <p>Find the closest common ancestor of every component that needs the value. That's where the state lives. Everything below just receives it as a prop — either the value itself, or a function to change it.</p>
+  </div>
+</section>
+
+<section class="stage" id="s6">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>08<span class="br">/&gt;</span></span><h2>useEffect, used correctly</h2></div>
+  <p class="stage-sub">An effect synchronizes your component with something <em>outside</em> React — a timer, a subscription, a manual DOM API, a fetch call. It is not a general "run this when something changes" hook.</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r6')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r6-code"></code></pre>
+<textarea class="cell-input" id="r6-input" spellcheck="false">function WindowWidth() {
+  const [width, setWidth] = React.useState(window.innerWidth);
+
+  React.useEffect(() => {
+    function handleResize() {
+      setWidth(window.innerWidth);
+    }
+    window.addEventListener("resize", handleResize);
+    // cleanup: remove the listener when this component goes away
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);   // empty array = run once, on mount
+
+  return <p>Window width: {width}px — try resizing your browser</p>;
+}
+render(<WindowWidth />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r6-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r6-console"></div>
+  </div>
+
+  <div class="callout coral">
+    <span class="label">The dependency array is not optional decoration</span>
+    <p><code class="inline-code">[]</code> means "run once." <code class="inline-code">[count]</code> means "re-run whenever count changes." Leaving it off entirely means "run after every single render" — almost never what you actually want, and a common source of infinite loops when the effect itself updates state it depends on.</p>
+  </div>
+
+  <p style="color:var(--text-dim);font-size:13.5px;margin:18px 0 4px;">Here's an effect that genuinely depends on state — a countdown that stops itself. Every time <code class="inline-code">seconds</code> changes, the old interval is cleaned up and a fresh check runs, which is exactly why <code class="inline-code">seconds</code> is listed in the dependency array.</p>
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r6b')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r6b-code"></code></pre>
+<textarea class="cell-input" id="r6b-input" spellcheck="false">function Countdown() {
+  const [seconds, setSeconds] = React.useState(5);
+
+  React.useEffect(() => {
+    if (seconds === 0) return;   // stop scheduling once we hit zero
+    const id = setTimeout(() => setSeconds(seconds - 1), 1000);
+    return () => clearTimeout(id);
+  }, [seconds]);   // re-runs every time seconds changes
+
+  return <p>{seconds === 0 ? "Liftoff!" : `T-minus ${seconds}`}</p>;
+}
+render(<Countdown />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r6b-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r6b-console"></div>
+  </div>
+</section>
+
+<section class="stage" id="s7">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>09<span class="br">/&gt;</span></span><h2>Custom hooks — extracting reusable logic</h2></div>
+  <p class="stage-sub">A custom hook is just a regular function whose name starts with <code class="inline-code">use</code>, that calls other hooks inside it. It's the standard way to reuse stateful logic between components without repeating yourself.</p>
+
+  <div class="cell" data-cell>
+    <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('r7')">▶ Run</button></div>
+    <div class="cell-body">
+      <div class="cell-editor">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="r7-code"></code></pre>
+<textarea class="cell-input" id="r7-input" spellcheck="false">// useToggle: the on/off logic from earlier, extracted so ANY
+// component can reuse it without rewriting useState + a flip function.
+function useToggle(initial = false) {
+  const [value, setValue] = React.useState(initial);
+  const toggle = () => setValue(v => !v);
+  return [value, toggle];
+}
+
+function Sidebar() {
+  const [open, toggleOpen] = useToggle(true);
+  return (
+    <div>
+      <button onClick={toggleOpen}>{open ? "Close" : "Open"} sidebar</button>
+      {open && <p>Sidebar content here</p>}
+    </div>
+  );
+}
+
+function Notifications() {
+  const [enabled, toggleEnabled] = useToggle(false);
+  return (
+    <button onClick={toggleEnabled}>
+      Notifications: {enabled ? "on" : "off"}
+    </button>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <Sidebar />
+      <Notifications />
+    </div>
+  );
+}
+render(<App />);</textarea>
+        </div>
+      </div>
+      <div class="cell-preview" id="r7-preview"><span class="cell-placeholder">Click Run</span></div>
+    </div>
+    <div class="cell-console" id="r7-console"></div>
+  </div>
+
+  <div class="callout">
+    <span class="label">When to extract a custom hook</span>
+    <p>The moment you copy-paste a <code class="inline-code">useState</code> + a bit of logic into a second component, stop and extract it. That's the whole signal — no bigger architecture decision required.</p>
+  </div>
+</section>
+
+<section class="stage" id="thinking">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>10<span class="br">/&gt;</span></span><h2>Thinking in React</h2></div>
+  <p class="stage-sub">A methodology for turning any design or feature request into components, before you write a single line of state logic. This is the process, not just the patterns.</p>
+
+  <div class="grid2">
+    <div class="card"><h3><span class="icon"></span>1. Break the UI into components</h3><p>Draw boxes around every piece of the design. Each box that represents one thing (one row, one card, one panel) is a candidate component.</p></div>
+    <div class="card"><h3><span class="icon"></span>2. Build a static version first</h3><p>Render the whole tree using only props, top-down, with zero state and zero interactivity. This forces you to get the component hierarchy right before anything can move.</p></div>
+    <div class="card"><h3><span class="icon"></span>3. Find the minimal state</h3><p>Ask of every piece of data: does it change over time? Can it be computed from other state or props? If yes to the second question, it's not state — it's derived, and it doesn't belong in <code class="inline-code">useState</code> at all.</p></div>
+    <div class="card"><h3><span class="icon"></span>4. Decide where each piece of state lives</h3><p>Find every component that needs to read or change it. State lives in their closest common parent — exactly the "lifting state up" pattern from earlier, arrived at deliberately instead of by trial and error.</p></div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3><span class="icon"></span>All four steps, in one component tree</h3>
+    <p>A searchable product list. The component boundaries came from step 1 (a search box, a table, a row). The state — just <code class="inline-code">searchTerm</code> — came from step 3: <code class="inline-code">filteredProducts</code> is <em>derived</em> from it, not separate state. And <code class="inline-code">searchTerm</code> lives in <code class="inline-code">App</code> because both <code class="inline-code">SearchBox</code> and <code class="inline-code">ProductTable</code> need it — step 4.</p>
+    <div class="cell" data-cell>
+      <div class="cell-bar"><span class="cell-lang">jsx</span><button class="btn small run-btn" onclick="runReactCell('rt1')">▶ Run</button></div>
+      <div class="cell-body">
+        <div class="cell-editor">
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-jsx" id="rt1-code"></code></pre>
+<textarea class="cell-input" id="rt1-input" spellcheck="false">const products = [
+  { id: 1, name: "Wireless Mouse", price: 24.99 },
+  { id: 2, name: "Mechanical Keyboard", price: 89.0 },
+  { id: 3, name: "USB-C Hub", price: 34.5 },
+  { id: 4, name: "Webcam", price: 45.0 },
+];
+
+// step 1: a small, obvious component per piece of UI
+function SearchBox({ value, onChange }) {
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Search products..."
+      style={{padding: 8, borderRadius: 6, border: "1px solid #444", marginBottom: 10}}
+    />
+  );
+}
+
+function ProductTable({ items }) {
+  return (
+    <ul>
+      {items.map(p => (
+        <li key={p.id}>{p.name} — ${p.price.toFixed(2)}</li>
+      ))}
+    </ul>
+  );
+}
+
+// step 3 + 4: searchTerm is the only real state, and it lives here
+// because both children below need access to it
+function App() {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  // derived, not state — recomputed each render, always in sync
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div>
+      <SearchBox value={searchTerm} onChange={setSearchTerm} />
+      <ProductTable items={filtered} />
+    </div>
+  );
+}
+render(<App />);</textarea>
+          </div>
+        </div>
+        <div class="cell-preview" id="rt1-preview"><span class="cell-placeholder">Click Run</span></div>
+      </div>
+      <div class="cell-console" id="rt1-console"></div>
+    </div>
+  </div>
+
+  <div class="callout violet">
+    <span class="label">The step people skip</span>
+    <p>Step 2 — the static version — feels slow when you're excited to make something interactive. Skipping it is exactly how you end up with state in the wrong place and a component tree you have to rebuild halfway through. Five extra minutes here saves an hour later.</p>
+  </div>
+</section>
+
+<section class="stage" id="roadmap">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>11<span class="br">/&gt;</span></span><h2>Zero → professional, in order</h2></div>
+  <p class="stage-sub">Do these in sequence, not in parallel. Each one only needs what came before it. Click to mark done as you go.</p>
+
+  <div class="roadmap" id="roadmap-list">
+    <div class="road-item" data-idx="0"><div class="road-check">1</div><div class="road-body"><h4>Static component tree</h4><p>Build a page of nested components using only props — zero state, zero events. Get comfortable with JSX and composition first.</p></div></div>
+    <div class="road-item" data-idx="1"><div class="road-check">2</div><div class="road-body"><h4>One component, one piece of state</h4><p>A counter, a toggle, a like button. Nothing shared, nothing lifted — just you and <code class="inline-code">useState</code>.</p></div></div>
+    <div class="road-item" data-idx="2"><div class="road-check">3</div><div class="road-body"><h4>A controlled form with validation</h4><p>Multiple inputs, all driven by state, with inline feedback. This is where events and state combine for real.</p></div></div>
+    <div class="road-item" data-idx="3"><div class="road-check">4</div><div class="road-body"><h4>A list with add, remove, and edit</h4><p>Practice <code class="inline-code">.map()</code>, stable keys, and updating arrays immutably under real pressure.</p></div></div>
+    <div class="road-item" data-idx="4"><div class="road-check">5</div><div class="road-body"><h4>Two siblings sharing state</h4><p>Force yourself to lift state to a common parent instead of reaching for a library.</p></div></div>
+    <div class="road-item" data-idx="5"><div class="road-check">6</div><div class="road-body"><h4>Extract your first custom hook</h4><p>Find logic you've written twice. Pull it into a <code class="inline-code">useSomething</code> function.</p></div></div>
+    <div class="road-item" data-idx="6"><div class="road-check">7</div><div class="road-body"><h4>Fetch real data</h4><p>Loading state, error state, success state — a real <code class="inline-code">useEffect</code> synchronizing with an external API.</p></div></div>
+    <div class="road-item" data-idx="7"><div class="road-check">8</div><div class="road-body"><h4>Compose it all into one small app</h4><p>A todo app, a mini dashboard, anything with multiple connected pieces. This is the first thing that will actually feel like "a React app."</p></div></div>
+  </div>
+
+  <div class="callout">
+    <span class="label">After these eight</span>
+    <p>You're not "done learning React" — nobody is. But you now have every pattern you'll use in 99% of real components. Everything past this point (routing, global state libraries, performance tuning) is a tool you reach for when a specific problem actually shows up, not something to learn preemptively.</p>
+  </div>
+</section>
+
+<section class="stage" id="habits">
+  <div class="stage-head"><span class="stage-num"><span class="br">&lt;</span>12<span class="br">/&gt;</span></span><h2>Habits that separate professionals</h2></div>
+  <p class="stage-sub">Not talent. Repetition, applied to the right things. Click each one you're committing to.</p>
+
+  <div class="habit-list" id="habitList">
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Before reaching for useEffect, ask "am I just computing a value?" — if so, compute it during render instead</span></div>
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Never mutate state directly — always create a new array or object and call the setter</span></div>
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Read the actual error in the console before guessing — React's error messages usually name the exact problem</span></div>
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Keep state as close to where it's used as possible — lift it up only when something else genuinely needs it</span></div>
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Use stable, unique keys on lists — never the array index once the list can reorder</span></div>
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Reach for composition (children, props) before reaching for a state-management library</span></div>
+    <div class="habit-item"><div class="habit-box"></div><span class="txt">Extract a custom hook the second you copy-paste stateful logic into a second component</span></div>
+  </div>
+</section>
+
+<footer>Unlearn React — the mindset shift is the whole course. Everything else is 30 minutes of vocabulary on top of it.</footer>
+
+</main>
+
+<script>
+hljs.highlightAll();
+
+/* =========================================================
+   LIVE SYNTAX HIGHLIGHTING (textarea + hljs overlay)
+   ========================================================= */
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlightPair(inputEl, codeEl){
+  codeEl.textContent = inputEl.value;
+  delete codeEl.dataset.highlighted;
+  codeEl.className = 'language-jsx';
+  hljs.highlightElement(codeEl);
+}
+function autoGrow(inputEl){
+  // let the box grow to fit whatever is typed, instead of scrolling inside it
+  inputEl.style.height = 'auto';
+  inputEl.style.height = inputEl.scrollHeight + 'px';
+}
+function syncScrollPair(inputEl, preEl){
+  preEl.scrollTop = inputEl.scrollTop;
+  preEl.scrollLeft = inputEl.scrollLeft;
+}
+function wireHighlight(inputId, codeId){
+  const inputEl = document.getElementById(inputId);
+  const codeEl = document.getElementById(codeId);
+  if(!inputEl || !codeEl) return;
+  const preEl = codeEl.parentElement;
+  highlightPair(inputEl, codeEl);
+  autoGrow(inputEl);
+  inputEl.addEventListener('input', () => { highlightPair(inputEl, codeEl); autoGrow(inputEl); syncScrollPair(inputEl, preEl); });
+  inputEl.addEventListener('scroll', () => syncScrollPair(inputEl, preEl));
+  inputEl.addEventListener('keydown', (e) => {
+    if(e.key === 'Tab'){
+      e.preventDefault();
+      const start = inputEl.selectionStart, end = inputEl.selectionEnd;
+      inputEl.value = inputEl.value.slice(0, start) + '  ' + inputEl.value.slice(end);
+      inputEl.selectionStart = inputEl.selectionEnd = start + 2;
+      highlightPair(inputEl, codeEl);
+      autoGrow(inputEl);
+    }
+  });
+}
+document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(ta => {
+  wireHighlight(ta.id, ta.id.replace(/-input$/, '-code'));
+});
+// re-measure every box after fonts/layout settle, and again if the
+// viewport width changes (wrapped line count depends on box width)
+window.addEventListener('load', () => {
+  document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(autoGrow);
+});
+let _resizeDebounce;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeDebounce);
+  _resizeDebounce = setTimeout(() => {
+    document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(autoGrow);
+  }, 150);
+});
+
+/* =========================================================
+   LIVE REACT SANDBOX ENGINE (Babel + React, real execution)
+   ========================================================= */
+const reactRoots = {};
+
+function makeRender(previewId){
+  return function(el){
+    let container = document.getElementById(previewId);
+    if(!reactRoots[previewId]){
+      container.innerHTML = '';
+      reactRoots[previewId] = ReactDOM.createRoot(container);
+    }
+    reactRoots[previewId].render(el);
+  };
+}
+
+function makeConsole(logLines){
+  return {
+    log: (...args) => logLines.push({type:'log', text: args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')}),
+    warn: (...args) => logLines.push({type:'log', text: args.map(a => String(a)).join(' ')}),
+    error: (...args) => logLines.push({type:'err', text: args.map(a => String(a)).join(' ')}),
+  };
+}
+
+function runInSandbox(code, previewId, consoleId){
+  const logLines = [];
+  const consoleEl = consoleId ? document.getElementById(consoleId) : null;
+  const previewEl = document.getElementById(previewId);
+
+  if(typeof Babel === 'undefined' || typeof window.React === 'undefined' || typeof ReactDOM === 'undefined'){
+    if(previewEl) previewEl.innerHTML = '<span style="color:#FF7A85;font-family:var(--mono);font-size:11.5px;">Could not load React/Babel from the CDN — check your connection and reload the page.</span>';
+    return;
+  }
+
+  try{
+    const transformed = Babel.transform(code, { presets: [['react', { runtime: 'classic' }]] }).code;
+    const sandboxConsole = makeConsole(logLines);
+    const fn = new Function('React', 'render', 'console', transformed);
+    fn(window.React, makeRender(previewId), sandboxConsole);
+  } catch(err){
+    const message = String(err.message || err);
+    logLines.push({type:'err', text: message});
+    // render the error through the same managed root, so a mistake never
+    // leaves a stale "Click Run" box sitting there with no explanation
+    try{
+      makeRender(previewId)(
+        window.React.createElement('span', {
+          style:{color:'#FF7A85', fontFamily:'var(--mono)', fontSize:12, whiteSpace:'pre-wrap'}
+        }, '⚠ ' + message)
+      );
+    } catch(e2){ /* if the sandbox itself is broken, the console line below still shows the error */ }
+  }
+  if(consoleEl){
+    consoleEl.innerHTML = logLines.map(l =>
+      `<div class="${l.type === 'err' ? 'err-line' : 'log-line'}">${escapeHtml(l.text)}</div>`
+    ).join('');
+  }
+}
+
+function runReactCell(id){
+  const code = document.getElementById(id + '-input').value;
+  runInSandbox(code, id + '-preview', id + '-console');
+}
+
+/* Every example is meant to be read as a complete, already-working
+   piece of code — not a lab you have to click to unlock. So we run
+   every cell once automatically on load, exactly like the hero does.
+   The Run button still exists for after you edit the code. */
+document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(ta => {
+  if(ta.id === 'hero-input') return;
+  const baseId = ta.id.replace(/-input$/, '');
+  runReactCell(baseId);
+});
+
+/* =========================================================
+   HERO SANDBOX (auto-runs once on load)
+   ========================================================= */
+wireHighlight('hero-input', 'hero-code');
+function runHero(){
+  runInSandbox(document.getElementById('hero-input').value, 'hero-preview', null);
+}
+runHero();
+document.getElementById('hero-input').addEventListener('input', () => {
+  clearTimeout(window._heroDebounce);
+  window._heroDebounce = setTimeout(runHero, 500);
+});
+
+/* =========================================================
+   ROADMAP + HABITS TOGGLES
+   ========================================================= */
+document.querySelectorAll('.road-item').forEach(item => {
+  item.addEventListener('click', () => {
+    item.classList.toggle('done');
+    if(item.classList.contains('done')) item.querySelector('.road-check').textContent = '✓';
+    else item.querySelector('.road-check').textContent = (parseInt(item.dataset.idx) + 1);
+  });
+});
+document.querySelectorAll('.habit-item').forEach(item => {
+  item.addEventListener('click', () => item.classList.toggle('done'));
+});
+
+/* =========================================================
+   SCROLL PROGRESS + NAV SCROLL-SPY
+   ========================================================= */
+const progressBar = document.getElementById('scrollProgress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progressBar.style.width = scrolled + '%';
+}
+window.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+const navLinks = Array.from(document.querySelectorAll('.navlinks a'));
+const navSections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+function updateActiveNav(){
+  let current = navSections[0];
+  for(const sec of navSections){
+    if(sec.getBoundingClientRect().top - 90 <= 0) current = sec;
+  }
+  navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+updateActiveNav();
+
+/* =========================================================
+   SCROLL REVEAL
+   ========================================================= */
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window){
+  document.querySelectorAll('.stage').forEach(sec => {
+    sec.style.opacity = '0';
+    sec.style.transform = 'translateY(14px)';
+    sec.style.transition = 'opacity .6s ease, transform .6s ease';
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'none';
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.06, rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('.stage').forEach(sec => io.observe(sec));
+}
+</script>
+</body>
+</html>
