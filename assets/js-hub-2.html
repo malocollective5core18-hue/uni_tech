@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanilla JavaScript: Zero to Mastery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root{
+  --bg:#0A0F0D;
+  --panel:#111815;
+  --panel-2:#161F1B;
+  --border:#243029;
+  --border-soft:#1B241F;
+  --text:#EAF2EE;
+  --text-dim:#8FA69C;
+  --text-faint:#55685F;
+  --amber:#F7DF1E;
+  --amber-dim:#8A7A10;
+  --teal:#2DD4BF;
+  --teal-dim:#0F5E54;
+  --blue:#60A5FA;
+  --red:#FB7185;
+  --purple:#C4B5FD;
+  --disp:'Urbanist',sans-serif;
+  --body:'Work Sans',sans-serif;
+  --mono:'Space Mono',monospace;
+  --shadow-lg:0 26px 64px -26px rgba(0,0,0,.75);
+  --shadow-sm:0 8px 22px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--body);
+  line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;top:-8%;left:50%;transform:translateX(-50%);
+  width:1000px;height:620px;
+  background:radial-gradient(ellipse at center, rgba(247,223,30,.08) 0%, rgba(45,212,191,.06) 42%, transparent 72%);
+  pointer-events:none;z-index:0;filter:blur(8px);
+}
+a{color:var(--amber);text-decoration:none;}
+code{font-family:var(--mono);}
+::selection{background:var(--amber);color:#0A0F0D;}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:3px;}
+
+.scroll-progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--amber),var(--teal));z-index:100;width:0%;transition:width .1s linear;}
+
+/* ============ NAV ============ */
+.topnav{
+  position:sticky;top:2px;z-index:50;
+  background:rgba(10,15,13,.85);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:12px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:13.5px;letter-spacing:.01em;}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 2.4s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.navlinks{display:flex;gap:2px;flex-wrap:wrap;}
+.navlinks a{
+  font-family:var(--mono);font-size:10px;color:var(--text-dim);
+  padding:6px 8px;border-radius:5px;border:1px solid transparent;transition:all .18s ease;white-space:nowrap;
+}
+.navlinks a:hover{color:var(--amber);background:var(--panel);}
+.navlinks a.active{color:var(--amber);border-color:var(--border);background:var(--panel);}
+
+/* ============ HERO ============ */
+.hero{position:relative;z-index:1;padding:60px 26px 42px;max-width:1140px;margin:0 auto;}
+.hero-eyebrow{
+  font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:16px;display:flex;align-items:center;gap:9px;
+}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:linear-gradient(90deg,var(--teal),transparent);}
+.hero h1{
+  font-family:var(--disp);font-weight:800;font-size:clamp(29px,4.6vw,49px);line-height:1.1;letter-spacing:-.015em;
+  color:#fff;max-width:780px;
+}
+.hero h1 span{
+  background:linear-gradient(90deg,var(--amber),#FFF3A0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p.lede{font-size:15.5px;color:var(--text-dim);max-width:610px;margin-top:18px;}
+.hero-meta{display:flex;gap:0;margin-top:28px;flex-wrap:wrap;border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden;width:fit-content;}
+.hero-meta .stat{font-family:var(--mono);padding:13px 20px;border-right:1px solid var(--border);}
+.hero-meta .stat:last-child{border-right:none;}
+.hero-meta .stat b{display:block;color:var(--amber);font-size:20px;font-family:var(--disp);line-height:1.1;}
+.hero-meta .stat span{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
+
+/* ============ LIVE JS CONSOLE (signature element) ============ */
+.console-win{margin-top:34px;background:#070C0A;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-lg);}
+.console-bar{display:flex;align-items:center;gap:8px;padding:11px 15px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.cdot{width:10px;height:10px;border-radius:50%;}
+.console-bar .ctitle{margin-left:8px;font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+.console-bar .cstatus{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--teal);display:flex;align-items:center;gap:6px;}
+.console-bar .cstatus .lidot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:blink 1.4s infinite;}
+.console-split{display:grid;grid-template-columns:1fr 1fr;min-width:0;}
+@media(max-width:760px){.console-split{grid-template-columns:1fr;}}
+.console-code{border-right:1px solid var(--border);min-width:0;}
+@media(max-width:760px){.console-code{border-right:none;border-bottom:1px solid var(--border);}}
+.console-output{padding:18px 20px;background:#0D1512;min-height:180px;font-family:var(--mono);font-size:12.5px;overflow-x:auto;}
+.console-output *{max-width:100%;box-sizing:border-box;}
+@media(max-width:480px){.console-output{overflow-x:hidden;}}
+
+/* ============ SECTIONS ============ */
+.stage{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:64px 26px 64px 92px;border-top:1px solid var(--border);}
+.stage::before{content:'';position:absolute;left:52px;top:0;bottom:0;width:1px;background:linear-gradient(var(--border-soft),var(--border-soft) 90%,transparent);z-index:1;}
+.stage:first-of-type::before{top:64px;}
+.stage:last-of-type::before{bottom:calc(100% - 110px);}
+.stage-head{display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap;}
+.stage-num{
+  font-family:var(--mono);font-weight:700;font-size:12px;
+  border:1px solid var(--border);border-radius:7px;padding:8px 8px;min-width:42px;text-align:center;
+  background:var(--bg);position:relative;z-index:2;margin-left:-92px;box-shadow:0 0 0 6px var(--bg);
+  color:var(--amber);
+}
+#p8 .stage-num, #p9 .stage-num{color:var(--blue);}
+#p10 .stage-num, #p11 .stage-num, #p12 .stage-num{color:var(--purple);}
+#roadmap .stage-num{color:var(--teal);}
+.stage-head h2{font-family:var(--disp);font-weight:700;font-size:clamp(21px,2.8vw,28px);color:#fff;letter-spacing:-.01em;}
+.stage-sub{color:var(--text-dim);max-width:700px;margin:14px 0 26px;font-size:14px;}
+@media(max-width:640px){.stage{padding-left:62px;}.stage::before{left:32px;}.stage-num{margin-left:-62px;min-width:36px;font-size:10.5px;padding:6px 6px;}}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:0;}
+@media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+.grid2 > *{min-width:0;}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:16px;transition:border-color .2s ease, transform .2s ease, box-shadow .2s ease;min-width:0;}
+.card:hover{border-color:#33453C;box-shadow:var(--shadow-sm);transform:translateY(-2px);}
+.card h3{font-family:var(--disp);font-size:14px;color:#fff;margin-bottom:6px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.card h3 .icon{width:6px;height:6px;border-radius:2px;background:var(--teal);flex-shrink:0;transform:rotate(45deg);}
+.card p{color:var(--text-dim);font-size:12.5px;margin-bottom:8px;}
+
+pre{background:#070C0A !important;border:1px solid var(--border);border-radius:9px;padding:13px 15px !important;font-family:var(--mono) !important;font-size:12px !important;overflow-x:auto;margin:10px 0;}
+pre code{font-family:var(--mono) !important;}
+.inline-code{background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:11.5px;color:var(--teal);}
+
+.btn{font-family:var(--mono);font-size:11.5px;font-weight:500;background:var(--amber);color:#0A0F0D;border:1px solid var(--amber);border-radius:6px;padding:7px 13px;cursor:pointer;transition:all .16s ease;}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 16px -6px rgba(247,223,30,.35);}
+.btn:active{transform:translateY(0);}
+.btn.alt{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn.alt:hover{border-color:var(--amber);color:var(--amber);box-shadow:none;}
+.btn.small{padding:5px 11px;font-size:10.5px;}
+
+.callout{border-left:3px solid var(--teal);background:var(--panel);border-radius:0 9px 9px 0;padding:13px 17px;margin:16px 0;}
+.callout.red{border-left-color:var(--red);}
+.callout.amber{border-left-color:var(--amber);}
+.callout .label{font-family:var(--mono);font-size:10.5px;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;}
+.callout.red .label{color:var(--red);}
+.callout.amber .label{color:var(--amber);}
+.callout p{color:var(--text-dim);font-size:13px;margin:0;}
+
+/* ============ LIVE JS CELLS (compact) ============ */
+.cell{background:#070C0A;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-top:8px;transition:border-color .2s ease;}
+.cell:focus-within{border-color:#3D5348;box-shadow:0 0 0 3px rgba(45,212,191,.1);}
+.cell-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+.cell-lang{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px;}
+.cell-lang::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber);}
+.cell-bar .run-btn{margin-left:auto;}
+
+.cell-input-wrap{position:relative;min-width:0;}
+.cell-highlight{
+  position:absolute !important;inset:0 !important;margin:0 !important;z-index:0;
+  background:#070C0A !important;border:none !important;border-radius:0 !important;
+  padding:11px 13px !important;font-family:var(--mono) !important;font-size:11.5px !important;
+  line-height:1.6 !important;white-space:pre-wrap !important;word-break:break-word !important;
+  overflow:hidden;pointer-events:none;
+}
+.cell-highlight code.hljs{background:transparent !important;padding:0 !important;display:block;font-family:var(--mono) !important;font-size:11.5px !important;line-height:1.6 !important;white-space:pre-wrap !important;word-break:break-word !important;}
+.cell-input{
+  position:relative;z-index:1;width:100%;
+  background:transparent !important;border:none;color:transparent;caret-color:#fff;
+  font-family:var(--mono);font-size:11.5px;padding:11px 13px;resize:none;outline:none;
+  line-height:1.6;min-height:40px;display:block;overflow:hidden;
+}
+.cell-input::selection{background:rgba(45,212,191,.3);color:transparent;}
+
+.cell-output{
+  font-family:var(--mono);font-size:11.5px;padding:10px 13px;border-top:1px solid var(--border-soft);
+  color:var(--teal);min-height:16px;white-space:pre-wrap;word-break:break-word;background:#0A1210;
+  max-height:180px;overflow-y:auto;
+}
+.cell-output .out-line{white-space:pre-wrap;word-break:break-word;}
+.cell-output .cell-placeholder{color:var(--text-faint);}
+.cell-output .cell-err{color:var(--red);}
+.cell-output .cell-dim{color:var(--text-faint);}
+.cell-output .dom-preview{background:#fff;color:#111;border-radius:6px;padding:10px;margin-top:6px;font-family:var(--body);}
+
+/* ============ ROADMAP ============ */
+.roadmap{position:relative;margin-top:8px;}
+.road-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border-soft);cursor:pointer;}
+.road-item:last-child{border-bottom:none;}
+.road-check{
+  width:24px;height:24px;border-radius:50%;border:1px solid var(--border);flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);
+  transition:all .2s ease;
+}
+.road-item.done .road-check{background:var(--teal);border-color:var(--teal);color:#04140F;}
+.road-body h4{font-family:var(--disp);font-size:14px;color:#fff;font-weight:600;margin-bottom:3px;}
+.road-item.done .road-body h4{color:var(--text-dim);text-decoration:line-through;text-decoration-color:var(--border-soft);}
+.road-body p{color:var(--text-dim);font-size:12.5px;}
+
+footer{text-align:center;padding:46px 26px 64px;color:var(--text-faint);font-size:11.5px;font-family:var(--mono);position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav class="topnav">
+  <div class="brand"><span class="dot"></span> VANILLA JS: ZERO TO MASTERY</div>
+  <div class="navlinks">
+    <a href="#p1">Variables</a>
+    <a href="#p2">Operators</a>
+    <a href="#p3">Control Flow</a>
+    <a href="#p4">Functions</a>
+    <a href="#p5">Arrays</a>
+    <a href="#p6">Objects</a>
+    <a href="#p7">Strings</a>
+    <a href="#p8">DOM</a>
+    <a href="#p9">Events</a>
+    <a href="#p10">Async</a>
+    <a href="#p11">Errors</a>
+    <a href="#p12">Classes</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">Zero → mastery · 12 parts · 6 examples each</div>
+  <h1>No framework. No build step.<br>Just <span>real JavaScript.</span></h1>
+  <p class="lede">Every example on this page runs in your actual browser as you read it — nothing is simulated. Twelve parts, six complete worked examples each, in the order a real curriculum teaches them: from a variable to a class with private fields.</p>
+  <div class="hero-meta">
+    <div class="stat"><b>12</b><span>Parts</span></div>
+    <div class="stat"><b>72</b><span>Live examples</span></div>
+    <div class="stat"><b>Live</b><span>Real browser JS engine</span></div>
+    <div class="stat"><b>0</b><span>Build tools needed</span></div>
+  </div>
+
+  <div class="console-win">
+    <div class="console-bar">
+      <div class="cdot" style="background:#FB7185"></div>
+      <div class="cdot" style="background:#F7DF1E"></div>
+      <div class="cdot" style="background:#2DD4BF"></div>
+      <span class="ctitle">script.js — running live, right now</span>
+      <span class="cstatus"><span class="lidot"></span>ready</span>
+    </div>
+    <div class="console-split">
+      <div class="console-code">
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="hero-code"></code></pre>
+<textarea class="cell-input" id="hero-input" spellcheck="false">function fizzbuzz(n) {
+  if (n % 15 === 0) return "FizzBuzz";
+  if (n % 3 === 0) return "Fizz";
+  if (n % 5 === 0) return "Buzz";
+  return String(n);
+}
+
+for (let i = 1; i <= 15; i++) {
+  console.log(fizzbuzz(i));
+}</textarea>
+        </div>
+      </div>
+      <div class="console-output" id="hero-output"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="stage" id="p1">
+  <div class="stage-head"><span class="stage-num">01</span><h2>Variables &amp; data types</h2></div>
+  <p class="stage-sub">The nouns of the language — how you hold a value, and the handful of types every value belongs to.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>let vs. const vs. var</h3>
+      <p>const can't be reassigned. let can. var is the old way — avoid it in new code.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p1-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p1-1-code"></code></pre>
+<textarea class="cell-input" id="p1-1-input" spellcheck="false">let count = 1;
+count = 2;          // fine, let allows reassignment
+
+const name = "Ada";
+// name = "Grace";  // would throw: Assignment to constant variable
+
+console.log(count, name);</textarea>
+        </div>
+        <div class="cell-output" id="p1-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>The primitive types</h3>
+      <p>typeof tells you exactly what kind of value you're holding — the first tool for debugging weird behavior.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p1-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p1-2-code"></code></pre>
+<textarea class="cell-input" id="p1-2-input" spellcheck="false">console.log(typeof "hello");     // string
+console.log(typeof 42);          // number
+console.log(typeof true);        // boolean
+console.log(typeof undefined);   // undefined
+console.log(typeof null);        // "object" — a famous, very old bug
+console.log(typeof {});          // object</textarea>
+        </div>
+        <div class="cell-output" id="p1-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Template literals</h3>
+      <p>Backticks let you embed variables directly in a string — no more string concatenation with +.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p1-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p1-3-code"></code></pre>
+<textarea class="cell-input" id="p1-3-input" spellcheck="false">const name = "Ada";
+const age = 28;
+
+const oldWay = "Hello, " + name + ". You are " + age + ".";
+const newWay = `Hello, ${name}. You are ${age}.`;
+
+console.log(oldWay);
+console.log(newWay);</textarea>
+        </div>
+        <div class="cell-output" id="p1-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Type coercion surprises</h3>
+      <p>== converts types before comparing; === does not. This single difference prevents a huge class of bugs.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p1-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p1-4-code"></code></pre>
+<textarea class="cell-input" id="p1-4-input" spellcheck="false">console.log("5" == 5);    // true  — coerces "5" to a number first
+console.log("5" === 5);   // false — different types, no coercion
+
+console.log("5" + 3);     // "53"  — + with a string concatenates
+console.log("5" - 3);     // 2     — - only makes sense for numbers, so it coerces</textarea>
+        </div>
+        <div class="cell-output" id="p1-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Numbers: NaN and Infinity</h3>
+      <p>JavaScript has exactly one number type — but it has some famous edge-case values worth knowing by sight.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p1-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p1-5-code"></code></pre>
+<textarea class="cell-input" id="p1-5-input" spellcheck="false">console.log(1 / 0);         // Infinity
+console.log(-1 / 0);        // -Infinity
+console.log(0 / 0);         // NaN — "Not a Number"
+console.log(typeof NaN);    // "number" (yes, really)
+console.log(NaN === NaN);   // false — NaN never equals itself
+console.log(Number.isNaN(NaN)); // true — the correct way to check</textarea>
+        </div>
+        <div class="cell-output" id="p1-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Truthy and falsy values</h3>
+      <p>Every value is either truthy or falsy when used in a condition — only eight values are actually falsy.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p1-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p1-6-code"></code></pre>
+<textarea class="cell-input" id="p1-6-input" spellcheck="false">const falsyValues = [false, 0, "", null, undefined, NaN];
+falsyValues.forEach(v => console.log(v, "->", Boolean(v)));
+
+console.log("---");
+console.log(Boolean("0"));    // true  — non-empty string is truthy
+console.log(Boolean([]));     // true  — empty array is truthy
+console.log(Boolean({}));     // true  — empty object is truthy</textarea>
+        </div>
+        <div class="cell-output" id="p1-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p2">
+  <div class="stage-head"><span class="stage-num">02</span><h2>Operators &amp; expressions</h2></div>
+  <p class="stage-sub">The small symbols that combine values into new ones — arithmetic, comparison, and logic.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Arithmetic operators</h3>
+      <p>The usual six, plus ** for exponents — no separate power() function needed.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-1-code"></code></pre>
+<textarea class="cell-input" id="p2-1-input" spellcheck="false">console.log(10 + 3);   // 13
+console.log(10 - 3);   // 7
+console.log(10 * 3);   // 30
+console.log(10 / 3);   // 3.333...
+console.log(10 % 3);   // 1  (remainder)
+console.log(10 ** 3);  // 1000 (10 to the power of 3)</textarea>
+        </div>
+        <div class="cell-output" id="p2-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Comparison operators</h3>
+      <p>Prefer === and !== almost always — they're predictable in a way == and != aren't.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-2-code"></code></pre>
+<textarea class="cell-input" id="p2-2-input" spellcheck="false">console.log(5 > 3);
+console.log(5 >= 5);
+console.log(5 !== "5");   // true — different types
+console.log(5 != "5");    // false — coerces first, so they ARE equal</textarea>
+        </div>
+        <div class="cell-output" id="p2-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Logical operators &amp; short-circuiting</h3>
+      <p>&& stops at the first falsy value; || stops at the first truthy one — used constantly for defaults.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-3-code"></code></pre>
+<textarea class="cell-input" id="p2-3-input" spellcheck="false">console.log(true && "yes");     // "yes"
+console.log(false && "yes");    // false — never evaluates the right side
+
+console.log(null || "default"); // "default"
+console.log("set" || "default");// "set"
+
+console.log(!true);  // false</textarea>
+        </div>
+        <div class="cell-output" id="p2-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>The ternary operator</h3>
+      <p>A one-line if/else that returns a value — perfect for a quick either/or decision.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-4-code"></code></pre>
+<textarea class="cell-input" id="p2-4-input" spellcheck="false">const age = 20;
+const status = age >= 18 ? "adult" : "minor";
+console.log(status);
+
+const score = 85;
+console.log(score >= 90 ? "A" : score >= 80 ? "B" : "C");</textarea>
+        </div>
+        <div class="cell-output" id="p2-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Nullish coalescing (??) vs. OR (||)</h3>
+      <p>?? only falls back on null/undefined — || falls back on ANY falsy value, including 0 and "", which is often wrong.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-5-code"></code></pre>
+<textarea class="cell-input" id="p2-5-input" spellcheck="false">const votes = 0;
+
+console.log(votes || 10);   // 10 — WRONG, 0 is a valid vote count
+console.log(votes ?? 10);   // 0  — correct, 0 is not null/undefined
+
+const name = "";
+console.log(name ?? "Guest"); // "" — empty string is not nullish</textarea>
+        </div>
+        <div class="cell-output" id="p2-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Optional chaining (?.)</h3>
+      <p>Safely read a nested property that might not exist, without a crash or a manual check first.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-6-code"></code></pre>
+<textarea class="cell-input" id="p2-6-input" spellcheck="false">const user = { profile: { city: "Nairobi" } };
+const guest = {};
+
+console.log(user?.profile?.city);   // "Nairobi"
+console.log(guest?.profile?.city);  // undefined — no error thrown
+// without ?. this would throw: Cannot read properties of undefined</textarea>
+        </div>
+        <div class="cell-output" id="p2-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p3">
+  <div class="stage-head"><span class="stage-num">03</span><h2>Control flow</h2></div>
+  <p class="stage-sub">How a program decides what to do next, and how to repeat an action without copy-pasting it.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>if / else if / else</h3>
+      <p>Checked top to bottom — the first true condition wins, the rest are skipped.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p3-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p3-1-code"></code></pre>
+<textarea class="cell-input" id="p3-1-input" spellcheck="false">const hour = 14;
+
+if (hour < 12) {
+  console.log("Good morning");
+} else if (hour < 18) {
+  console.log("Good afternoon");
+} else {
+  console.log("Good evening");
+}</textarea>
+        </div>
+        <div class="cell-output" id="p3-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>switch</h3>
+      <p>Cleaner than a long if/else chain when you're comparing one value against many exact options.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p3-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p3-2-code"></code></pre>
+<textarea class="cell-input" id="p3-2-input" spellcheck="false">const day = "Wed";
+
+switch (day) {
+  case "Sat":
+  case "Sun":
+    console.log("Weekend");
+    break;
+  case "Wed":
+    console.log("Midweek");
+    break;
+  default:
+    console.log("Weekday");
+}</textarea>
+        </div>
+        <div class="cell-output" id="p3-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>for loop</h3>
+      <p>The classic three-part loop — init, condition, and what runs after each pass.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p3-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p3-3-code"></code></pre>
+<textarea class="cell-input" id="p3-3-input" spellcheck="false">for (let i = 0; i < 5; i++) {
+  console.log("Iteration " + i);
+}</textarea>
+        </div>
+        <div class="cell-output" id="p3-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>while / do...while</h3>
+      <p>while checks first, do...while runs once before checking — a subtle but real difference.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p3-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p3-4-code"></code></pre>
+<textarea class="cell-input" id="p3-4-input" spellcheck="false">let n = 3;
+while (n > 0) {
+  console.log("Countdown: " + n);
+  n--;
+}
+
+let x = 0;
+do {
+  console.log("Runs at least once, x =", x);
+} while (x > 0);</textarea>
+        </div>
+        <div class="cell-output" id="p3-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>for...of vs. for...in</h3>
+      <p>for...of iterates VALUES (arrays, strings); for...in iterates KEYS (object properties). Mixing them up is a classic bug.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p3-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p3-5-code"></code></pre>
+<textarea class="cell-input" id="p3-5-input" spellcheck="false">const fruits = ["apple", "banana", "cherry"];
+for (const fruit of fruits) {
+  console.log(fruit);
+}
+
+const user = { name: "Alice", age: 28 };
+for (const key in user) {
+  console.log(key, "=", user[key]);
+}</textarea>
+        </div>
+        <div class="cell-output" id="p3-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>break and continue</h3>
+      <p>break exits the loop entirely. continue skips just this iteration and moves to the next.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p3-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p3-6-code"></code></pre>
+<textarea class="cell-input" id="p3-6-input" spellcheck="false">for (let i = 1; i <= 10; i++) {
+  if (i === 6) break;             // stop entirely at 6
+  if (i % 2 === 0) continue;      // skip even numbers
+  console.log(i);
+}</textarea>
+        </div>
+        <div class="cell-output" id="p3-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p4">
+  <div class="stage-head"><span class="stage-num">04</span><h2>Functions</h2></div>
+  <p class="stage-sub">Packaging logic so you write it once and reuse it — the single most important habit for clean code.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Declaration vs. expression</h3>
+      <p>A function declaration is hoisted (usable before its definition); a function expression is not.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-1-code"></code></pre>
+<textarea class="cell-input" id="p4-1-input" spellcheck="false">console.log(add(2, 3));  // works — declarations are hoisted
+function add(a, b) {
+  return a + b;
+}
+
+const multiply = function (a, b) {
+  return a * b;
+};
+console.log(multiply(2, 3));</textarea>
+        </div>
+        <div class="cell-output" id="p4-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Arrow functions</h3>
+      <p>Shorter syntax, and — importantly — no own `this`, which fixes a common bug from regular functions in callbacks.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-2-code"></code></pre>
+<textarea class="cell-input" id="p4-2-input" spellcheck="false">const square = (n) => n * n;
+console.log(square(5));
+
+const greet = (name) => {
+  const message = `Hello, ${name}!`;
+  return message;
+};
+console.log(greet("Ada"));</textarea>
+        </div>
+        <div class="cell-output" id="p4-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Default parameters</h3>
+      <p>A fallback value used only when the argument is omitted or undefined — no manual `if` needed inside the function.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-3-code"></code></pre>
+<textarea class="cell-input" id="p4-3-input" spellcheck="false">function greet(name = "stranger", greeting = "Hello") {
+  console.log(`${greeting}, ${name}!`);
+}
+
+greet();
+greet("Ada");
+greet("Ada", "Hey");</textarea>
+        </div>
+        <div class="cell-output" id="p4-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Rest parameters (...args)</h3>
+      <p>Collects any number of extra arguments into a real array — no more juggling the old `arguments` object.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-4-code"></code></pre>
+<textarea class="cell-input" id="p4-4-input" spellcheck="false">function sum(...numbers) {
+  return numbers.reduce((total, n) => total + n, 0);
+}
+
+console.log(sum(1, 2, 3));
+console.log(sum(10, 20, 30, 40));
+console.log(sum());</textarea>
+        </div>
+        <div class="cell-output" id="p4-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Closures</h3>
+      <p>An inner function remembers the variables from where it was created, even after the outer function has finished running.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-5-code"></code></pre>
+<textarea class="cell-input" id="p4-5-input" spellcheck="false">function makeCounter() {
+  let count = 0;
+  return function () {
+    count++;
+    return count;
+  };
+}
+
+const counter = makeCounter();
+console.log(counter());  // 1
+console.log(counter());  // 2
+console.log(counter());  // 3 — count persists between calls</textarea>
+        </div>
+        <div class="cell-output" id="p4-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>IIFE — Immediately Invoked Function Expression</h3>
+      <p>A function that runs itself once, right away — useful for isolating variables from the surrounding scope.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-6-code"></code></pre>
+<textarea class="cell-input" id="p4-6-input" spellcheck="false">const result = (function () {
+  const secret = 42;
+  return secret * 2;
+})();
+
+console.log(result);
+// "secret" doesn't exist out here — it was fully contained inside the IIFE</textarea>
+        </div>
+        <div class="cell-output" id="p4-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p5">
+  <div class="stage-head"><span class="stage-num">05</span><h2>Arrays</h2></div>
+  <p class="stage-sub">Ordered lists of values, and the handful of built-in methods that cover almost everything you'll ever do with them.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Creating &amp; accessing arrays</h3>
+      <p>Zero-indexed — the first item is index 0, and .length always tells you how many there are.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-1-code"></code></pre>
+<textarea class="cell-input" id="p5-1-input" spellcheck="false">const fruits = ["apple", "banana", "cherry"];
+console.log(fruits[0]);       // "apple"
+console.log(fruits.length);   // 3
+console.log(fruits[fruits.length - 1]); // "cherry" — last item</textarea>
+        </div>
+        <div class="cell-output" id="p5-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>push / pop / shift / unshift</h3>
+      <p>Add or remove from either end — push/pop work at the end, shift/unshift work at the start.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-2-code"></code></pre>
+<textarea class="cell-input" id="p5-2-input" spellcheck="false">const queue = ["b", "c"];
+queue.push("d");       // add to end
+queue.unshift("a");    // add to start
+console.log(queue);    // ["a","b","c","d"]
+
+queue.pop();            // remove from end
+queue.shift();          // remove from start
+console.log(queue);    // ["b","c"]</textarea>
+        </div>
+        <div class="cell-output" id="p5-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>map() — transform every item</h3>
+      <p>Returns a brand NEW array — the original is never changed.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-3-code"></code></pre>
+<textarea class="cell-input" id="p5-3-input" spellcheck="false">const numbers = [1, 2, 3, 4];
+const doubled = numbers.map(n => n * 2);
+
+console.log(doubled);   // [2, 4, 6, 8]
+console.log(numbers);   // [1, 2, 3, 4] — unchanged</textarea>
+        </div>
+        <div class="cell-output" id="p5-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>filter() — keep only some items</h3>
+      <p>Returns a new array with only the items where the function returned true.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-4-code"></code></pre>
+<textarea class="cell-input" id="p5-4-input" spellcheck="false">const ages = [12, 18, 25, 16, 30];
+const adults = ages.filter(age => age >= 18);
+
+console.log(adults);   // [18, 25, 30]</textarea>
+        </div>
+        <div class="cell-output" id="p5-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>reduce() — combine into one value</h3>
+      <p>The most flexible array method — sums, builds objects, flattens arrays, all with the same shape.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-5-code"></code></pre>
+<textarea class="cell-input" id="p5-5-input" spellcheck="false">const prices = [10, 20, 30];
+const total = prices.reduce((sum, price) => sum + price, 0);
+console.log(total);   // 60
+
+const words = ["JS", "is", "fun"];
+const sentence = words.reduce((acc, word) => acc + " " + word);
+console.log(sentence);</textarea>
+        </div>
+        <div class="cell-output" id="p5-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>find / some / every</h3>
+      <p>find returns the first match. some checks if ANY item matches. every checks if ALL items match.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-6-code"></code></pre>
+<textarea class="cell-input" id="p5-6-input" spellcheck="false">const users = [
+  { name: "Alice", active: true },
+  { name: "Bob", active: false },
+];
+
+console.log(users.find(u => !u.active));       // Bob's object
+console.log(users.some(u => u.active));        // true
+console.log(users.every(u => u.active));       // false</textarea>
+        </div>
+        <div class="cell-output" id="p5-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p6">
+  <div class="stage-head"><span class="stage-num">06</span><h2>Objects</h2></div>
+  <p class="stage-sub">Labeled data — the shape behind almost every real piece of information: a user, a config, an API response.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Object literals &amp; access</h3>
+      <p>Dot notation for known keys, bracket notation when the key is a variable or has special characters.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-1-code"></code></pre>
+<textarea class="cell-input" id="p6-1-input" spellcheck="false">const user = { name: "Alice", age: 28 };
+
+console.log(user.name);        // dot notation
+console.log(user["age"]);      // bracket notation
+
+const key = "name";
+console.log(user[key]);        // bracket notation with a variable key</textarea>
+        </div>
+        <div class="cell-output" id="p6-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Destructuring</h3>
+      <p>Pull properties out into their own variables in one line, instead of one assignment per property.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-2-code"></code></pre>
+<textarea class="cell-input" id="p6-2-input" spellcheck="false">const user = { name: "Alice", age: 28, city: "Nairobi" };
+
+const { name, age } = user;
+console.log(name, age);
+
+const { city: userCity } = user;   // rename while destructuring
+console.log(userCity);</textarea>
+        </div>
+        <div class="cell-output" id="p6-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>The spread operator ({...obj})</h3>
+      <p>Copies an object's properties into a new one — the standard way to update state immutably.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-3-code"></code></pre>
+<textarea class="cell-input" id="p6-3-input" spellcheck="false">const user = { name: "Alice", age: 28 };
+const updated = { ...user, age: 29 };
+
+console.log(user);      // { name: "Alice", age: 28 } — unchanged
+console.log(updated);   // { name: "Alice", age: 29 }</textarea>
+        </div>
+        <div class="cell-output" id="p6-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Object.keys / values / entries</h3>
+      <p>Three ways to loop over an object's contents, depending on what you actually need.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-4-code"></code></pre>
+<textarea class="cell-input" id="p6-4-input" spellcheck="false">const scores = { math: 90, science: 85 };
+
+console.log(Object.keys(scores));     // ["math", "science"]
+console.log(Object.values(scores));   // [90, 85]
+console.log(Object.entries(scores));  // [["math",90],["science",85]]</textarea>
+        </div>
+        <div class="cell-output" id="p6-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Computed property names</h3>
+      <p>Use a variable's VALUE as a key name, built dynamically instead of typed literally.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-5-code"></code></pre>
+<textarea class="cell-input" id="p6-5-input" spellcheck="false">const field = "email";
+const value = "a@example.com";
+
+const user = {
+  name: "Alice",
+  [field]: value,   // key becomes "email"
+};
+
+console.log(user);</textarea>
+        </div>
+        <div class="cell-output" id="p6-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Methods &amp; this</h3>
+      <p>A function stored as an object property — `this` inside it refers to the object it was called on.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-6-code"></code></pre>
+<textarea class="cell-input" id="p6-6-input" spellcheck="false">const counter = {
+  count: 0,
+  increment() {
+    this.count++;
+    return this.count;
+  },
+};
+
+console.log(counter.increment());
+console.log(counter.increment());</textarea>
+        </div>
+        <div class="cell-output" id="p6-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p7">
+  <div class="stage-head"><span class="stage-num">07</span><h2>Strings</h2></div>
+  <p class="stage-sub">Text manipulation — the methods you'll reach for constantly when cleaning up or formatting real data.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Template literals with expressions</h3>
+      <p>Any JavaScript expression works inside ${ } — not just variables.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-1-code"></code></pre>
+<textarea class="cell-input" id="p7-1-input" spellcheck="false">const price = 19.99;
+const qty = 3;
+console.log(`Total: $${(price * qty).toFixed(2)}`);</textarea>
+        </div>
+        <div class="cell-output" id="p7-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>slice / substring</h3>
+      <p>Extract part of a string by index — negative numbers count from the end.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-2-code"></code></pre>
+<textarea class="cell-input" id="p7-2-input" spellcheck="false">const text = "Hello, World!";
+console.log(text.slice(0, 5));    // "Hello"
+console.log(text.slice(7));       // "World!"
+console.log(text.slice(-6));      // "World!" — negative counts from the end</textarea>
+        </div>
+        <div class="cell-output" id="p7-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>split / join</h3>
+      <p>split turns a string into an array; join turns an array back into a string — often used together.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-3-code"></code></pre>
+<textarea class="cell-input" id="p7-3-input" spellcheck="false">const csv = "Alice,28,Nairobi";
+const parts = csv.split(",");
+console.log(parts);              // ["Alice","28","Nairobi"]
+
+const words = ["JS", "is", "fun"];
+console.log(words.join(" "));    // "JS is fun"</textarea>
+        </div>
+        <div class="cell-output" id="p7-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>includes / startsWith / endsWith</h3>
+      <p>Readable substring checks — no more manual indexOf() !== -1 comparisons.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-4-code"></code></pre>
+<textarea class="cell-input" id="p7-4-input" spellcheck="false">const email = "user@example.com";
+console.log(email.includes("@"));           // true
+console.log(email.startsWith("user"));      // true
+console.log(email.endsWith(".com"));        // true</textarea>
+        </div>
+        <div class="cell-output" id="p7-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>replace / replaceAll</h3>
+      <p>replace changes the first match; replaceAll changes every match — a common source of subtle bugs when confused.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-5-code"></code></pre>
+<textarea class="cell-input" id="p7-5-input" spellcheck="false">const text = "cat sat on the cat mat";
+console.log(text.replace("cat", "dog"));     // only the first "cat"
+console.log(text.replaceAll("cat", "dog"));  // every "cat"</textarea>
+        </div>
+        <div class="cell-output" id="p7-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>trim / padStart / padEnd</h3>
+      <p>Clean up whitespace, or pad a string to a fixed width — handy for aligning output or formatting IDs.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-6-code"></code></pre>
+<textarea class="cell-input" id="p7-6-input" spellcheck="false">const raw = "  hello  ";
+console.log(`[${raw.trim()}]`);          // "[hello]"
+
+console.log("7".padStart(3, "0"));       // "007"
+console.log("7".padEnd(3, "."));         // "7.."</textarea>
+        </div>
+        <div class="cell-output" id="p7-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p8">
+  <div class="stage-head"><span class="stage-num">08</span><h2>The DOM</h2></div>
+  <p class="stage-sub">Turning JavaScript loose on an actual web page. Each example below gets its own live mini-page to work on — safe to experiment with, changes nothing outside the box.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>querySelector / querySelectorAll</h3>
+      <p>querySelector returns the first match; querySelectorAll returns ALL matches, as a static list.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-1-code"></code></pre>
+<textarea class="cell-input" id="p8-1-input" spellcheck="false">sandbox.innerHTML = `
+  <ul>
+    <li class="item">Apple</li>
+    <li class="item">Banana</li>
+    <li class="item">Cherry</li>
+  </ul>
+`;
+
+const all = sandbox.querySelectorAll(".item");
+console.log("Found", all.length, "items");
+
+const first = sandbox.querySelector(".item");
+console.log("First item text:", first.textContent);</textarea>
+        </div>
+        <div class="cell-output" id="p8-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>textContent vs. innerHTML</h3>
+      <p>textContent treats everything as plain text. innerHTML parses it as real markup — a difference that also matters for security.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-2-code"></code></pre>
+<textarea class="cell-input" id="p8-2-input" spellcheck="false">sandbox.innerHTML = `<p id="demo"></p>`;
+const p = sandbox.querySelector("#demo");
+
+p.textContent = "<b>shows as literal text</b>";
+console.log("textContent result:", p.innerHTML);
+
+p.innerHTML = "<b>actually renders as bold</b>";
+console.log("innerHTML result:", p.innerHTML);</textarea>
+        </div>
+        <div class="cell-output" id="p8-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>classList — add / remove / toggle</h3>
+      <p>The clean way to control CSS classes from JS, instead of string-editing className by hand.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-3-code"></code></pre>
+<textarea class="cell-input" id="p8-3-input" spellcheck="false">sandbox.innerHTML = `<button id="btn" class="btn">Status</button>`;
+const btn = sandbox.querySelector("#btn");
+
+btn.classList.add("active");
+console.log(btn.className);
+
+btn.classList.remove("active");
+console.log(btn.className);
+
+btn.classList.toggle("active");
+console.log(btn.className);</textarea>
+        </div>
+        <div class="cell-output" id="p8-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Creating &amp; appending elements</h3>
+      <p>Build a new element with createElement, then attach it to the page with appendChild.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-4-code"></code></pre>
+<textarea class="cell-input" id="p8-4-input" spellcheck="false">sandbox.innerHTML = `<ul id="list"></ul>`;
+const list = sandbox.querySelector("#list");
+
+["Milk", "Eggs", "Bread"].forEach(item => {
+  const li = document.createElement("li");
+  li.textContent = item;
+  list.appendChild(li);
+});
+
+console.log("Items in list:", list.children.length);</textarea>
+        </div>
+        <div class="cell-output" id="p8-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Changing styles via JS</h3>
+      <p>element.style.property directly sets inline CSS — useful for one-off, dynamic changes.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-5-code"></code></pre>
+<textarea class="cell-input" id="p8-5-input" spellcheck="false">sandbox.innerHTML = `<div id="box" style="width:80px;height:40px;background:#ccc;"></div>`;
+const box = sandbox.querySelector("#box");
+
+box.style.background = "#2DD4BF";
+box.style.borderRadius = "8px";
+
+console.log("New background:", box.style.background);</textarea>
+        </div>
+        <div class="cell-output" id="p8-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Removing elements</h3>
+      <p>element.remove() takes it out of the page entirely — no parent lookup required, unlike the old removeChild approach.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-6-code"></code></pre>
+<textarea class="cell-input" id="p8-6-input" spellcheck="false">sandbox.innerHTML = `
+  <p id="a">Paragraph A</p>
+  <p id="b">Paragraph B</p>
+`;
+
+const b = sandbox.querySelector("#b");
+b.remove();
+
+console.log("Remaining paragraphs:", sandbox.querySelectorAll("p").length);</textarea>
+        </div>
+        <div class="cell-output" id="p8-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p9">
+  <div class="stage-head"><span class="stage-num">09</span><h2>Events</h2></div>
+  <p class="stage-sub">Making a page react to a person — clicks, typing, hovering. Try interacting with the little demos below; they're really listening.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>addEventListener basics</h3>
+      <p>Attach a function to run whenever a specific event happens on an element — click the button below for real.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-1-code"></code></pre>
+<textarea class="cell-input" id="p9-1-input" spellcheck="false">sandbox.innerHTML = `<button id="btn">Click me</button><p id="out">Not clicked yet</p>`;
+const btn = sandbox.querySelector("#btn");
+const out = sandbox.querySelector("#out");
+
+btn.addEventListener("click", () => {
+  out.textContent = "Button was clicked!";
+});
+console.log("Listener attached — click the button above");</textarea>
+        </div>
+        <div class="cell-output" id="p9-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>The event object &amp; e.target</h3>
+      <p>Every handler receives an event object — e.target tells you exactly which element triggered it.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-2-code"></code></pre>
+<textarea class="cell-input" id="p9-2-input" spellcheck="false">sandbox.innerHTML = `
+  <button class="color-btn" data-color="red">Red</button>
+  <button class="color-btn" data-color="blue">Blue</button>
+  <p id="out"></p>
+`;
+const out = sandbox.querySelector("#out");
+
+sandbox.querySelectorAll(".color-btn").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    out.textContent = "You picked: " + e.target.dataset.color;
+  });
+});
+console.log("Click a color button above");</textarea>
+        </div>
+        <div class="cell-output" id="p9-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Event delegation</h3>
+      <p>One listener on the parent handles clicks on any current OR future child — far more efficient than one listener per item.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-3-code"></code></pre>
+<textarea class="cell-input" id="p9-3-input" spellcheck="false">sandbox.innerHTML = `
+  <ul id="list">
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+  </ul>
+`;
+const list = sandbox.querySelector("#list");
+
+list.addEventListener("click", (e) => {
+  if (e.target.tagName === "LI") {
+    e.target.style.textDecoration = "line-through";
+  }
+});
+console.log("Click any item — one listener handles them all");</textarea>
+        </div>
+        <div class="cell-output" id="p9-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>preventDefault()</h3>
+      <p>Stops the browser's default action for an event — like a form reloading the page on submit.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-4-code"></code></pre>
+<textarea class="cell-input" id="p9-4-input" spellcheck="false">sandbox.innerHTML = `
+  <form id="form">
+    <input id="email" placeholder="email" />
+    <button type="submit">Submit</button>
+  </form>
+  <p id="out"></p>
+`;
+const form = sandbox.querySelector("#form");
+const out = sandbox.querySelector("#out");
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  out.textContent = "Form submitted without a page reload";
+});
+console.log("Submit the form above");</textarea>
+        </div>
+        <div class="cell-output" id="p9-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Keyboard events</h3>
+      <p>keydown fires on every key press — e.key tells you exactly which key.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-5-code"></code></pre>
+<textarea class="cell-input" id="p9-5-input" spellcheck="false">sandbox.innerHTML = `<input id="field" placeholder="Type here" /><p id="out"></p>`;
+const field = sandbox.querySelector("#field");
+const out = sandbox.querySelector("#out");
+
+field.addEventListener("keydown", (e) => {
+  out.textContent = "Last key pressed: " + e.key;
+});
+console.log("Type in the field above");</textarea>
+        </div>
+        <div class="cell-output" id="p9-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Mouse events — enter / leave</h3>
+      <p>mouseenter/mouseleave fire once per hover, unlike mouseover/mouseout which also fire for child elements.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-6-code"></code></pre>
+<textarea class="cell-input" id="p9-6-input" spellcheck="false">sandbox.innerHTML = `<div id="box" style="width:100px;height:60px;background:#ccc;"></div>`;
+const box = sandbox.querySelector("#box");
+
+box.addEventListener("mouseenter", () => box.style.background = "#F7DF1E");
+box.addEventListener("mouseleave", () => box.style.background = "#ccc");
+console.log("Hover over the box above");</textarea>
+        </div>
+        <div class="cell-output" id="p9-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p10">
+  <div class="stage-head"><span class="stage-num">10</span><h2>Asynchronous JavaScript</h2></div>
+  <p class="stage-sub">JavaScript runs one thing at a time — this is how it still handles waiting on a timer, a server, or a file without freezing.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>setTimeout — the building block</h3>
+      <p>Doesn't pause anything. It schedules code to run later while everything else keeps going.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p10-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p10-1-code"></code></pre>
+<textarea class="cell-input" id="p10-1-input" spellcheck="false">console.log("1. This runs first");
+
+setTimeout(() => {
+  console.log("3. This runs after 1 second");
+}, 1000);
+
+console.log("2. This runs second — setTimeout doesn't pause anything");</textarea>
+        </div>
+        <div class="cell-output" id="p10-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Callbacks</h3>
+      <p>The original pattern: pass a function to be called once the async work finishes.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p10-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p10-2-code"></code></pre>
+<textarea class="cell-input" id="p10-2-input" spellcheck="false">function fetchUser(id, callback) {
+  setTimeout(() => {
+    callback({ id, name: "Alice" });
+  }, 500);
+}
+
+console.log("Fetching user...");
+fetchUser(1, (user) => {
+  console.log("Got user:", user.name);
+});</textarea>
+        </div>
+        <div class="cell-output" id="p10-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Promises</h3>
+      <p>An object representing a value that will exist eventually — .then() for success, .catch() for failure.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p10-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p10-3-code"></code></pre>
+<textarea class="cell-input" id="p10-3-input" spellcheck="false">function fetchUser(id) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (id > 0) resolve({ id, name: "Alice" });
+      else reject(new Error("Invalid id"));
+    }, 500);
+  });
+}
+
+fetchUser(1)
+  .then(user => console.log("Resolved:", user.name))
+  .catch(err => console.log("Rejected:", err.message));</textarea>
+        </div>
+        <div class="cell-output" id="p10-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>async / await</h3>
+      <p>Lets asynchronous code read top-to-bottom like synchronous code — the modern default over .then() chains.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p10-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p10-4-code"></code></pre>
+<textarea class="cell-input" id="p10-4-input" spellcheck="false">function fetchUser(id) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve({ id, name: "Ada" }), 500);
+  });
+}
+
+async function main() {
+  console.log("Waiting for user...");
+  const user = await fetchUser(1);
+  console.log("Got:", user.name);
+}
+
+main();</textarea>
+        </div>
+        <div class="cell-output" id="p10-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Promise.all — run things in parallel</h3>
+      <p>Waits for every promise to finish, but they all run AT THE SAME TIME instead of one after another.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p10-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p10-5-code"></code></pre>
+<textarea class="cell-input" id="p10-5-input" spellcheck="false">function delay(ms, value) {
+  return new Promise(resolve => setTimeout(() => resolve(value), ms));
+}
+
+async function main() {
+  console.log("Fetching three things in parallel...");
+  const [a, b, c] = await Promise.all([
+    delay(300, "first"),
+    delay(500, "second"),
+    delay(200, "third"),
+  ]);
+  console.log("All done:", a, b, c);
+}
+
+main();</textarea>
+        </div>
+        <div class="cell-output" id="p10-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Simulated fetch with error handling</h3>
+      <p>The real shape of almost every API call you'll write — try/catch around an await.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p10-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p10-6-code"></code></pre>
+<textarea class="cell-input" id="p10-6-input" spellcheck="false">function simulatedFetch(url) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (url.includes("valid")) {
+        resolve({ status: 200, data: "Success!" });
+      } else {
+        reject(new Error("404 Not Found"));
+      }
+    }, 400);
+  });
+}
+
+async function loadData(url) {
+  try {
+    const response = await simulatedFetch(url);
+    console.log("Success:", response.data);
+  } catch (err) {
+    console.log("Error caught:", err.message);
+  }
+}
+
+loadData("/api/valid-endpoint");
+loadData("/api/broken-endpoint");</textarea>
+        </div>
+        <div class="cell-output" id="p10-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p11">
+  <div class="stage-head"><span class="stage-num">11</span><h2>Error handling</h2></div>
+  <p class="stage-sub">Real programs fail in expected ways. This is how you catch that on purpose, instead of letting the whole thing crash.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>try / catch</h3>
+      <p>Code in try runs normally; if it throws, execution jumps straight to catch instead of crashing the whole script.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p11-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p11-1-code"></code></pre>
+<textarea class="cell-input" id="p11-1-input" spellcheck="false">try {
+  const result = JSON.parse("{ invalid json");
+  console.log(result);
+} catch (err) {
+  console.log("Caught an error:", err.message);
+}</textarea>
+        </div>
+        <div class="cell-output" id="p11-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>finally</h3>
+      <p>Runs no matter what — whether the try block succeeded, failed, or even returned early. Perfect for cleanup.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p11-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p11-2-code"></code></pre>
+<textarea class="cell-input" id="p11-2-input" spellcheck="false">function process(value) {
+  try {
+    if (value < 0) throw new Error("Value must be positive");
+    console.log("Processing:", value);
+  } catch (err) {
+    console.log("Error:", err.message);
+  } finally {
+    console.log("Cleanup runs no matter what");
+  }
+}
+
+process(5);
+process(-1);</textarea>
+        </div>
+        <div class="cell-output" id="p11-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Custom error classes</h3>
+      <p>Extend the built-in Error class to create your own error types, carrying whatever extra detail you need.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p11-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p11-3-code"></code></pre>
+<textarea class="cell-input" id="p11-3-input" spellcheck="false">class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = "ValidationError";
+    this.field = field;
+  }
+}
+
+function validateAge(age) {
+  if (age < 0) throw new ValidationError("Age cannot be negative", "age");
+  return age;
+}
+
+try {
+  validateAge(-5);
+} catch (err) {
+  console.log(err.name + ":", err.message, "(field:", err.field + ")");
+}</textarea>
+        </div>
+        <div class="cell-output" id="p11-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Throwing errors on purpose</h3>
+      <p>throw immediately stops the current function and hands control to the nearest catch — your code decides what counts as an error.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p11-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p11-4-code"></code></pre>
+<textarea class="cell-input" id="p11-4-input" spellcheck="false">function divide(a, b) {
+  if (b === 0) {
+    throw new Error("Cannot divide by zero");
+  }
+  return a / b;
+}
+
+console.log(divide(10, 2));
+try {
+  console.log(divide(10, 0));
+} catch (err) {
+  console.log("Caught:", err.message);
+}</textarea>
+        </div>
+        <div class="cell-output" id="p11-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Error handling in async code</h3>
+      <p>try/catch works around await exactly like it does around synchronous code — the same mental model, no special cases.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p11-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p11-5-code"></code></pre>
+<textarea class="cell-input" id="p11-5-input" spellcheck="false">function riskyOperation() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error("Network timeout")), 300);
+  });
+}
+
+async function main() {
+  try {
+    await riskyOperation();
+  } catch (err) {
+    console.log("Async error caught:", err.message);
+  }
+}
+
+main();</textarea>
+        </div>
+        <div class="cell-output" id="p11-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Defensive validation</h3>
+      <p>Check your assumptions about input EARLY and throw a clear message — much easier to debug than a confusing crash three functions later.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p11-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p11-6-code"></code></pre>
+<textarea class="cell-input" id="p11-6-input" spellcheck="false">function createUser(data) {
+  if (!data.name) throw new Error("name is required");
+  if (typeof data.age !== "number") throw new Error("age must be a number");
+  return { name: data.name, age: data.age };
+}
+
+try {
+  console.log(createUser({ name: "Alice", age: 28 }));
+  console.log(createUser({ name: "Bob", age: "twenty" }));
+} catch (err) {
+  console.log("Validation failed:", err.message);
+}</textarea>
+        </div>
+        <div class="cell-output" id="p11-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="stage" id="p12">
+  <div class="stage-head"><span class="stage-num">12</span><h2>Classes &amp; modern JS</h2></div>
+  <p class="stage-sub">The syntax for organizing related data and behavior together — and the features that make it genuinely safe to use.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Class basics</h3>
+      <p>A blueprint for creating objects that share the same shape and behavior — constructor sets up each new instance.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p12-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p12-1-code"></code></pre>
+<textarea class="cell-input" id="p12-1-input" spellcheck="false">class Person {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  greet() {
+    return `Hi, I'm ${this.name}`;
+  }
+}
+
+const p = new Person("Ada", 28);
+console.log(p.greet());
+console.log(p.age);</textarea>
+        </div>
+        <div class="cell-output" id="p12-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Inheritance with extends</h3>
+      <p>A subclass gets everything the parent has, and can override just the parts that need to differ.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p12-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p12-2-code"></code></pre>
+<textarea class="cell-input" id="p12-2-input" spellcheck="false">class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+  speak() {
+    return `${this.name} makes a sound`;
+  }
+}
+
+class Dog extends Animal {
+  speak() {
+    return `${this.name} barks`;
+  }
+}
+
+const generic = new Animal("Creature");
+const rex = new Dog("Rex");
+console.log(generic.speak());
+console.log(rex.speak());
+console.log(rex instanceof Animal);</textarea>
+        </div>
+        <div class="cell-output" id="p12-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Getters &amp; setters</h3>
+      <p>get/set let a property read like data but run real logic behind the scenes — including validation on write.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p12-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p12-3-code"></code></pre>
+<textarea class="cell-input" id="p12-3-input" spellcheck="false">class Circle {
+  constructor(radius) {
+    this._radius = radius;
+  }
+  get area() {
+    return Math.PI * this._radius ** 2;
+  }
+  set radius(value) {
+    if (value <= 0) throw new Error("Radius must be positive");
+    this._radius = value;
+  }
+}
+
+const c = new Circle(5);
+console.log(c.area.toFixed(2));
+c.radius = 10;
+console.log(c.area.toFixed(2));</textarea>
+        </div>
+        <div class="cell-output" id="p12-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Static methods</h3>
+      <p>Called on the class itself, never on an instance — for utility functions that logically belong to the class.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p12-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p12-4-code"></code></pre>
+<textarea class="cell-input" id="p12-4-input" spellcheck="false">class MathHelper {
+  static double(n) {
+    return n * 2;
+  }
+  static square(n) {
+    return n * n;
+  }
+}
+
+console.log(MathHelper.double(5));
+console.log(MathHelper.square(5));</textarea>
+        </div>
+        <div class="cell-output" id="p12-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Private fields (#)</h3>
+      <p>A # prefix makes a field truly inaccessible from outside the class — not just a naming convention, actually enforced.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p12-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p12-5-code"></code></pre>
+<textarea class="cell-input" id="p12-5-input" spellcheck="false">class BankAccount {
+  #balance = 0;
+
+  deposit(amount) {
+    this.#balance += amount;
+    return this.#balance;
+  }
+  get balance() {
+    return this.#balance;
+  }
+}
+
+const account = new BankAccount();
+account.deposit(100);
+console.log(account.balance);
+console.log(account.deposit(50));
+// account.#balance from outside would throw a SyntaxError</textarea>
+        </div>
+        <div class="cell-output" id="p12-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Polymorphism</h3>
+      <p>Different classes responding to the same method call, each in their own way — the payoff of a shared parent class.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p12-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p12-6-code"></code></pre>
+<textarea class="cell-input" id="p12-6-input" spellcheck="false">class Shape {
+  area() { return 0; }
+}
+class Square extends Shape {
+  constructor(side) { super(); this.side = side; }
+  area() { return this.side ** 2; }
+}
+class Circle extends Shape {
+  constructor(radius) { super(); this.radius = radius; }
+  area() { return (Math.PI * this.radius ** 2).toFixed(2); }
+}
+
+const shapes = [new Square(4), new Circle(3)];
+shapes.forEach(shape => {
+  console.log(shape.constructor.name, "area:", shape.area());
+});</textarea>
+        </div>
+        <div class="cell-output" id="p12-6-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stage" id="roadmap">
+  <div class="stage-head"><span class="stage-num">13</span><h2>What to build next</h2></div>
+  <p class="stage-sub">Six small projects, in order — each one forces you to combine several parts above instead of using them in isolation.</p>
+  <div class="roadmap" id="roadmap-list">
+    <div class="road-item" data-idx="0"><div class="road-check">1</div><div class="road-body"><h4>A to-do list</h4><p>Arrays, DOM creation, and events — add, remove, and mark items complete.</p></div></div>
+    <div class="road-item" data-idx="1"><div class="road-check">2</div><div class="road-body"><h4>A form with live validation</h4><p>Events, string methods, and error handling — validate as the user types, not just on submit.</p></div></div>
+    <div class="road-item" data-idx="2"><div class="road-check">3</div><div class="road-body"><h4>A countdown timer</h4><p>setTimeout, control flow, and DOM updates working together every second.</p></div></div>
+    <div class="road-item" data-idx="3"><div class="road-check">4</div><div class="road-body"><h4>A simulated API dashboard</h4><p>async/await, Promise.all, and try/catch — loading states and error states, not just the happy path.</p></div></div>
+    <div class="road-item" data-idx="4"><div class="road-check">5</div><div class="road-body"><h4>A small class-based app</h4><p>A Cart class with private fields and methods — this is where classes stop feeling academic.</p></div></div>
+    <div class="road-item" data-idx="5"><div class="road-check">6</div><div class="road-body"><h4>Refactor project 1 using everything above</h4><p>Rebuild the to-do list with classes, closures, and proper error handling — the same feature, visibly more solid code.</p></div></div>
+  </div>
+</section>
+
+<footer>Vanilla JavaScript: Zero to Mastery — every example above ran in your actual browser, not a simulation.</footer>
+
+</main>
+
+<script>
+hljs.highlightAll();
+
+/* =========================================================
+   LIVE SYNTAX HIGHLIGHTING (textarea + hljs overlay)
+   ========================================================= */
+function highlightPair(inputEl, codeEl){
+  codeEl.textContent = inputEl.value;
+  delete codeEl.dataset.highlighted;
+  codeEl.className = 'language-javascript';
+  hljs.highlightElement(codeEl);
+}
+function autoGrow(inputEl){
+  inputEl.style.height = 'auto';
+  inputEl.style.height = inputEl.scrollHeight + 'px';
+}
+function syncScrollPair(inputEl, preEl){
+  preEl.scrollTop = inputEl.scrollTop;
+  preEl.scrollLeft = inputEl.scrollLeft;
+}
+function wireHighlight(inputId, codeId){
+  const inputEl = document.getElementById(inputId);
+  const codeEl = document.getElementById(codeId);
+  if(!inputEl || !codeEl) return;
+  const preEl = codeEl.parentElement;
+  highlightPair(inputEl, codeEl);
+  autoGrow(inputEl);
+  inputEl.addEventListener('input', () => { highlightPair(inputEl, codeEl); autoGrow(inputEl); syncScrollPair(inputEl, preEl); });
+  inputEl.addEventListener('scroll', () => syncScrollPair(inputEl, preEl));
+  inputEl.addEventListener('keydown', (e) => {
+    if(e.key === 'Tab'){
+      e.preventDefault();
+      const start = inputEl.selectionStart, end = inputEl.selectionEnd;
+      inputEl.value = inputEl.value.slice(0, start) + '  ' + inputEl.value.slice(end);
+      inputEl.selectionStart = inputEl.selectionEnd = start + 2;
+      highlightPair(inputEl, codeEl);
+      autoGrow(inputEl);
+    }
+  });
+}
+document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(ta => {
+  wireHighlight(ta.id, ta.id.replace(/-input$/, '-code'));
+});
+window.addEventListener('load', () => {
+  document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(autoGrow);
+});
+let _resizeDebounce;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeDebounce);
+  _resizeDebounce = setTimeout(() => {
+    document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(autoGrow);
+  }, 150);
+});
+
+/* =========================================================
+   LIVE JS EXECUTION ENGINE
+   Real browser JS — no transpiler, no sandboxed VM needed.
+   Every cell gets its own scratch DOM node ("sandbox") so
+   DOM/event examples have something safe to manipulate.
+   ========================================================= */
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmt(a){
+  if(a === undefined) return 'undefined';
+  if(a === null) return 'null';
+  if(typeof a === 'object'){
+    try { return JSON.stringify(a); } catch(e){ return String(a); }
+  }
+  return String(a);
+}
+
+function runJsCell(id){
+  const code = document.getElementById(id + '-input').value;
+  const outputEl = document.getElementById(id + '-output');
+  outputEl.innerHTML = '';
+
+  const sandbox = document.createElement('div');
+  sandbox.className = 'dom-preview';
+  sandbox.style.display = 'none';
+  outputEl.appendChild(sandbox);
+
+  function appendLine(text, cls){
+    const div = document.createElement('div');
+    div.className = 'out-line' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    outputEl.appendChild(div);
+    outputEl.scrollTop = outputEl.scrollHeight;
+    if(sandbox.innerHTML.trim()) sandbox.style.display = 'block';
+  }
+
+  const sandboxConsole = {
+    log:   (...a) => appendLine(a.map(fmt).join(' ')),
+    warn:  (...a) => appendLine(a.map(fmt).join(' ')),
+    error: (...a) => appendLine(a.map(fmt).join(' '), 'cell-err'),
+  };
+
+  try{
+    // wrapped in an async IIFE so every example can use `await` freely,
+    // whether or not it actually needs to
+    const NL = String.fromCharCode(10); // avoids escape-sequence ambiguity entirely
+    const fn = new Function('sandbox', 'console', 'return (async () => {' + NL + code + NL + '})()');
+    const result = fn(sandbox, sandboxConsole);
+    if(result && typeof result.catch === 'function'){
+      result.catch(err => appendLine(String(err && err.message || err), 'cell-err'));
+    }
+  } catch(err){
+    appendLine(String(err && err.message || err), 'cell-err');
+  }
+
+  // give async examples a moment before deciding there's truly nothing to show
+  setTimeout(() => {
+    if(!outputEl.querySelector('.out-line') && !sandbox.innerHTML.trim()){
+      appendLine('(no console output)', 'cell-dim');
+    }
+  }, 60);
+}
+
+// run every example once on load — complete worked examples, not click-to-reveal
+document.querySelectorAll('.cell-input-wrap textarea.cell-input').forEach(ta => {
+  runJsCell(ta.id.replace(/-input$/, ''));
+});
+
+/* =========================================================
+   ROADMAP TOGGLES
+   ========================================================= */
+document.querySelectorAll('.road-item').forEach(item => {
+  item.addEventListener('click', () => {
+    item.classList.toggle('done');
+    if(item.classList.contains('done')) item.querySelector('.road-check').textContent = '✓';
+    else item.querySelector('.road-check').textContent = (parseInt(item.dataset.idx) + 1);
+  });
+});
+
+/* =========================================================
+   SCROLL PROGRESS + NAV SCROLL-SPY
+   ========================================================= */
+const progressBar = document.getElementById('scrollProgress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progressBar.style.width = scrolled + '%';
+}
+window.addEventListener('scroll', updateProgress, {passive:true});
+updateProgress();
+
+const navLinks = Array.from(document.querySelectorAll('.navlinks a'));
+const navSections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+function updateActiveNav(){
+  let current = navSections[0];
+  for(const sec of navSections){
+    if(sec.getBoundingClientRect().top - 90 <= 0) current = sec;
+  }
+  navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+updateActiveNav();
+
+/* =========================================================
+   SCROLL REVEAL
+   ========================================================= */
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window){
+  document.querySelectorAll('.stage').forEach(sec => {
+    sec.style.opacity = '0';
+    sec.style.transform = 'translateY(14px)';
+    sec.style.transition = 'opacity .6s ease, transform .6s ease';
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'none';
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.05, rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('.stage').forEach(sec => io.observe(sec));
+}
+</script>
+</body>
+</html>
