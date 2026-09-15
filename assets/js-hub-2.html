@@ -165,6 +165,8 @@ pre code{font-family:var(--mono) !important;}
 .cell-lang{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px;}
 .cell-lang::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber);}
 .cell-bar .run-btn{margin-left:auto;}
+.cell-bar .expand-btn{margin-left:6px;}
+.expanded-source{display:none;}
 
 .cell-input-wrap{position:relative;min-width:0;}
 .cell-highlight{
@@ -192,7 +194,36 @@ pre code{font-family:var(--mono) !important;}
 .cell-output .cell-placeholder{color:var(--text-faint);}
 .cell-output .cell-err{color:var(--red);}
 .cell-output .cell-dim{color:var(--text-faint);}
-.cell-output .dom-preview{background:#fff;color:#111;border-radius:6px;padding:10px;margin-top:6px;font-family:var(--body);}
+.cell-output .dom-preview{background:#fff;color:#111;border-radius:6px;padding:12px;margin-bottom:8px;font-family:var(--body);line-height:1.5;}
+/* baseline styling for whatever raw HTML an example injects — otherwise
+   plain <button>/<input>/<ul> render as stark, unstyled OS widgets that
+   look broken against the rest of this page, even though they work fine */
+.dom-preview button{
+  font-family:var(--body);font-size:13px;font-weight:600;color:#fff;background:var(--teal);
+  border:none;border-radius:6px;padding:7px 14px;cursor:pointer;transition:filter .15s;
+}
+.dom-preview button:hover{filter:brightness(1.08);}
+.dom-preview button:disabled{background:#ccc;cursor:not-allowed;}
+.dom-preview input, .dom-preview textarea{
+  font-family:var(--body);font-size:13px;color:#111;background:#fff;
+  border:1px solid #ccc;border-radius:6px;padding:7px 10px;outline:none;
+}
+.dom-preview input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,191,.15);}
+.dom-preview p{margin:8px 0 0;font-size:13px;color:#333;}
+.dom-preview p:first-child{margin-top:0;}
+.dom-preview ul, .dom-preview ol{margin:0;padding-left:20px;font-size:13px;}
+.dom-preview .truncated{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+.dom-preview dialog{border:none;border-radius:10px;padding:18px;box-shadow:0 20px 50px -20px rgba(0,0,0,.4);}
+.dom-preview dialog::backdrop{background:rgba(0,0,0,.4);}
+.dom-preview .menu-item{padding:6px 10px;font-size:12.5px;border-radius:4px;cursor:pointer;}
+.dom-preview .menu-item:hover{background:#f0f0f0;}
+.dom-preview .tab-btn{background:#eee;color:#333;margin-right:4px;}
+.dom-preview .tab-btn.active{background:var(--teal);color:#fff;}
+.dom-preview .acc-header{width:100%;text-align:left;background:#f4f4f4;color:#111;}
+.dom-preview .acc-body{padding:10px 4px 0;font-size:12.5px;color:#444;}
+.dom-preview li{margin:3px 0;}
+.dom-preview form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.dom-preview div[id]{font-size:12px;}
 
 /* ============ ROADMAP ============ */
 .roadmap{position:relative;margin-top:8px;}
@@ -227,6 +258,7 @@ footer{text-align:center;padding:46px 26px 64px;color:var(--text-faint);font-siz
     <a href="#p7">Strings</a>
     <a href="#p8">DOM</a>
     <a href="#p9">Events</a>
+    <a href="#pui">UI Patterns</a>
     <a href="#p10">Async</a>
     <a href="#p11">Errors</a>
     <a href="#p12">Classes</a>
@@ -240,7 +272,7 @@ footer{text-align:center;padding:46px 26px 64px;color:var(--text-faint);font-siz
   <p class="lede">Every example on this page runs in your actual browser as you read it — nothing is simulated. Twelve parts, six complete worked examples each, in the order a real curriculum teaches them: from a variable to a class with private fields.</p>
   <div class="hero-meta">
     <div class="stat"><b>12</b><span>Parts</span></div>
-    <div class="stat"><b>72</b><span>Live examples</span></div>
+    <div class="stat"><b>100</b><span>Live examples</span></div>
     <div class="stat"><b>Live</b><span>Real browser JS engine</span></div>
     <div class="stat"><b>0</b><span>Build tools needed</span></div>
   </div>
@@ -447,7 +479,7 @@ console.log(!true);  // false</textarea>
       <h3><span class="icon"></span>The ternary operator</h3>
       <p>A one-line if/else that returns a value — perfect for a quick either/or decision.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-4')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-4')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p2-4', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-4-code"></code></pre>
 <textarea class="cell-input" id="p2-4-input" spellcheck="false">const age = 20;
@@ -456,6 +488,29 @@ console.log(status);
 
 const score = 85;
 console.log(score >= 90 ? "A" : score >= 80 ? "B" : "C");</textarea>
+<textarea class="expanded-source" id="p2-4-expanded" style="display:none">const age = 20;
+
+// the ternary "age >= 18 ? 'adult' : 'minor'" is shorthand for this:
+let status;
+if (age >= 18) {
+  status = "adult";
+} else {
+  status = "minor";
+}
+console.log(status);
+
+// a CHAINED ternary like "a ? b : c ? d : e" is really just
+// nested if/else statements, written compactly
+const score = 85;
+let grade;
+if (score >= 90) {
+  grade = "A";
+} else if (score >= 80) {
+  grade = "B";
+} else {
+  grade = "C";
+}
+console.log(grade);</textarea>
         </div>
         <div class="cell-output" id="p2-4-output"></div>
       </div>
@@ -464,7 +519,7 @@ console.log(score >= 90 ? "A" : score >= 80 ? "B" : "C");</textarea>
       <h3><span class="icon"></span>Nullish coalescing (??) vs. OR (||)</h3>
       <p>?? only falls back on null/undefined — || falls back on ANY falsy value, including 0 and "", which is often wrong.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-5')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-5')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p2-5', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-5-code"></code></pre>
 <textarea class="cell-input" id="p2-5-input" spellcheck="false">const votes = 0;
@@ -474,6 +529,34 @@ console.log(votes ?? 10);   // 0  — correct, 0 is not null/undefined
 
 const name = "";
 console.log(name ?? "Guest"); // "" — empty string is not nullish</textarea>
+<textarea class="expanded-source" id="p2-5-expanded" style="display:none">const votes = 0;
+
+// "votes || 10" is shorthand for: "if votes is FALSY, use 10 instead"
+let result1;
+if (votes) {
+  result1 = votes;
+} else {
+  result1 = 10;   // 0 is falsy, so this branch runs — WRONG for a vote count!
+}
+console.log(result1);
+
+// "votes ?? 10" is shorthand for: "if votes is null OR undefined, use 10"
+let result2;
+if (votes === null || votes === undefined) {
+  result2 = 10;
+} else {
+  result2 = votes;   // 0 is neither null nor undefined, so 0 is kept — correct
+}
+console.log(result2);
+
+const name = "";
+let result3;
+if (name === null || name === undefined) {
+  result3 = "Guest";
+} else {
+  result3 = name;   // "" is not nullish, so it's kept as-is
+}
+console.log(result3);</textarea>
         </div>
         <div class="cell-output" id="p2-5-output"></div>
       </div>
@@ -482,7 +565,7 @@ console.log(name ?? "Guest"); // "" — empty string is not nullish</textarea>
       <h3><span class="icon"></span>Optional chaining (?.)</h3>
       <p>Safely read a nested property that might not exist, without a crash or a manual check first.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-6')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p2-6')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p2-6', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p2-6-code"></code></pre>
 <textarea class="cell-input" id="p2-6-input" spellcheck="false">const user = { profile: { city: "Nairobi" } };
@@ -491,6 +574,30 @@ const guest = {};
 console.log(user?.profile?.city);   // "Nairobi"
 console.log(guest?.profile?.city);  // undefined — no error thrown
 // without ?. this would throw: Cannot read properties of undefined</textarea>
+<textarea class="expanded-source" id="p2-6-expanded" style="display:none">const user = { profile: { city: "Nairobi" } };
+const guest = {};
+
+// "user?.profile?.city" is shorthand for manually checking every
+// step exists before reading the next one:
+let cityA;
+if (user && user.profile) {
+  cityA = user.profile.city;
+} else {
+  cityA = undefined;
+}
+console.log(cityA);
+
+// same manual check on "guest", which has no .profile at all
+let cityB;
+if (guest && guest.profile) {
+  cityB = guest.profile.city;
+} else {
+  cityB = undefined;   // stops safely here instead of crashing
+}
+console.log(cityB);
+
+// without the manual check (or ?.), this next line would throw:
+// guest.profile.city  ->  TypeError: Cannot read properties of undefined</textarea>
         </div>
         <div class="cell-output" id="p2-6-output"></div>
       </div>
@@ -650,13 +757,28 @@ console.log(multiply(2, 3));</textarea>
       <h3><span class="icon"></span>Arrow functions</h3>
       <p>Shorter syntax, and — importantly — no own `this`, which fixes a common bug from regular functions in callbacks.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-2')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p4-2')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p4-2', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p4-2-code"></code></pre>
 <textarea class="cell-input" id="p4-2-input" spellcheck="false">const square = (n) => n * n;
 console.log(square(5));
 
 const greet = (name) => {
+  const message = `Hello, ${name}!`;
+  return message;
+};
+console.log(greet("Ada"));</textarea>
+<textarea class="expanded-source" id="p4-2-expanded" style="display:none">// "const square = (n) => n * n;" is shorthand for a full function
+// that automatically returns the expression after the arrow
+const square = function (n) {
+  return n * n;
+};
+console.log(square(5));
+
+// arrow functions with a { } body work exactly like a regular
+// function — the only real difference is arrow functions don't
+// have their own "this"
+const greet = function (name) {
   const message = `Hello, ${name}!`;
   return message;
 };
@@ -788,7 +910,7 @@ console.log(queue);    // ["b","c"]</textarea>
       <h3><span class="icon"></span>map() — transform every item</h3>
       <p>Returns a brand NEW array — the original is never changed.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-3')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-3')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p5-3', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-3-code"></code></pre>
 <textarea class="cell-input" id="p5-3-input" spellcheck="false">const numbers = [1, 2, 3, 4];
@@ -796,6 +918,18 @@ const doubled = numbers.map(n => n * 2);
 
 console.log(doubled);   // [2, 4, 6, 8]
 console.log(numbers);   // [1, 2, 3, 4] — unchanged</textarea>
+<textarea class="expanded-source" id="p5-3-expanded" style="display:none">const numbers = [1, 2, 3, 4];
+
+// ".map(n => n * 2)" is shorthand for looping and building a
+// new array by hand:
+const doubled = [];
+for (let i = 0; i < numbers.length; i++) {
+  const transformed = numbers[i] * 2;
+  doubled.push(transformed);
+}
+
+console.log(doubled);   // [2, 4, 6, 8]
+console.log(numbers);   // [1, 2, 3, 4] — the original is never touched</textarea>
         </div>
         <div class="cell-output" id="p5-3-output"></div>
       </div>
@@ -804,11 +938,23 @@ console.log(numbers);   // [1, 2, 3, 4] — unchanged</textarea>
       <h3><span class="icon"></span>filter() — keep only some items</h3>
       <p>Returns a new array with only the items where the function returned true.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-4')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-4')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p5-4', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-4-code"></code></pre>
 <textarea class="cell-input" id="p5-4-input" spellcheck="false">const ages = [12, 18, 25, 16, 30];
 const adults = ages.filter(age => age >= 18);
+
+console.log(adults);   // [18, 25, 30]</textarea>
+<textarea class="expanded-source" id="p5-4-expanded" style="display:none">const ages = [12, 18, 25, 16, 30];
+
+// ".filter(age => age >= 18)" is shorthand for looping and only
+// keeping the items that pass a test:
+const adults = [];
+for (let i = 0; i < ages.length; i++) {
+  if (ages[i] >= 18) {
+    adults.push(ages[i]);
+  }
+}
 
 console.log(adults);   // [18, 25, 30]</textarea>
         </div>
@@ -819,7 +965,7 @@ console.log(adults);   // [18, 25, 30]</textarea>
       <h3><span class="icon"></span>reduce() — combine into one value</h3>
       <p>The most flexible array method — sums, builds objects, flattens arrays, all with the same shape.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-5')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-5')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p5-5', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-5-code"></code></pre>
 <textarea class="cell-input" id="p5-5-input" spellcheck="false">const prices = [10, 20, 30];
@@ -829,6 +975,23 @@ console.log(total);   // 60
 const words = ["JS", "is", "fun"];
 const sentence = words.reduce((acc, word) => acc + " " + word);
 console.log(sentence);</textarea>
+<textarea class="expanded-source" id="p5-5-expanded" style="display:none">const prices = [10, 20, 30];
+
+// ".reduce((sum, price) => sum + price, 0)" is shorthand for
+// keeping a running total as you loop, starting from 0:
+let total = 0;                 // this 0 is the starting value passed to reduce
+for (let i = 0; i < prices.length; i++) {
+  total = total + prices[i];   // update the running total each time
+}
+console.log(total);   // 60
+
+// without a starting value, reduce just starts from the array's first item
+const words = ["JS", "is", "fun"];
+let sentence = words[0];
+for (let i = 1; i < words.length; i++) {
+  sentence = sentence + " " + words[i];
+}
+console.log(sentence);</textarea>
         </div>
         <div class="cell-output" id="p5-5-output"></div>
       </div>
@@ -837,7 +1000,7 @@ console.log(sentence);</textarea>
       <h3><span class="icon"></span>find / some / every</h3>
       <p>find returns the first match. some checks if ANY item matches. every checks if ALL items match.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-6')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p5-6')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p5-6', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p5-6-code"></code></pre>
 <textarea class="cell-input" id="p5-6-input" spellcheck="false">const users = [
@@ -848,6 +1011,40 @@ console.log(sentence);</textarea>
 console.log(users.find(u => !u.active));       // Bob's object
 console.log(users.some(u => u.active));        // true
 console.log(users.every(u => u.active));       // false</textarea>
+<textarea class="expanded-source" id="p5-6-expanded" style="display:none">const users = [
+  { name: "Alice", active: true },
+  { name: "Bob", active: false },
+];
+
+// ".find()" is shorthand for looping and stopping at the FIRST match
+let firstInactive = undefined;
+for (let i = 0; i < users.length; i++) {
+  if (!users[i].active) {
+    firstInactive = users[i];
+    break;   // stop as soon as one is found
+  }
+}
+console.log(firstInactive);
+
+// ".some()" is shorthand for looping and checking if ANY item passes
+let anyActive = false;
+for (let i = 0; i < users.length; i++) {
+  if (users[i].active) {
+    anyActive = true;
+    break;
+  }
+}
+console.log(anyActive);
+
+// ".every()" is shorthand for looping and checking if ALL items pass
+let allActive = true;
+for (let i = 0; i < users.length; i++) {
+  if (!users[i].active) {
+    allActive = false;
+    break;
+  }
+}
+console.log(allActive);</textarea>
         </div>
         <div class="cell-output" id="p5-6-output"></div>
       </div>
@@ -882,7 +1079,7 @@ console.log(user[key]);        // bracket notation with a variable key</textarea
       <h3><span class="icon"></span>Destructuring</h3>
       <p>Pull properties out into their own variables in one line, instead of one assignment per property.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-2')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-2')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p6-2', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-2-code"></code></pre>
 <textarea class="cell-input" id="p6-2-input" spellcheck="false">const user = { name: "Alice", age: 28, city: "Nairobi" };
@@ -892,6 +1089,18 @@ console.log(name, age);
 
 const { city: userCity } = user;   // rename while destructuring
 console.log(userCity);</textarea>
+<textarea class="expanded-source" id="p6-2-expanded" style="display:none">const user = { name: "Alice", age: 28, city: "Nairobi" };
+
+// "const { name, age } = user;" is shorthand for pulling out
+// each property manually into its own variable:
+const name = user.name;
+const age = user.age;
+console.log(name, age);
+
+// "const { city: userCity } = user;" additionally renames the
+// variable while pulling it out:
+const userCity = user.city;
+console.log(userCity);</textarea>
         </div>
         <div class="cell-output" id="p6-2-output"></div>
       </div>
@@ -900,13 +1109,25 @@ console.log(userCity);</textarea>
       <h3><span class="icon"></span>The spread operator ({...obj})</h3>
       <p>Copies an object's properties into a new one — the standard way to update state immutably.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-3')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p6-3')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p6-3', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p6-3-code"></code></pre>
 <textarea class="cell-input" id="p6-3-input" spellcheck="false">const user = { name: "Alice", age: 28 };
 const updated = { ...user, age: 29 };
 
 console.log(user);      // { name: "Alice", age: 28 } — unchanged
+console.log(updated);   // { name: "Alice", age: 29 }</textarea>
+<textarea class="expanded-source" id="p6-3-expanded" style="display:none">const user = { name: "Alice", age: 28 };
+
+// "{ ...user, age: 29 }" is shorthand for copying every property
+// of "user" into a brand new object, then overwriting just "age":
+const updated = {};
+for (const key in user) {
+  updated[key] = user[key];   // copy each property across
+}
+updated.age = 29;              // then apply the override
+
+console.log(user);      // { name: "Alice", age: 28 } — original untouched
 console.log(updated);   // { name: "Alice", age: 29 }</textarea>
         </div>
         <div class="cell-output" id="p6-3-output"></div>
@@ -981,12 +1202,22 @@ console.log(counter.increment());</textarea>
       <h3><span class="icon"></span>Template literals with expressions</h3>
       <p>Any JavaScript expression works inside ${ } — not just variables.</p>
       <div class="cell" data-cell>
-        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-1')">▶ Run</button></div>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p7-1')">▶ Run</button><button class="btn alt small expand-btn" data-state="compact" onclick="toggleExpand('p7-1', this)">⤢ Show expanded</button></div>
         <div class="cell-input-wrap">
 <pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p7-1-code"></code></pre>
 <textarea class="cell-input" id="p7-1-input" spellcheck="false">const price = 19.99;
 const qty = 3;
 console.log(`Total: $${(price * qty).toFixed(2)}`);</textarea>
+<textarea class="expanded-source" id="p7-1-expanded" style="display:none">const price = 19.99;
+const qty = 3;
+
+// the template literal below is shorthand for building the same
+// string with plain concatenation:
+const total = (price * qty).toFixed(2);   // compute the value FIRST
+const message = "Total: $" + total;       // then glue the pieces together
+console.log(message);
+
+// this is exactly what `Total: $${(price * qty).toFixed(2)}` does in one line</textarea>
         </div>
         <div class="cell-output" id="p7-1-output"></div>
       </div>
@@ -1074,7 +1305,7 @@ console.log("7".padEnd(3, "."));         // "7.."</textarea>
 
 <section class="stage" id="p8">
   <div class="stage-head"><span class="stage-num">08</span><h2>The DOM</h2></div>
-  <p class="stage-sub">Turning JavaScript loose on an actual web page. Each example below gets its own live mini-page to work on — safe to experiment with, changes nothing outside the box.</p>
+  <p class="stage-sub">Turning JavaScript loose on an actual web page. Each example below gets its own live mini-page to work on — safe to experiment with, changes nothing outside the box. Sixteen examples here — this is the part that matters most for real web work.</p>
   <div class="grid2">
     <div class="card">
       <h3><span class="icon"></span>querySelector / querySelectorAll</h3>
@@ -1200,13 +1431,226 @@ console.log("Remaining paragraphs:", sandbox.querySelectorAll("p").length);</tex
         <div class="cell-output" id="p8-6-output"></div>
       </div>
     </div>
+      <div class="card">
+      <h3><span class="icon"></span>getElementById vs. getElementsByClassName</h3>
+      <p>getElementById only exists on `document` itself, never on another element — getElementsByClassName works on any node and returns a LIVE list.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-7')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-7-code"></code></pre>
+<textarea class="cell-input" id="p8-7-input" spellcheck="false">sandbox.innerHTML = `
+  <div id="p8x7-widget" class="note">First note</div>
+  <div class="note">Second note</div>
+`;
+
+const widget = document.getElementById("p8x7-widget");
+console.log("By id:", widget.textContent);
+
+const notes = sandbox.getElementsByClassName("note");
+console.log("By class:", notes.length, "found");</textarea>
+        </div>
+        <div class="cell-output" id="p8-7-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>setAttribute / getAttribute / removeAttribute</h3>
+      <p>The general-purpose way to read or write ANY HTML attribute, not just the common ones with their own shortcut property.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-8')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-8-code"></code></pre>
+<textarea class="cell-input" id="p8-8-input" spellcheck="false">sandbox.innerHTML = `<a class="link">Visit site</a>`;
+const link = sandbox.querySelector(".link");
+
+link.setAttribute("href", "https://example.com");
+link.setAttribute("target", "_blank");
+console.log("href is now:", link.getAttribute("href"));
+
+link.removeAttribute("target");
+console.log("target after removal:", link.getAttribute("target"));</textarea>
+        </div>
+        <div class="cell-output" id="p8-8-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>dataset — reading data-* attributes</h3>
+      <p>Every data-my-thing attribute becomes element.dataset.myThing automatically — camelCase, no manual parsing.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-9')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-9-code"></code></pre>
+<textarea class="cell-input" id="p8-9-input" spellcheck="false">sandbox.innerHTML = `<div id="card" data-user-id="42" data-role="admin">User card</div>`;
+const card = sandbox.querySelector("#card");
+
+console.log(card.dataset.userId);
+console.log(card.dataset.role);
+
+card.dataset.status = "active";   // writing creates data-status="active" on the element
+console.log(card.outerHTML);</textarea>
+        </div>
+        <div class="cell-output" id="p8-9-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>cloneNode — duplicating an element</h3>
+      <p>cloneNode(true) copies an element AND everything inside it — the standard way to stamp out repeated UI from one template.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-10')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-10-code"></code></pre>
+<textarea class="cell-input" id="p8-10-input" spellcheck="false">sandbox.innerHTML = `<div id="template" class="tag">Tag</div>`;
+const original = sandbox.querySelector("#template");
+
+const copy = original.cloneNode(true);
+copy.textContent = "Cloned Tag";
+copy.removeAttribute("id");
+sandbox.appendChild(copy);
+
+console.log("Elements now in sandbox:", sandbox.children.length);</textarea>
+        </div>
+        <div class="cell-output" id="p8-10-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>insertAdjacentHTML — precise positioning</h3>
+      <p>Insert markup at an exact position relative to an element, without rebuilding everything around it.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-11')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-11-code"></code></pre>
+<textarea class="cell-input" id="p8-11-input" spellcheck="false">sandbox.innerHTML = `<ul id="list"><li>Middle</li></ul>`;
+const list = sandbox.querySelector("#list");
+
+list.insertAdjacentHTML("afterbegin", "<li>First</li>");
+list.insertAdjacentHTML("beforeend", "<li>Last</li>");
+
+console.log([...list.children].map(li => li.textContent));</textarea>
+        </div>
+        <div class="cell-output" id="p8-11-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Traversal: parentElement, children, nextElementSibling</h3>
+      <p>Move around the tree relative to an element you already have, instead of querying from scratch.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-12')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-12-code"></code></pre>
+<textarea class="cell-input" id="p8-12-input" spellcheck="false">sandbox.innerHTML = `
+  <div id="parent">
+    <span id="first">A</span>
+    <span id="second">B</span>
+  </div>
+`;
+const first = sandbox.querySelector("#first");
+
+console.log("Parent tag:", first.parentElement.tagName);
+console.log("Sibling count:", first.parentElement.children.length);
+console.log("Next sibling text:", first.nextElementSibling.textContent);</textarea>
+        </div>
+        <div class="cell-output" id="p8-12-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>closest() — find a matching ancestor</h3>
+      <p>Walks UP the tree from an element until it finds one matching a selector — perfect inside a delegated event handler.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-13')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-13-code"></code></pre>
+<textarea class="cell-input" id="p8-13-input" spellcheck="false">sandbox.innerHTML = `
+  <div class="card">
+    <div class="card-body">
+      <button id="btn">Delete</button>
+    </div>
+  </div>
+`;
+const btn = sandbox.querySelector("#btn");
+
+const card = btn.closest(".card");
+console.log("Found ancestor with class:", card.className);</textarea>
+        </div>
+        <div class="cell-output" id="p8-13-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Toggling visibility with .hidden</h3>
+      <p>The hidden property is a clean boolean on/off switch — simpler than juggling style.display strings.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-14')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-14-code"></code></pre>
+<textarea class="cell-input" id="p8-14-input" spellcheck="false">sandbox.innerHTML = `<p id="msg">I can disappear</p><button id="toggle">Toggle</button>`;
+const msg = sandbox.querySelector("#msg");
+const toggle = sandbox.querySelector("#toggle");
+
+toggle.addEventListener("click", () => {
+  msg.hidden = !msg.hidden;
+});
+console.log("Click the button — hidden starts as", msg.hidden);</textarea>
+        </div>
+        <div class="cell-output" id="p8-14-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Building a table from real data</h3>
+      <p>The pattern behind almost every data-driven UI: loop over an array, create a row per item, append it.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-15')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-15-code"></code></pre>
+<textarea class="cell-input" id="p8-15-input" spellcheck="false">const users = [
+  { name: "Alice", role: "Admin" },
+  { name: "Bob", role: "Editor" },
+];
+
+sandbox.innerHTML = `<table id="tbl"><tr><th>Name</th><th>Role</th></tr></table>`;
+const table = sandbox.querySelector("#tbl");
+
+users.forEach(user => {
+  const row = document.createElement("tr");
+  row.innerHTML = `<td>${user.name}</td><td>${user.role}</td>`;
+  table.appendChild(row);
+});
+
+console.log("Rows in table:", table.querySelectorAll("tr").length);</textarea>
+        </div>
+        <div class="cell-output" id="p8-15-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Reading form values</h3>
+      <p>input.value for text, checkbox.checked for booleans — the two properties behind almost every form read.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p8-16')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p8-16-code"></code></pre>
+<textarea class="cell-input" id="p8-16-input" spellcheck="false">sandbox.innerHTML = `
+  <input id="name" value="Ada" />
+  <label><input type="checkbox" id="subscribe" checked /> Subscribe</label>
+  <button id="read">Read values</button>
+  <p id="out"></p>
+`;
+const read = sandbox.querySelector("#read");
+const out = sandbox.querySelector("#out");
+
+read.addEventListener("click", () => {
+  const name = sandbox.querySelector("#name").value;
+  const subscribed = sandbox.querySelector("#subscribe").checked;
+  out.textContent = name + " — subscribed: " + subscribed;
+});
+console.log("Click 'Read values' above");</textarea>
+        </div>
+        <div class="cell-output" id="p8-16-output"></div>
+      </div>
+    </div>
   </div>
 </section>
 
 
 <section class="stage" id="p9">
   <div class="stage-head"><span class="stage-num">09</span><h2>Events</h2></div>
-  <p class="stage-sub">Making a page react to a person — clicks, typing, hovering. Try interacting with the little demos below; they're really listening.</p>
+  <p class="stage-sub">Making a page react to a person — clicks, typing, hovering. Try interacting with the little demos below; they're really listening. Sixteen examples — the most practical section on this whole page.</p>
   <div class="grid2">
     <div class="card">
       <h3><span class="icon"></span>addEventListener basics</h3>
@@ -1339,9 +1783,493 @@ console.log("Hover over the box above");</textarea>
         <div class="cell-output" id="p9-6-output"></div>
       </div>
     </div>
+      <div class="card">
+      <h3><span class="icon"></span>Multiple listeners, one element</h3>
+      <p>Every listener attached fires, in the order it was added — they don't replace each other like onclick= would.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-7')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-7-code"></code></pre>
+<textarea class="cell-input" id="p9-7-input" spellcheck="false">sandbox.innerHTML = `<button id="btn">Click</button><p id="out"></p>`;
+const btn = sandbox.querySelector("#btn");
+const out = sandbox.querySelector("#out");
+let clicks = 0;
+
+btn.addEventListener("click", () => { clicks++; });
+btn.addEventListener("click", () => {
+  out.textContent = "Total clicks: " + clicks;
+});
+console.log("Both listeners fire on every click, in the order they were added");</textarea>
+        </div>
+        <div class="cell-output" id="p9-7-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>removeEventListener</h3>
+      <p>Needs a reference to the ORIGINAL function — this is exactly why inline arrow functions can't be removed later.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-8')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-8-code"></code></pre>
+<textarea class="cell-input" id="p9-8-input" spellcheck="false">sandbox.innerHTML = `<button id="btn">Click me (only works 3 times)</button><p id="out">0 clicks</p>`;
+const btn = sandbox.querySelector("#btn");
+const out = sandbox.querySelector("#out");
+let count = 0;
+
+function handleClick() {
+  count++;
+  out.textContent = count + " clicks";
+  if (count >= 3) {
+    btn.removeEventListener("click", handleClick);
+    out.textContent += " — listener removed";
+  }
+}
+btn.addEventListener("click", handleClick);
+console.log("Click the button up to 3 times");</textarea>
+        </div>
+        <div class="cell-output" id="p9-8-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>{ once: true }</h3>
+      <p>Tells the browser to remove the listener automatically right after it fires the first time — no manual cleanup needed.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-9')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-9-code"></code></pre>
+<textarea class="cell-input" id="p9-9-input" spellcheck="false">sandbox.innerHTML = `<button id="btn">Click me (works once)</button><p id="out">Not clicked</p>`;
+const btn = sandbox.querySelector("#btn");
+const out = sandbox.querySelector("#out");
+
+btn.addEventListener("click", () => {
+  out.textContent = "Fired! Click again — nothing happens now";
+}, { once: true });
+console.log("Click the button — then try clicking it again");</textarea>
+        </div>
+        <div class="cell-output" id="p9-9-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Bubbling &amp; stopPropagation</h3>
+      <p>A click on a child also fires its ancestors' click handlers by default — stopPropagation() is how you opt out.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-10')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-10-code"></code></pre>
+<textarea class="cell-input" id="p9-10-input" spellcheck="false">sandbox.innerHTML = `
+  <div id="outer" style="padding:16px;background:#eee;">
+    outer
+    <button id="inner">inner button</button>
+  </div>
+  <p id="out"></p>
+`;
+const out = sandbox.querySelector("#out");
+
+sandbox.querySelector("#outer").addEventListener("click", () => {
+  out.textContent = "Outer div's handler ran (event bubbled up)";
+});
+sandbox.querySelector("#inner").addEventListener("click", (e) => {
+  e.stopPropagation();
+  out.textContent = "Inner button's handler ran, bubbling stopped here";
+});
+console.log("Click the inner button");</textarea>
+        </div>
+        <div class="cell-output" id="p9-10-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Custom events</h3>
+      <p>Dispatch your own named event with CustomEvent — the standard way for unrelated pieces of code to talk without calling each other directly.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-11')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-11-code"></code></pre>
+<textarea class="cell-input" id="p9-11-input" spellcheck="false">sandbox.innerHTML = `<button id="btn">Trigger custom event</button><p id="out"></p>`;
+const btn = sandbox.querySelector("#btn");
+const out = sandbox.querySelector("#out");
+
+sandbox.addEventListener("user-logged-in", (e) => {
+  out.textContent = "Custom event received! User: " + e.detail.name;
+});
+
+btn.addEventListener("click", () => {
+  const event = new CustomEvent("user-logged-in", { detail: { name: "Ada" }, bubbles: true });
+  btn.dispatchEvent(event);
+});
+console.log("Click the button to dispatch a custom event");</textarea>
+        </div>
+        <div class="cell-output" id="p9-11-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>input vs. change</h3>
+      <p>input fires on every keystroke; change only fires once you commit the value (usually by clicking away).</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-12')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-12-code"></code></pre>
+<textarea class="cell-input" id="p9-12-input" spellcheck="false">sandbox.innerHTML = `<input id="field" placeholder="Type, then click away" /><p id="out">Waiting...</p>`;
+const field = sandbox.querySelector("#field");
+const out = sandbox.querySelector("#out");
+let inputCount = 0;
+
+field.addEventListener("input", () => {
+  inputCount++;
+  out.textContent = "input fired " + inputCount + " time(s)";
+});
+field.addEventListener("change", () => {
+  out.textContent = "change fired — only after you click away";
+});
+console.log("Type in the field, then click outside it");</textarea>
+        </div>
+        <div class="cell-output" id="p9-12-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Debouncing an input event</h3>
+      <p>Cancel and reschedule a timer on every keystroke — the real code behind a search box that doesn't fire on every letter.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-13')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-13-code"></code></pre>
+<textarea class="cell-input" id="p9-13-input" spellcheck="false">sandbox.innerHTML = `<input id="search" placeholder="Type to search..." /><p id="out">Waiting...</p>`;
+const search = sandbox.querySelector("#search");
+const out = sandbox.querySelector("#out");
+let timer;
+
+search.addEventListener("input", (e) => {
+  clearTimeout(timer);
+  out.textContent = "Typing...";
+  timer = setTimeout(() => {
+    out.textContent = "Searching for: \"" + e.target.value + "\"";
+  }, 500);
+});
+console.log("Type fast — the search only 'runs' 500ms after you stop");</textarea>
+        </div>
+        <div class="cell-output" id="p9-13-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>focus / blur</h3>
+      <p>Fire when an element gains or loses keyboard focus — the basis of live field-level validation styling.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-14')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-14-code"></code></pre>
+<textarea class="cell-input" id="p9-14-input" spellcheck="false">sandbox.innerHTML = `<input id="field" placeholder="Click in and out" /><p id="out">Not focused</p>`;
+const field = sandbox.querySelector("#field");
+const out = sandbox.querySelector("#out");
+
+field.addEventListener("focus", () => out.textContent = "Focused!");
+field.addEventListener("blur", () => out.textContent = "Lost focus");
+console.log("Click into the field, then click elsewhere");</textarea>
+        </div>
+        <div class="cell-output" id="p9-14-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>dblclick &amp; contextmenu</h3>
+      <p>Two events people forget exist — double-click, and intercepting the right-click menu.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-15')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-15-code"></code></pre>
+<textarea class="cell-input" id="p9-15-input" spellcheck="false">sandbox.innerHTML = `<div id="box" style="width:120px;height:60px;background:#eee;display:flex;align-items:center;justify-content:center;">Try me</div><p id="out"></p>`;
+const box = sandbox.querySelector("#box");
+const out = sandbox.querySelector("#out");
+
+box.addEventListener("dblclick", () => out.textContent = "Double-clicked!");
+box.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  out.textContent = "Right-click intercepted — no browser menu appeared";
+});
+console.log("Double-click or right-click the box above");</textarea>
+        </div>
+        <div class="cell-output" id="p9-15-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Capstone: click + keyboard together</h3>
+      <p>A counter driven by both a button and the keyboard — combining everything from this section into one small real widget.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('p9-16')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="p9-16-code"></code></pre>
+<textarea class="cell-input" id="p9-16-input" spellcheck="false">sandbox.innerHTML = `
+  <p id="count" style="font-size:24px;margin:0 0 8px;">0</p>
+  <button id="inc">+1 (click)</button>
+  <p style="font-size:11px;color:#666;margin-top:8px;">or click here first, then press the Up arrow key</p>
+`;
+sandbox.setAttribute("tabindex", "0");
+const countEl = sandbox.querySelector("#count");
+const inc = sandbox.querySelector("#inc");
+let count = 0;
+
+function bump() {
+  count++;
+  countEl.textContent = count;
+}
+
+inc.addEventListener("click", bump);
+sandbox.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowUp") bump();
+});
+console.log("Click the button, or click the sandbox then press the Up arrow");</textarea>
+        </div>
+        <div class="cell-output" id="p9-16-output"></div>
+      </div>
+    </div>
   </div>
 </section>
 
+
+
+<section class="stage" id="pui">
+  <div class="stage-head"><span class="stage-num">9b</span><h2>Practical UI patterns</h2></div>
+  <p class="stage-sub">The actual widgets you build on real projects, combining DOM and Events together — accordions, modals, tabs, dropdowns, and the other pieces every website is made of.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="icon"></span>Accordion / collapsible section</h3>
+      <p>The exact "hidden section" pattern behind every FAQ page and settings panel — content stays hidden until the header is clicked.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-1')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-1-code"></code></pre>
+<textarea class="cell-input" id="pui-1-input" spellcheck="false">sandbox.innerHTML = `
+  <div class="accordion">
+    <button id="acc-toggle" class="acc-header">What is an accordion? ▾</button>
+    <div id="acc-body" class="acc-body" hidden>
+      A collapsible section that hides content until the user clicks to
+      reveal it — used everywhere for FAQs, settings panels, and "show
+      more" details.
+    </div>
+  </div>
+`;
+const toggle = sandbox.querySelector("#acc-toggle");
+const body = sandbox.querySelector("#acc-body");
+
+toggle.addEventListener("click", () => {
+  // this ".hidden" flip IS the whole trick — everything else is styling
+  body.hidden = !body.hidden;
+  toggle.textContent = body.hidden
+    ? "What is an accordion? ▾"
+    : "What is an accordion? ▴";
+});
+console.log("Click the header above to expand/collapse the section");</textarea>
+        </div>
+        <div class="cell-output" id="pui-1-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Tabs</h3>
+      <p>Only one panel is ever visible at a time — clicking a tab hides every OTHER panel, then shows just the one that was clicked.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-2')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-2-code"></code></pre>
+<textarea class="cell-input" id="pui-2-input" spellcheck="false">sandbox.innerHTML = `
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="one">Tab One</button>
+    <button class="tab-btn" data-tab="two">Tab Two</button>
+  </div>
+  <div id="panel-one" class="tab-panel">Content for tab one.</div>
+  <div id="panel-two" class="tab-panel" hidden>Content for tab two.</div>
+`;
+const tabButtons = sandbox.querySelectorAll(".tab-btn");
+const panels = {
+  one: sandbox.querySelector("#panel-one"),
+  two: sandbox.querySelector("#panel-two"),
+};
+
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // step 1: no button is "active" ...
+    tabButtons.forEach(b => b.classList.remove("active"));
+    // ...except the one that was just clicked
+    btn.classList.add("active");
+
+    // step 2: hide every panel, then reveal only the matching one
+    Object.values(panels).forEach(p => p.hidden = true);
+    panels[btn.dataset.tab].hidden = false;
+  });
+});
+console.log("Click a tab above to switch panels");</textarea>
+        </div>
+        <div class="cell-output" id="pui-2-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Modal dialog</h3>
+      <p>The native &lt;dialog&gt; element — showModal() handles the backdrop and focus for you, no library required.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-3')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-3-code"></code></pre>
+<textarea class="cell-input" id="pui-3-input" spellcheck="false">sandbox.innerHTML = `
+  <button id="open">Open modal</button>
+  <dialog id="modal">
+    <p>This is a real native &lt;dialog&gt; element.</p>
+    <button id="close">Close</button>
+  </dialog>
+`;
+const openBtn = sandbox.querySelector("#open");
+const closeBtn = sandbox.querySelector("#close");
+const dialog = sandbox.querySelector("#modal");
+
+openBtn.addEventListener("click", () => dialog.showModal());
+closeBtn.addEventListener("click", () => dialog.close());
+console.log("Click 'Open modal' above");</textarea>
+        </div>
+        <div class="cell-output" id="pui-3-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Dropdown menu with outside-click-to-close</h3>
+      <p>The part beginners usually miss: closing the menu when you click ANYWHERE else on the page, not just an explicit close button.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-4')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-4-code"></code></pre>
+<textarea class="cell-input" id="pui-4-input" spellcheck="false">sandbox.innerHTML = `
+  <div style="position:relative;display:inline-block;">
+    <button id="menu-btn">Options ▾</button>
+    <div id="menu" hidden style="position:absolute;background:#fff;border:1px solid #ccc;border-radius:6px;padding:6px;margin-top:4px;min-width:120px;">
+      <div class="menu-item">Edit</div>
+      <div class="menu-item">Duplicate</div>
+      <div class="menu-item">Delete</div>
+    </div>
+  </div>
+`;
+const menuBtn = sandbox.querySelector("#menu-btn");
+const menu = sandbox.querySelector("#menu");
+
+menuBtn.addEventListener("click", (e) => {
+  e.stopPropagation();   // stop this click from also triggering the listener below
+  menu.hidden = !menu.hidden;
+});
+
+// closing on ANY other click anywhere in the sandbox — this is the key part
+sandbox.addEventListener("click", () => {
+  menu.hidden = true;
+});
+console.log("Click 'Options' to open the menu, click anywhere else to close it");</textarea>
+        </div>
+        <div class="cell-output" id="pui-4-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Tooltip on hover</h3>
+      <p>A small floating label shown only while hovering — positioned with CSS, toggled with two event listeners.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-5')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-5-code"></code></pre>
+<textarea class="cell-input" id="pui-5-input" spellcheck="false">sandbox.innerHTML = `
+  <span style="position:relative;display:inline-block;">
+    <button id="info">Hover me ⓘ</button>
+    <span id="tip" hidden style="position:absolute;bottom:120%;left:0;background:#333;color:#fff;font-size:11px;padding:5px 8px;border-radius:5px;white-space:nowrap;">
+      Extra info shown on hover
+    </span>
+  </span>
+`;
+const info = sandbox.querySelector("#info");
+const tip = sandbox.querySelector("#tip");
+
+info.addEventListener("mouseenter", () => tip.hidden = false);
+info.addEventListener("mouseleave", () => tip.hidden = true);
+console.log("Hover the button above to see the tooltip");</textarea>
+        </div>
+        <div class="cell-output" id="pui-5-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Copy to clipboard</h3>
+      <p>The real Clipboard API, wrapped in a try/catch — the exact pattern behind every "copy code" button you've ever clicked.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-6')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-6-code"></code></pre>
+<textarea class="cell-input" id="pui-6-input" spellcheck="false">sandbox.innerHTML = `
+  <input id="code" value="npm install react" readonly />
+  <button id="copy">Copy</button>
+  <p id="out"></p>
+`;
+const copyBtn = sandbox.querySelector("#copy");
+const codeInput = sandbox.querySelector("#code");
+const out = sandbox.querySelector("#out");
+
+copyBtn.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(codeInput.value);
+    out.textContent = "Copied to clipboard!";
+  } catch (err) {
+    // clipboard access needs a real HTTPS page and user permission —
+    // this fallback message is what a real site shows when it's blocked
+    out.textContent = "Clipboard blocked here, but this is the exact real code for it";
+  }
+});
+console.log("Click 'Copy' above");</textarea>
+        </div>
+        <div class="cell-output" id="pui-6-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Toast notification</h3>
+      <p>A small message that appears and removes ITSELF after a delay — no manual cleanup click required.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-7')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-7-code"></code></pre>
+<textarea class="cell-input" id="pui-7-input" spellcheck="false">sandbox.innerHTML = `
+  <button id="show-toast">Save changes</button>
+  <div id="toast-area" style="margin-top:10px;min-height:32px;"></div>
+`;
+const showBtn = sandbox.querySelector("#show-toast");
+const toastArea = sandbox.querySelector("#toast-area");
+
+showBtn.addEventListener("click", () => {
+  const toast = document.createElement("div");
+  toast.textContent = "Changes saved ✓";
+  toast.style.cssText = "background:#111;color:#fff;padding:8px 14px;border-radius:6px;font-size:12px;display:inline-block;";
+  toastArea.innerHTML = "";
+  toastArea.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 2000);   // the toast cleans up after itself
+});
+console.log("Click 'Save changes' — the toast disappears after 2 seconds on its own");</textarea>
+        </div>
+        <div class="cell-output" id="pui-7-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Read more / read less</h3>
+      <p>Text starts visually clamped to one line; clicking the button toggles a class that expands it — no content is duplicated.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-8')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-8-code"></code></pre>
+<textarea class="cell-input" id="pui-8-input" spellcheck="false">sandbox.innerHTML = `
+  <p id="text" class="truncated">
+    This is a long paragraph that gets cut short by default, with a
+    button to reveal the rest — one of the most common patterns on
+    article previews, product descriptions, and comment threads.
+  </p>
+  <button id="toggle-text">Read more</button>
+`;
+const text = sandbox.querySelector("#text");
+const toggleBtn = sandbox.querySelector("#toggle-text");
+
+toggleBtn.addEventListener("click", () => {
+  const isTruncated = text.classList.toggle("truncated");
+  toggleBtn.textContent = isTruncated ? "Read more" : "Read less";
+});
+console.log("Click 'Read more' to expand the full paragraph");</textarea>
+        </div>
+        <div class="cell-output" id="pui-8-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="stage" id="p10">
   <div class="stage-head"><span class="stage-num">10</span><h2>Asynchronous JavaScript</h2></div>
@@ -1948,6 +2876,34 @@ function runJsCell(id){
       appendLine('(no console output)', 'cell-dim');
     }
   }, 60);
+}
+
+/* =========================================================
+   EXPAND TOGGLE — for the shorthand-heavy examples
+   (ternaries, arrow one-liners, chained array methods,
+   destructuring, spread) swap in a fully-commented,
+   longhand version so beginners can see it spelled out
+   ========================================================= */
+function toggleExpand(id, btn){
+  const input = document.getElementById(id + '-input');
+  const codeEl = document.getElementById(id + '-code');
+  const expandedHolder = document.getElementById(id + '-expanded');
+  if(!input || !expandedHolder) return;
+
+  const isExpanded = btn.dataset.state === 'expanded';
+  if(isExpanded){
+    input.value = input.dataset.compactBackup || input.value;
+    btn.textContent = '⤢ Show expanded';
+    btn.dataset.state = 'compact';
+  } else {
+    input.dataset.compactBackup = input.value;
+    input.value = expandedHolder.value;
+    btn.textContent = '⤡ Show compact';
+    btn.dataset.state = 'expanded';
+  }
+  highlightPair(input, codeEl);
+  autoGrow(input);
+  runJsCell(id);
 }
 
 // run every example once on load — complete worked examples, not click-to-reveal
