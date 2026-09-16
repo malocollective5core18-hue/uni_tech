@@ -232,6 +232,12 @@ pre.plain{background:#0A0C10 !important;border:1px solid var(--border);border-ra
 .flist-item code{color:var(--rust);font-size:12.5px;flex-shrink:0;}
 .flist-item span{color:var(--text-dim);font-size:13px;}
 
+/* ============ NEW TAGS: cargo / embedded ============ */
+.tag.cargo{color:#E4B15A;background:#3E2E12;}
+.tag.cargo::before{background:#E4B15A;}
+.tag.embedded{color:#7FD4C1;background:#173832;}
+.tag.embedded::before{background:#7FD4C1;}
+
 footer{padding:50px 0 70px;color:var(--text-faint);font-size:13px;position:relative;z-index:1;max-width:680px;}
 footer .quote{color:var(--text-dim);font-style:normal;font-size:14.5px;line-height:1.7;}
 footer .sig{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
@@ -246,12 +252,14 @@ footer .sig{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(-
   <div class="navlinks">
     <a href="#s-reality">Reality</a>
     <a href="#s-syntax">Syntax basics</a>
+    <a href="#s-cargo">Cargo</a>
     <a href="#s-fund">Fundamentals</a>
     <a href="#s-actix">Actix-web</a>
     <a href="#s-data">Data &amp; auth</a>
     <a href="#s-compare">Comparison</a>
     <a href="#s-unlearn">Unlearn</a>
     <a href="#s-anti">Anti-advice</a>
+    <a href="#s-embedded">Embedded</a>
     <a href="#s-start">Get started</a>
   </div>
 </nav>
@@ -590,6 +598,150 @@ fn main() {
   <div class="callout">
     <span class="label">That's the whole syntax layer</span>
     <p>Thirteen steps, all plain Rust — no ownership, no traits, no async yet. Everything from here on is Rust-specific ideas layered on top of exactly what you just typed, not new syntax to memorize. If any of the thirteen steps above still feels unfamiliar, it's worth re-running them before continuing.</p>
+  </div>
+</section>
+
+<section class="stage" id="s-cargo">
+  <span class="tag cargo">Cargo mastery</span>
+  <h2>The tool you'll run a hundred times a day</h2>
+  <p class="stage-sub">Cargo is Django's <code class="inline-code">manage.py</code>, <code class="inline-code">pip</code>, and <code class="inline-code">virtualenv</code> rolled into one binary — package manager, build system, and test runner. Get fluent here before anything else; everything downstream assumes it.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Cargo.toml</h3>
+      <p>≈ <code class="inline-code">requirements.txt</code> + <code class="inline-code">pyproject.toml</code>. Declares your crate's name, version, and dependencies.</p>
+    </div>
+    <div class="card">
+      <h3>Cargo.lock</h3>
+      <p>The exact resolved dependency tree — like a pip freeze that's generated for you. <b>Commit it</b> for applications; libraries usually don't.</p>
+    </div>
+    <div class="card">
+      <h3>target/</h3>
+      <p>Build output — binaries, intermediate artifacts. Equivalent to <code class="inline-code">__pycache__</code> and a venv combined. Never commit it.</p>
+    </div>
+    <div class="card">
+      <h3>cargo</h3>
+      <p>One binary that installs packages, compiles, tests, lints, formats, and documents your project.</p>
+    </div>
+  </div>
+
+  <div class="step-label"><span class="num">1</span>Install Rust — per platform</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Rust ships as one toolchain manager, <code class="inline-code">rustup</code>, which then manages the compiler and Cargo for you.</p>
+  <pre class="plain"><code class="language-bash"># Linux / macOS
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
+
+# Windows — download and run the installer from rustup.rs, or:
+winget install Rustlang.Rustup
+# then close and reopen your terminal / PowerShell so PATH picks up cargo
+
+# Verify, on any platform:
+cargo --version
+rustc --version</code></pre>
+  <div class="callout amber">
+    <span class="label">Windows gotcha</span>
+    <p>The installer needs the Microsoft C++ Build Tools (it will offer to fetch them). If <code class="inline-code">cargo --version</code> still fails after installing, restart the terminal — PATH changes don't apply to already-open shells.</p>
+  </div>
+
+  <div class="step-label"><span class="num">2</span>Keep the toolchain current</div>
+  <pre class="plain"><code class="language-bash">rustup update
+rustup component add clippy rustfmt   # linter + formatter, both official</code></pre>
+
+  <div class="step-label"><span class="num">3</span>The commands you'll actually type</div>
+  <div class="flist">
+    <div class="flist-item"><code>cargo new myapi</code><span>Scaffold a new binary project (add <code class="inline-code">--lib</code> for a library); <code class="inline-code">cargo init</code> does the same in a folder that already exists</span></div>
+    <div class="flist-item"><code>cargo check</code><span>Type-checks without producing a binary — much faster than a full build. Run this constantly while coding.</span></div>
+    <div class="flist-item"><code>cargo build</code><span>Compiles a debug binary into <code class="inline-code">target/debug/</code>; add <code class="inline-code">--release</code> for an optimized one in <code class="inline-code">target/release/</code></span></div>
+    <div class="flist-item"><code>cargo run</code><span>Builds (if needed) and runs the binary in one step — like <code class="inline-code">python manage.py runserver</code></span></div>
+    <div class="flist-item"><code>cargo test</code><span>Runs every function annotated <code class="inline-code">#[test]</code> — Rust's built-in test runner, no pytest needed</span></div>
+    <div class="flist-item"><code>cargo clippy</code><span>A much stricter linter than the compiler — catches non-idiomatic patterns and likely bugs</span></div>
+    <div class="flist-item"><code>cargo fmt</code><span>Formats the whole project to the standard style — the community equivalent of black, with no debate over config</span></div>
+    <div class="flist-item"><code>cargo doc --open</code><span>Builds HTML docs from your doc-comments (and your dependencies') and opens them in a browser</span></div>
+    <div class="flist-item"><code>cargo add serde</code><span>Adds a dependency to Cargo.toml for you — the modern replacement for hand-editing it (add <code class="inline-code">--features derive</code> for feature flags)</span></div>
+    <div class="flist-item"><code>cargo tree</code><span>Prints the full dependency tree — useful for finding what's pulling in a duplicate or unwanted crate</span></div>
+    <div class="flist-item"><code>cargo update</code><span>Updates Cargo.lock to the latest versions allowed by Cargo.toml's constraints</span></div>
+    <div class="flist-item"><code>cargo clean</code><span>Deletes <code class="inline-code">target/</code> — reach for this when a build gets into a confusing state</span></div>
+  </div>
+
+  <div class="step-label"><span class="num">4</span>Cargo.toml — real patterns from an Actix project</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">toml</span><div class="actions"><button class="pbtn" onclick="copyPanel('pc1')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-toml" id="pc1-code"></code></pre>
+<textarea class="panel-input" id="pc1-input" spellcheck="false">[package]
+name = "myapi"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+serde = { version = "1", features = ["derive"] }   # feature flag: turns on #[derive(Serialize)]
+
+# an optional dependency — only compiled in if the feature is enabled
+sentry = { version = "0.32", optional = true }
+
+[features]
+default = []
+error-tracking = ["dep:sentry"]
+
+# only compiled for `cargo test` / `cargo bench` — never shipped
+[dev-dependencies]
+actix-rt = "2"
+
+[profile.release]
+opt-level = 3
+lto = true          # slower build, faster/smaller binary — worth it for production</textarea>
+</div>
+    <div class="panel-note">Feature flags are Cargo's version of Python "extras" — code stays out of the compiled binary until you opt in.</div>
+  </div>
+
+  <div class="step-label"><span class="num">5</span>Daily habits</div>
+  <div class="grid2">
+    <div class="card">
+      <h3>While coding</h3>
+      <p>Run <code class="inline-code">cargo check</code> (or let your editor run it on save) instead of a full <code class="inline-code">cargo build</code> — it's the fast feedback loop.</p>
+    </div>
+    <div class="card">
+      <h3>Before committing</h3>
+      <p><code class="inline-code">cargo fmt</code> then <code class="inline-code">cargo clippy</code>. Many teams wire both into a pre-commit hook or CI.</p>
+    </div>
+    <div class="card">
+      <h3>Version control</h3>
+      <p>Commit <code class="inline-code">Cargo.lock</code> for a binary/application. Never commit <code class="inline-code">target/</code> — add it to <code class="inline-code">.gitignore</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Debug vs release</h3>
+      <p>Debug builds compile fast and run slow, with overflow checks on. Release builds are the opposite — always benchmark against <code class="inline-code">--release</code>.</p>
+    </div>
+  </div>
+
+  <div class="step-label"><span class="num">↳</span>Fix this Cargo.toml</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Two mistakes are hiding here — a missing feature flag that will make <code class="inline-code">#[derive(Serialize)]</code> fail to compile, and a dependency likely meant to be dev-only. Find both.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">toml · practice</span><div class="actions"><button class="pbtn" onclick="copyPanel('pc2')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-toml" id="pc2-code"></code></pre>
+<textarea class="panel-input" id="pc2-input" spellcheck="false">[package]
+name = "myapi"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+serde = "1"                 # bug 1: no derive feature — #[derive(Serialize)] won't compile
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+actix-rt = "2"               # bug 2: only used in tests — belongs in [dev-dependencies]
+
+# Fix: serde = { version = "1", features = ["derive"] }
+# Fix: move actix-rt down into a [dev-dependencies] section</textarea>
+</div>
+    <div class="panel-note">In real life, `cargo add serde --features derive` would have avoided bug 1 entirely.</div>
+  </div>
+
+  <div class="callout steel">
+    <span class="label">Common pitfalls</span>
+    <p>Editing Cargo.toml by hand and forgetting a feature flag; confusing a debug build's slower runtime for a real performance problem; and — on Windows — running <code class="inline-code">cargo</code> in a terminal that was open before rustup finished installing.</p>
   </div>
 </section>
 
@@ -1103,6 +1255,232 @@ async fn handler(state: web::Data<AppState>) -> impl Responder {
   </div>
 </section>
 
+<section class="stage" id="s-embedded">
+  <span class="tag embedded">Embedded systems</span>
+  <h2>A different world, same language</h2>
+  <p class="stage-sub">Everything above assumed an operating system underneath you. Embedded Rust often has none: no heap in many setups, hard memory limits, and hardware you talk to directly. This covers the 30–40% that gets you blinking an LED, reading a button, and printing over serial with real confidence.</p>
+
+  <div class="callout amber">
+    <span class="label">Reality check</span>
+    <p>Embedded is not "smaller web development." There's no request/response loop, no filesystem in many cases, and a bug can hang real hardware instead of a request. Rust is unusually good here because ownership catches memory bugs with no garbage collector to pay for — but the mental model shift is real.</p>
+  </div>
+
+  <div class="step-label"><span class="num">1</span>The mental model differences</div>
+  <div class="flist">
+    <div class="flist-item"><code>no_std</code><span>No heap, no OS, no <code class="inline-code">std</code> library by default — only <code class="inline-code">core</code>. No <code class="inline-code">String</code>, <code class="inline-code">Vec</code>, or <code class="inline-code">println!</code> unless you opt back in with an allocator</span></div>
+    <div class="flist-item"><code>bare-metal</code><span>Your code IS the whole program — vs an RTOS (a tiny embedded OS) that schedules multiple tasks for you</span></div>
+    <div class="flist-item"><code>registers</code><span>Peripherals (GPIO pins, timers, UART) are controlled by reading and writing specific memory addresses</span></div>
+    <div class="flist-item"><code>PAC</code><span>Peripheral Access Crate — a generated, type-safe wrapper around a chip's raw registers, one per chip family</span></div>
+    <div class="flist-item"><code>HAL</code><span>Hardware Abstraction Layer — built on a PAC, gives you friendlier calls like <code class="inline-code">pin.set_high()</code> instead of raw registers</span></div>
+    <div class="flist-item"><code>interrupts</code><span>Hardware events (a button press, a timer tick) that pause normal execution to run a handler — there's no async runtime doing this for you at the bottom layer</span></div>
+  </div>
+
+  <div class="step-label"><span class="num">2</span>Tooling you'll install once</div>
+  <pre class="plain"><code class="language-bash"># Add a compilation target for the chip family you're using, e.g.:
+rustup target add thumbv7em-none-eabihf   # Cortex-M4/M7 (many STM32, nRF52)
+rustup target add riscv32imac-unknown-none-elf   # RISC-V (e.g. ESP32-C3)
+
+# probe-rs: flashes and debugs over a hardware debug probe — replaces
+# the older probe-run / cargo-flash / OpenOCD combo for most boards
+cargo install probe-rs-tools --locked
+
+# defmt: a tiny, efficient logging format designed for constrained devices
+cargo add defmt defmt-rtt panic-probe --features panic-probe/print-defmt</code></pre>
+  <p style="color:var(--text-dim);font-size:13.5px;">Linux needs udev rules for USB debug-probe permissions (the probe-rs docs generate these for you); macOS and Windows generally work after installing the vendor's USB driver once.</p>
+
+  <div class="step-label"><span class="num">3</span>Hello world — no_std, no println!</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust · no_std</span><div class="actions"><button class="pbtn" onclick="copyPanel('pe1')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pe1-code"></code></pre>
+<textarea class="panel-input" id="pe1-input" spellcheck="false">#![no_std]     // no standard library — only `core` is available
+#![no_main]    // no normal main() signature; the runtime crate provides its own entry
+
+use cortex_m_rt::entry;      // #[entry] marks the real entry point on Cortex-M chips
+use panic_halt as _;          // what to do on panic: just stop (imported for its side effect)
+
+#[entry]
+fn main() -> ! {              // `-> !` means this function never returns — there's nowhere to return to
+    loop {
+        // an embedded program is usually one infinite loop, not a function that exits
+    }
+}</textarea>
+</div>
+    <div class="panel-note">Not runnable on the Playground — this needs a real or emulated chip target. Compare the `-> !` return type to a Django view returning a Response: here, there's no caller waiting for a value.</div>
+  </div>
+
+  <div class="step-label"><span class="num">4</span>Blinking an LED — embedded's "Hello, World"</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust · HAL example</span><div class="actions"><button class="pbtn" onclick="copyPanel('pe2')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pe2-code"></code></pre>
+<textarea class="panel-input" id="pe2-input" spellcheck="false">#![no_std]
+#![no_main]
+
+use cortex_m_rt::entry;
+use panic_halt as _;
+use embedded_hal::digital::OutputPin;   // the trait every HAL's pin type implements
+// use a chip-specific HAL crate for Peripherals::take(), e.g. stm32f4xx_hal or rp2040_hal
+
+#[entry]
+fn main() -> ! {
+    let peripherals = /* chip_hal::pac::Peripherals::take().unwrap() */ ();
+    // let mut led = gpio_pin.into_push_pull_output();
+
+    loop {
+        // led.set_high().unwrap();
+        // delay.delay_ms(500);
+        // led.set_low().unwrap();
+        // delay.delay_ms(500);
+    }
+}</textarea>
+</div>
+    <div class="panel-note">The exact setup lines differ per chip HAL — this shows the shape every board's example follows: take the peripherals once, configure one pin as an output, then toggle it in the loop.</div>
+  </div>
+
+  <div class="step-label"><span class="num">5</span>Reading a button (GPIO input)</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust · HAL example</span><div class="actions"><button class="pbtn" onclick="copyPanel('pe3')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pe3-code"></code></pre>
+<textarea class="panel-input" id="pe3-input" spellcheck="false">use embedded_hal::digital::InputPin;
+
+// let button = gpio_pin.into_pull_up_input();
+
+loop {
+    if button.is_low().unwrap() {   // many boards wire a button to pull the pin low when pressed
+        // led.set_high().unwrap();
+    } else {
+        // led.set_low().unwrap();
+    }
+}</textarea>
+</div>
+    <div class="panel-note">embedded-hal defines the InputPin/OutputPin traits once — any chip's HAL that implements them works with the same calling code, similar to how any type implementing Responder works with an Actix handler.</div>
+  </div>
+
+  <div class="step-label"><span class="num">6</span>Serial output with defmt — your println! replacement</div>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pe4')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pe4-code"></code></pre>
+<textarea class="panel-input" id="pe4-input" spellcheck="false">#![no_std]
+#![no_main]
+
+use cortex_m_rt::entry;
+use defmt_rtt as _;      // sends defmt output over the debug probe's RTT channel
+use panic_probe as _;
+use defmt::info;
+
+#[entry]
+fn main() -> ! {
+    info!("booting up, count = {}", 0);   // shows up in your terminal via `probe-rs run`
+
+    let mut count: u32 = 0;
+    loop {
+        count += 1;
+        info!("loop tick {}", count);
+    }
+}</textarea>
+</div>
+    <div class="panel-note">defmt formats log messages on the host machine, not the tiny chip — it sends compact binary codes over the wire instead of full text, which matters when you have kilobytes of flash, not gigabytes.</div>
+  </div>
+
+  <div class="step-label"><span class="num">7</span>Sharing a peripheral safely — no Arc&lt;Mutex&lt;T&gt;&gt; here</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">An interrupt handler and <code class="inline-code">main</code> both wanting the same LED is the embedded version of a shared-state bug. The <code class="inline-code">critical-section</code> crate provides a minimal, no_std-friendly mutex for exactly this.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust</span><div class="actions"><button class="pbtn" onclick="copyPanel('pe5')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pe5-code"></code></pre>
+<textarea class="panel-input" id="pe5-input" spellcheck="false">use core::cell::RefCell;
+use critical_section::Mutex;
+
+// shared between main() and an interrupt handler
+static SHARED_LED: Mutex<RefCell<Option<()>>> = Mutex::new(RefCell::new(None));
+
+fn set_up() {
+    critical_section::with(|cs| {
+        // SHARED_LED.borrow(cs).replace(Some(led));
+    });
+}
+
+// Frameworks like Embassy (async) or RTIC (interrupt-driven) manage this
+// pattern for you at a higher level once a project outgrows hand-rolled state.</textarea>
+</div>
+    <div class="panel-note">This is the embedded equivalent of Arc&lt;Mutex&lt;T&gt;&gt; from the Actix section — same idea (safe shared access), much lighter-weight implementation, because there's no OS thread scheduler underneath it.</div>
+  </div>
+
+  <div class="step-label"><span class="num">8</span>A first taste of async — Embassy</div>
+  <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:6px;">Once hand-rolled interrupt sharing gets tedious, <b>Embassy</b> brings the same <code class="inline-code">async</code>/<code class="inline-code">await</code> you used in Actix down to bare metal — no OS required. <b>RTIC</b> is the alternative if you prefer explicit interrupt priorities over async tasks.</p>
+  <div class="panel" data-panel>
+    <div class="panel-bar"><span class="panel-lang">rust · Embassy sketch</span><div class="actions"><button class="pbtn" onclick="copyPanel('pe6')">Copy</button></div></div>
+    <div class="panel-input-wrap">
+<pre class="panel-highlight" aria-hidden="true"><code class="language-rust" id="pe6-code"></code></pre>
+<textarea class="panel-input" id="pe6-input" spellcheck="false">#![no_std]
+#![no_main]
+
+use embassy_executor::Spawner;
+use embassy_time::{Duration, Timer};
+
+#[embassy_executor::main]
+async fn main(_spawner: Spawner) {
+    loop {
+        // led.set_high();
+        Timer::after(Duration::from_millis(500)).await;   // non-blocking delay
+        // led.set_low();
+        Timer::after(Duration::from_millis(500)).await;
+    }
+}</textarea>
+</div>
+    <div class="panel-note">Same `.await` syntax as `#[actix_web::main]` — Embassy's executor plays the role Tokio played for Actix, just sized for a microcontroller instead of a server.</div>
+  </div>
+
+  <div class="step-label"><span class="num">9</span>Key crates you'll see everywhere</div>
+  <div class="flist">
+    <div class="flist-item"><code>embedded-hal</code><span>The shared traits (GPIO, SPI, I2C, delays) that make code portable across chip vendors</span></div>
+    <div class="flist-item"><code>cortex-m-rt</code><span>Runtime + entry point for ARM Cortex-M chips (riscv-rt is the RISC-V equivalent)</span></div>
+    <div class="flist-item"><code>panic-halt / panic-probe</code><span>Defines what happens on a panic — halt forever, or report over the debug probe</span></div>
+    <div class="flist-item"><code>defmt + defmt-rtt</code><span>Compact logging designed for devices with kilobytes, not gigabytes, of storage</span></div>
+    <div class="flist-item"><code>probe-rs</code><span>Flashes your binary onto the chip and gives you a live debugger and log viewer</span></div>
+    <div class="flist-item"><code>embassy</code><span>Modern async runtime for embedded — timers, tasks, and peripherals, all `.await`-based</span></div>
+    <div class="flist-item"><code>rtic</code><span>Real-Time Interrupt-driven Concurrency — priority-based scheduling instead of async</span></div>
+  </div>
+
+  <div class="step-label"><span class="num">10</span>Recommended first hardware</div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Raspberry Pi Pico (RP2040)</h3>
+      <p>The easiest on-ramp — cheap, huge community, first-class Rust support via <code class="inline-code">rp2040-hal</code> or Embassy.</p>
+    </div>
+    <div class="card">
+      <h3>STM32 Nucleo boards</h3>
+      <p>Built-in debug probe on the board itself — no separate programmer needed. Wide range of HAL crates.</p>
+    </div>
+    <div class="card">
+      <h3>"Blue Pill" (STM32F103)</h3>
+      <p>Very cheap, widely used in tutorials, needs a separate ST-Link debug probe.</p>
+    </div>
+    <div class="card">
+      <h3>ESP32-C3 / ESP32-S3</h3>
+      <p>Adds Wi-Fi/Bluetooth once you're comfortable — a natural next step, not a starting point.</p>
+    </div>
+  </div>
+  <p style="color:var(--text-dim);font-size:13.5px;">No board yet? Many `embedded-hal` examples also run against QEMU's emulated Cortex-M targets, or against `probe-rs`'s software-only mode, enough to learn the shape of the code before buying anything.</p>
+
+  <div class="callout steel">
+    <span class="label">Common pitfalls for backend developers</span>
+    <p>Reaching for <code class="inline-code">std</code> types out of habit (there's no heap by default); calling anything slow or blocking from inside an interrupt handler; forgetting ownership rules apply to peripherals too — you can only hold one mutable reference to a pin; expecting `cargo run` speed — flashing a chip takes longer than restarting a dev server; and calling <code class="inline-code">.unwrap()</code> in code that will actually ship, since a panic on a deployed device often means a silent hang, not a helpful stack trace in a terminal.</p>
+  </div>
+
+  <div class="step-label"><span class="num">↳</span>Going deeper — a short roadmap</div>
+  <div class="roadmap">
+    <div class="road-item" data-idx="0"><div class="road-check">1</div><div class="road-body"><h4>Blink an LED on real hardware</h4><p>Pick one board from above and get the official HAL example running end to end.</p></div></div>
+    <div class="road-item" data-idx="1"><div class="road-check">2</div><div class="road-body"><h4>Read a button, debounce it</h4><p>Handle the noisy signal a mechanical switch produces — a classic first real bug to hit.</p></div></div>
+    <div class="road-item" data-idx="2"><div class="road-check">3</div><div class="road-body"><h4>Get defmt logging working</h4><p>Replace guesswork with actual log output over the debug probe.</p></div></div>
+    <div class="road-item" data-idx="3"><div class="road-check">4</div><div class="road-body"><h4>Pick Embassy or RTIC</h4><p>Rebuild the blink+button example using one concurrency model instead of hand-rolled interrupts.</p></div></div>
+    <div class="road-item" data-idx="4"><div class="road-check">5</div><div class="road-body"><h4>Add a real peripheral</h4><p>An I2C sensor or SPI display — the next step up from plain GPIO.</p></div></div>
+  </div>
+</section>
+
 <section class="stage" id="s-start">
   <span class="tag fund">Get started</span>
   <h2>Your first seven steps</h2>
@@ -1266,6 +1644,5 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'Intersecti
   document.querySelectorAll('.stage').forEach(sec => io.observe(sec));
 }
 </script>
-<script src="curriculum-upgrades.js"></script>
 </body>
 </html>
