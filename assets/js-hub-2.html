@@ -6,7 +6,7 @@
 <title>Vanilla JavaScript: Zero to Mastery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" onerror="window.hljs = window.hljs || { highlightAll: function(){}, highlightElement: function(el){ if(el) el.classList.add('hljs'); } };"></script>
 <style>
 :root{
   --bg:#0A0F0D;
@@ -172,6 +172,8 @@ pre code{font-family:var(--mono) !important;}
 .btn.small{padding:5px 11px;font-size:10.5px;}
 
 .callout{border-left:3px solid var(--teal);background:var(--panel);border-radius:0 9px 9px 0;padding:13px 17px;margin:16px 0;}
+.mini-tip{border-left:3px solid var(--teal);background:var(--panel);border-radius:0 7px 7px 0;padding:8px 12px;margin:8px 0 14px;font-size:.92em;color:var(--text-dim,inherit);}
+.mini-tip b{color:var(--teal);}
 .callout.red{border-left-color:var(--red);}
 .callout.amber{border-left-color:var(--amber);}
 .callout .label{font-family:var(--mono);font-size:10.5px;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;}
@@ -307,6 +309,23 @@ pre code{font-family:var(--mono) !important;}
 .dom-preview .pill{display:inline-flex;align-items:center;gap:6px;background:#eef8f6;color:#0F5E54;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:600;}
 .dom-preview .empty-state{color:#999;font-size:12.5px;text-align:center;padding:14px 0;}
 
+/* chip / tag input */
+.dom-preview .chip-field{display:flex;flex-wrap:wrap;gap:6px;border:1px solid #ddd;border-radius:8px;padding:8px;min-height:42px;align-items:center;}
+.dom-preview .chip-field:focus-within{border-color:#2DD4BF;box-shadow:0 0 0 3px rgba(45,212,191,.15);}
+.dom-preview .chip{display:inline-flex;align-items:center;gap:6px;background:#eef8f6;color:#0F5E54;border-radius:999px;padding:3px 6px 3px 10px;font-size:12px;font-weight:600;}
+.dom-preview .chip button{background:none;border:none;color:#0F5E54;cursor:pointer;padding:2px;font-size:11px;line-height:1;border-radius:50%;}
+.dom-preview .chip button:hover{background:rgba(15,94,84,.15);}
+.dom-preview .chip-input{border:none;outline:none;flex:1;min-width:90px;font-size:13px;padding:4px;background:transparent;}
+
+/* context menu */
+.dom-preview .ctx-menu{position:fixed;background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:6px;min-width:160px;box-shadow:0 14px 30px -12px rgba(0,0,0,.3);z-index:20;}
+.dom-preview .ctx-zone{border:1px dashed #ccc;border-radius:10px;padding:22px;text-align:center;color:#888;font-size:12.5px;user-select:none;}
+
+/* theme toggle preview */
+.dom-preview .theme-demo{border-radius:10px;padding:16px;transition:background .2s ease,color .2s ease;}
+.dom-preview .theme-demo.theme-light{background:#fff;color:#222;border:1px solid #e5e5e5;}
+.dom-preview .theme-demo.theme-dark{background:#1c2420;color:#eee;border:1px solid #33403a;}
+
 /* ============ ROADMAP ============ */
 .roadmap{position:relative;margin-top:8px;}
 .road-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border-soft);cursor:pointer;}
@@ -336,6 +355,25 @@ pre code{font-family:var(--mono) !important;}
 .project-card .cell-output{min-height:150px;}
 .project-card .cell-input{min-height:220px;}
 
+/* ============ DEBUGGING SECTION ============ */
+#debugging .stage-num{color:var(--red);}
+.debug-block{margin-bottom:22px;}
+.debug-block h4{font-family:var(--disp);font-size:15px;color:#fff;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.debug-block h4 .num{font-family:var(--mono);font-size:10.5px;color:var(--red);border:1px solid var(--border);border-radius:5px;padding:2px 7px;}
+.debug-block p{color:var(--text-dim);font-size:13px;margin-bottom:10px;max-width:760px;}
+.shortcut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:12px 0;}
+.shortcut{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text-dim);}
+.shortcut kbd{font-family:var(--mono);font-size:10.5px;color:var(--amber);background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:2px 6px;}
+.ext-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:12px 0;}
+.ext-item{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:12px 14px;}
+.ext-item b{color:#fff;font-family:var(--disp);font-size:13px;display:block;margin-bottom:3px;}
+.ext-item span{color:var(--text-dim);font-size:12px;}
+.checklist{list-style:none;padding:0;margin:12px 0;counter-reset:cl;}
+.checklist li{counter-increment:cl;display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:13px;color:var(--text-dim);}
+.checklist li:last-child{border-bottom:none;}
+.checklist li::before{content:counter(cl);font-family:var(--mono);font-weight:700;color:var(--red);border:1px solid var(--border);border-radius:50%;width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.bug-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--red);background:rgba(251,113,133,.1);border:1px solid #5c2530;border-radius:20px;padding:3px 10px;margin-bottom:8px;}
+
 footer{text-align:center;padding:46px 26px 64px;color:var(--text-faint);font-size:11.5px;font-family:var(--mono);position:relative;z-index:1;}
 </style>
 </head>
@@ -359,19 +397,20 @@ footer{text-align:center;padding:46px 26px 64px;color:var(--text-faint);font-siz
     <a href="#p10">Async</a>
     <a href="#p11">Errors</a>
     <a href="#p12">Classes</a>
+    <a href="#debugging">Debugging</a>
     <a href="#roadmap">Roadmap</a>
     <a href="#projects">Projects</a>
   </div>
 </nav>
 
 <header class="hero">
-  <div class="hero-eyebrow">Zero → mastery · 12 parts · 6 examples each</div>
+  <div class="hero-eyebrow">Zero → mastery · 15 parts · debugging included</div>
   <h1>No framework. No build step.<br>Just <span>real JavaScript.</span></h1>
-  <p class="lede">Every example on this page runs in your actual browser as you read it — nothing is simulated. Twelve parts, six complete worked examples each, in the order a real curriculum teaches them: from a variable to a class with private fields.</p>
+  <p class="lede">Every example on this page runs in your actual browser as you read it — nothing is simulated. Fifteen parts: the language, real UI patterns, ten full projects, and a dedicated section on finding and killing bugs like a professional.</p>
   <div class="hero-meta">
-    <div class="stat"><b>12</b><span>Parts</span></div>
-    <div class="stat"><b>100</b><span>Live examples</span></div>
-    <div class="stat"><b>Live</b><span>Real browser JS engine</span></div>
+    <div class="stat"><b>15</b><span>Parts</span></div>
+    <div class="stat"><b>120+</b><span>Live examples</span></div>
+    <div class="stat"><b>10</b><span>Full projects</span></div>
     <div class="stat"><b>0</b><span>Build tools needed</span></div>
   </div>
 
@@ -2124,7 +2163,7 @@ console.log("Click the button, or click the sandbox then press the Up arrow");</
 
 <section class="stage" id="pui">
   <div class="stage-head"><span class="stage-num">9b</span><h2>Practical UI patterns</h2></div>
-  <p class="stage-sub">The actual widgets you build on real projects, combining DOM and Events together — accordions, modals, tabs, search, drag-and-drop, and the other pieces every product is made of. Fifteen patterns, each one a small, focused lesson in state, accessibility, or cleanup.</p>
+  <p class="stage-sub">The actual widgets you build on real projects, combining DOM and Events together — accordions, modals, tabs, search, drag-and-drop, and the other pieces every product is made of. Eighteen patterns, each one a small, focused lesson in state, accessibility, or cleanup.</p>
   <div class="grid2">
     <div class="card">
       <h3><span class="icon"></span>Accordion / collapsible section</h3>
@@ -2151,16 +2190,8 @@ const icon = sandbox.querySelector("#acc-icon");
 toggle.addEventListener("click", () => {
   const isOpen = toggle.getAttribute("aria-expanded") === "true";
   toggle.setAttribute("aria-expanded", String(!isOpen));
-
-  // aria-expanded IS the real state — the max-height animation below is
-  // purely cosmetic. Even with CSS disabled, a screen reader still knows
-  // whether this section is open, because that attribute is the source
-  // of truth, not the visible height.
+  // aria-expanded IS the real state — animating max-height is purely cosmetic
   body.style.maxHeight = isOpen ? "0px" : body.scrollHeight + "px";
-
-  // scrollHeight is the section's FULL height even while it's collapsed —
-  // that's what lets us animate TO an exact pixel value instead of "auto"
-  // (which CSS transitions can't animate directly).
   icon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
 });
 console.log("Click the header above — aria-expanded tracks the real state");</textarea>
@@ -2197,8 +2228,6 @@ const panels = {
 function selectTab(tab) {
   tabs.forEach(t => {
     const active = t === tab;
-    // aria-selected is what a screen reader actually announces — the
-    // inline colors below are just so sighted users see the same thing
     t.setAttribute("aria-selected", String(active));
     t.style.background = active ? "#2DD4BF" : "#fff";
     t.style.color = active ? "#fff" : "#333";
@@ -2206,14 +2235,12 @@ function selectTab(tab) {
   });
   Object.values(panels).forEach(p => p.hidden = true);
   panels[tab.dataset.tab].hidden = false;
-  tab.focus();   // keep focus ON the tab that's now active, not wherever it was
+  tab.focus();
 }
 
 tabs.forEach((tab, i) => {
   tab.addEventListener("click", () => selectTab(tab));
-  // arrow-key navigation is the expected keyboard behavior for a real
-  // tablist — the % wraps around so ArrowRight on the last tab goes
-  // back to the first, and ArrowLeft on the first wraps to the last
+  // arrow-key navigation is the expected keyboard behavior for a real tablist
   tab.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") selectTab(tabs[(i + 1) % tabs.length]);
     if (e.key === "ArrowLeft") selectTab(tabs[(i - 1 + tabs.length) % tabs.length]);
@@ -2250,19 +2277,9 @@ const dialog = sandbox.querySelector("#modal");
 const cancelBtn = sandbox.querySelector("#cancel");
 const confirmBtn = sandbox.querySelector("#confirm");
 
-// showModal() (not just .show()) is what makes this behave like a real
-// modal: it dims everything else with a backdrop, traps Tab inside the
-// dialog so focus can't escape to the page behind it, and wires up
-// Escape-to-close automatically — none of that is manual work here
 openBtn.addEventListener("click", () => dialog.showModal());
-
 cancelBtn.addEventListener("click", () => dialog.close());
-
-// dialog.close(value) sets dialog.returnValue to whatever you pass —
-// a clean way to tell WHY it closed without a separate variable
 confirmBtn.addEventListener("click", () => dialog.close("confirmed"));
-
-// fires no matter how it closed: Cancel, Delete, Escape, or the backdrop
 dialog.addEventListener("close", () => {
   console.log("Modal closed, returnValue:", dialog.returnValue || "(dismissed)");
 });
@@ -2301,18 +2318,10 @@ function openMenu() {
 }
 
 menuBtn.addEventListener("click", (e) => {
-  // without this, the click below (on sandbox) would immediately close
-  // the menu we just opened, because clicks bubble up from this button
-  // to the sandbox itself
   e.stopPropagation();
   menu.hidden ? openMenu() : closeMenu();
 });
-
-// closing on ANY other click, anywhere in the sandbox — this single
-// listener is what makes it feel like a real dropdown instead of
-// something that only closes via its own toggle button
 sandbox.addEventListener("click", closeMenu);
-
 sandbox.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeMenu();
 });
@@ -2344,9 +2353,7 @@ const tip = sandbox.querySelector("#tip");
 function showTip() { tip.hidden = false; }
 function hideTip() { tip.hidden = true; }
 
-// both mouse AND keyboard users need to be able to trigger this — a
-// tooltip that only responds to mouseenter/mouseleave is invisible to
-// anyone tabbing through the page instead of using a mouse
+// both mouse AND keyboard users need to be able to trigger this
 info.addEventListener("mouseenter", showTip);
 info.addEventListener("mouseleave", hideTip);
 info.addEventListener("focus", showTip);
@@ -2376,18 +2383,14 @@ const codeText = "npm install react";
 
 copyBtn.addEventListener("click", async () => {
   try {
-    // the real Clipboard API — this actually writes to the OS clipboard,
-    // it's not a fake simulation
     await navigator.clipboard.writeText(codeText);
     copyBtn.textContent = "Copied ✓";
     out.textContent = "Copied to clipboard!";
   } catch (err) {
     // clipboard access needs a real HTTPS page and user permission —
-    // this fallback is exactly what a real site shows when it's blocked,
-    // instead of just silently failing
+    // this fallback is exactly what a real site shows when it's blocked
     out.textContent = "Clipboard blocked here, but this is the exact real code for it";
   }
-  // reset the button label after a beat, so it doesn't say "Copied ✓" forever
   setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
 });
 console.log("Click 'Copy' above");</textarea>
@@ -2423,12 +2426,10 @@ function addToast(message, type) {
   toast.className = "toast" + (type ? " toast-" + type : "");
   toast.innerHTML = `<span class="toast-msg"></span><button class="btn-icon" aria-label="Dismiss">✕</button>`;
   toast.querySelector(".toast-msg").textContent = message;
-  toast.dataset.id = id;   // stash the id on the element so we can find it again later
+  toast.dataset.id = id;
   stack.appendChild(toast);
 
-  // cap the stack — drop the oldest toast once we're over the limit,
-  // going through removeToast() so its timer gets cleared too, not just
-  // the element yanked out from under a still-running setTimeout
+  // cap the stack — drop the oldest toast once we're over the limit
   while (stack.children.length > MAX_TOASTS) {
     removeToast(stack.firstElementChild.dataset.id);
   }
@@ -2440,7 +2441,7 @@ function addToast(message, type) {
 function removeToast(id) {
   id = Number(id);
   const toast = stack.querySelector(`[data-id="${id}"]`);
-  if (!toast) return;   // already removed — e.g. its timer fired right as someone clicked ✕
+  if (!toast) return;
   clearTimeout(timers.get(id));   // cancel the auto-dismiss timer — avoids a leaked timeout
   timers.delete(id);
   toast.remove();
@@ -2475,12 +2476,8 @@ const text = sandbox.querySelector("#text");
 const toggleBtn = sandbox.querySelector("#toggle-text");
 
 toggleBtn.addEventListener("click", () => {
-  // .toggle() both flips the class AND tells you whether it's now present —
-  // no separate "is it truncated?" check needed before or after
   const isTruncated = text.classList.toggle("truncated");
   toggleBtn.textContent = isTruncated ? "Read more" : "Read less";
-  // the paragraph's own text never changes — only the class (which CSS
-  // uses to clamp it) and this button's own accessible state do
   toggleBtn.setAttribute("aria-expanded", String(!isTruncated));
 });
 console.log("Click 'Read more' to expand the full paragraph");</textarea>
@@ -2505,8 +2502,6 @@ const loadBtn = sandbox.querySelector("#load");
 const content = sandbox.querySelector("#content");
 
 function renderSkeleton() {
-  // three bars at different widths reads as "text is coming" at a glance —
-  // matching the rough shape of what's about to load beats a plain spinner
   content.innerHTML = `
     <div class="skeleton-line" style="width:60%;"></div>
     <div class="skeleton-line" style="width:90%;"></div>
@@ -2515,8 +2510,6 @@ function renderSkeleton() {
 }
 
 function fakeFetchProfile() {
-  // stands in for a real network call — same shape as an actual fetch:
-  // something async that eventually resolves with data
   return new Promise(resolve => setTimeout(() => resolve({ name: "Ada Lovelace", role: "Engineer" }), 1200));
 }
 
@@ -2526,9 +2519,6 @@ loadBtn.addEventListener("click", async () => {
 
   const profile = await fakeFetchProfile();
 
-  // swap the skeleton for the real content only once it's actually ready —
-  // the layout doesn't jump because the skeleton occupied roughly the
-  // same space the real content now does
   content.innerHTML = `
     <p style="font-weight:600;font-size:14px;margin:0;">${profile.name}</p>
     <p style="font-size:12.5px;color:#666;margin-top:2px;">${profile.role}</p>
@@ -2557,8 +2547,7 @@ console.log("Click 'Load profile' — the skeleton keeps the layout stable while
 const search = sandbox.querySelector("#search");
 const results = sandbox.querySelector("#results");
 
-// the DATA lives here, completely separate from the DOM it's rendered into —
-// renderResults() is the only thing that ever touches the <ul>
+// the DATA lives here, completely separate from the DOM it's rendered into
 const fruits = ["Apple", "Apricot", "Banana", "Blueberry", "Cherry", "Cranberry", "Grape", "Grapefruit", "Mango", "Orange", "Peach", "Pear"];
 
 function renderResults(query) {
@@ -2570,12 +2559,9 @@ function renderResults(query) {
 
 let debounceTimer;
 search.addEventListener("input", (e) => {
-  // every keystroke cancels whatever was scheduled before it —
   clearTimeout(debounceTimer);
   const query = e.target.value;
-  // ...and schedules a fresh 300ms wait. Only once you stop typing for a
-  // full 300ms does that last scheduled call actually survive to run —
-  // this IS the debounce, no external helper needed
+  // wait for 300ms of silence before actually filtering — this IS the debounce
   debounceTimer = setTimeout(() => renderResults(query), 300);
 });
 
@@ -2607,16 +2593,12 @@ console.log("Type in the box — filtering runs 300ms after you stop typing, not
 
 function wireSwitch(el) {
   function toggle() {
-    // aria-checked is a STRING attribute ("true"/"false"), not a real
-    // boolean — that's why it's compared and set with String() below
     const isOn = el.getAttribute("aria-checked") === "true";
     el.setAttribute("aria-checked", String(!isOn));
   }
   el.addEventListener("click", toggle);
   // Space and Enter both need to work — that's what makes this a real
-  // control, not just a styled div that happens to look like a switch.
-  // preventDefault() on Space stops the page from also scrolling down,
-  // which is the browser's default behavior for Space on a button.
+  // control, not just a styled div that happens to look like a switch
   el.addEventListener("keydown", (e) => {
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
@@ -2654,13 +2636,9 @@ const stepContent = sandbox.querySelector("#step-content");
 const prevBtn = sandbox.querySelector("#prev");
 const nextBtn = sandbox.querySelector("#next");
 
-// an explicit state machine — one object holding "where am I" (step) and
-// "what have I entered" (data). Every render reads FROM this; nothing
-// else stores the wizard's progress anywhere
+// an explicit state machine — one source of truth for "where am I" and "what have I entered"
 const wizard = { step: 0, data: { name: "", email: "" } };
 
-// each step knows how to render itself AND how to validate its own input —
-// the wizard driver below doesn't need to know anything field-specific
 const steps = [
   {
     render: () => `
@@ -2685,14 +2663,12 @@ const steps = [
     },
   },
   {
-    // the final step is just a summary — always valid, nothing to check
     render: () => `<p style="font-size:13px;color:#333;">All set, <b>${wizard.data.name}</b>. We'll reach you at <b>${wizard.data.email}</b>.</p>`,
     validate: () => "",
   },
 ];
 
 function renderStep() {
-  // a filled-in segment for every step up to and including the current one
   progress.innerHTML = steps.map((_, i) => `<div class="progress-step ${i <= wizard.step ? "done" : ""}"></div>`).join("");
   stepContent.innerHTML = steps[wizard.step].render();
   prevBtn.disabled = wizard.step === 0;
@@ -2715,7 +2691,6 @@ nextBtn.addEventListener("click", () => {
     wizard.step++;
     renderStep();
   } else {
-    // last step's Next is really "Finish" — end the flow instead of advancing
     stepContent.innerHTML = `<p class="pill">Submitted ✓</p>`;
     nextBtn.disabled = true;
     prevBtn.disabled = true;
@@ -2743,8 +2718,7 @@ console.log("Fill each step — Next is blocked until the current step passes va
 `;
 const dragList = sandbox.querySelector("#drag-list");
 
-// the ORDER lives in this array — dragging only ever reorders the array,
-// then renderList() rebuilds the <li> elements from scratch to match it
+// the ORDER lives in this array — dragging only ever reorders the array
 let items = ["Design", "Develop", "Test", "Deploy"];
 
 function renderList() {
@@ -2755,37 +2729,33 @@ function renderList() {
   `).join("");
 }
 
-let draggedItem = null;   // remembers WHICH item is mid-drag, across all four events below
+let draggedItem = null;
 
 dragList.addEventListener("dragstart", (e) => {
   const li = e.target.closest(".drag-item");
   if (!li) return;
   draggedItem = li.dataset.item;
-  li.classList.add("dragging");   // just a visual "this one is being dragged" cue
+  li.classList.add("dragging");
 });
 
 dragList.addEventListener("dragend", (e) => {
-  // fires whether the drop succeeded or the drag was cancelled — always
-  // clean up the visual classes here, not inside "drop"
   const li = e.target.closest(".drag-item");
   if (li) li.classList.remove("dragging");
   dragList.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
 });
 
 dragList.addEventListener("dragover", (e) => {
-  e.preventDefault();   // required — without this, "drop" never fires at all
+  e.preventDefault();   // required — without this, "drop" never fires
   const li = e.target.closest(".drag-item");
   if (!li || li.dataset.item === draggedItem) return;
   dragList.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
-  li.classList.add("drag-over");   // highlight whichever item you're currently over
+  li.classList.add("drag-over");
 });
 
 dragList.addEventListener("drop", (e) => {
   e.preventDefault();
   const li = e.target.closest(".drag-item");
   if (!li || !draggedItem) return;
-  // pull the dragged item out of its old spot, then insert it at the new
-  // spot — this is the entire reordering logic, just two array ops
   const from = items.indexOf(draggedItem);
   const to = items.indexOf(li.dataset.item);
   items.splice(from, 1);
@@ -2815,8 +2785,6 @@ console.log("Drag any item onto another to reorder — the array itself is the s
 const pageList = sandbox.querySelector("#page-list");
 const loadMoreBtn = sandbox.querySelector("#load-more");
 
-// the full dataset already exists in memory — a REAL app would fetch each
-// page from a server instead, but the rendering logic below is identical
 const allItems = Array.from({ length: 23 }, (_, i) => `Item ${i + 1}`);
 const PAGE_SIZE = 5;
 let visibleCount = PAGE_SIZE;
@@ -2827,12 +2795,10 @@ function renderPage() {
 
   const remaining = allItems.length - visibleCount;
   loadMoreBtn.textContent = remaining > 0 ? `Load more (${remaining} left)` : "That's everything";
-  loadMoreBtn.disabled = remaining <= 0;   // nothing left to load — grey it out instead of hiding it
+  loadMoreBtn.disabled = remaining <= 0;
 }
 
 loadMoreBtn.addEventListener("click", () => {
-  // Math.min caps it at the total length, so the last click never tries
-  // to reveal more items than actually exist
   visibleCount = Math.min(allItems.length, visibleCount + PAGE_SIZE);
   renderPage();
 });
@@ -2863,18 +2829,16 @@ const ratingOut = sandbox.querySelector("#rating-out");
 let rating = 0;   // the controlled value — the DOM is always redrawn FROM this, never edited directly
 
 function renderStars(previewValue) {
-  // hovering passes a preview value (e.g. 3) without touching "rating"
-  // itself — moving the mouse away just re-renders from the real value
   const value = previewValue === undefined ? rating : previewValue;
-  starsEl.innerHTML = "";   // full rebuild every time — simpler than tracking which stars changed
+  starsEl.innerHTML = "";
   for (let i = 1; i <= 5; i++) {
     const btn = document.createElement("button");
     btn.className = "star" + (i <= value ? " filled" : "");
     btn.textContent = "★";
     btn.setAttribute("role", "radio");
-    btn.setAttribute("aria-checked", String(i === rating));   // only the ACTUAL rating is "checked", never the hover preview
+    btn.setAttribute("aria-checked", String(i === rating));
     btn.addEventListener("mouseenter", () => renderStars(i));
-    btn.addEventListener("mouseleave", () => renderStars());   // no argument = fall back to the real rating
+    btn.addEventListener("mouseleave", () => renderStars());
     btn.addEventListener("click", () => {
       rating = i;
       renderStars();
@@ -2888,6 +2852,162 @@ renderStars();
 console.log("Hover to preview a rating, click to set it — the stars always redraw from the 'rating' variable");</textarea>
         </div>
         <div class="cell-output" id="pui-15-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Chip / tag input</h3>
+      <p>Type and press Enter (or comma) to turn text into a removable chip — the array of tags is the real state; the DOM is just its picture.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-16')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-16-code"></code></pre>
+<textarea class="cell-input" id="pui-16-input" spellcheck="false">sandbox.innerHTML = `
+  <div class="card-like">
+    <p class="field-label">Skills</p>
+    <div id="chip-field" class="chip-field">
+      <input id="chip-input" class="chip-input" placeholder="Type a skill, press Enter..." />
+    </div>
+    <p class="hint">Enter or comma adds a chip · Backspace on empty input removes the last one</p>
+  </div>
+`;
+const field = sandbox.querySelector("#chip-field");
+const input = sandbox.querySelector("#chip-input");
+
+// the array of strings IS the state — chips are just rendered from it
+let tags = ["JavaScript", "CSS"];
+
+function renderChips() {
+  field.querySelectorAll(".chip").forEach(c => c.remove());
+  tags.forEach((tag, i) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `<span></span><button aria-label="Remove ${tag}">✕</button>`;
+    chip.querySelector("span").textContent = tag;
+    chip.querySelector("button").addEventListener("click", () => {
+      tags.splice(i, 1);
+      renderChips();
+    });
+    field.insertBefore(chip, input);
+  });
+}
+
+function addTag(raw) {
+  const value = raw.trim();
+  if (value && !tags.includes(value)) tags.push(value);
+  input.value = "";
+  renderChips();
+}
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === ",") {
+    e.preventDefault();
+    addTag(input.value);
+  }
+  // Backspace on an EMPTY input removes the last chip — the classic tag-input feel
+  if (e.key === "Backspace" && input.value === "" && tags.length) {
+    tags.pop();
+    renderChips();
+  }
+});
+
+field.addEventListener("click", () => input.focus());
+renderChips();
+console.log("Type a skill and press Enter — tags:", tags);</textarea>
+        </div>
+        <div class="cell-output" id="pui-16-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Context menu (right-click)</h3>
+      <p>A custom right-click menu that positions itself at the cursor and closes on any outside click, Escape, or scroll — the same lifecycle as the dropdown, applied to <span class="inline-code">contextmenu</span> instead of <span class="inline-code">click</span>.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-17')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-17-code"></code></pre>
+<textarea class="cell-input" id="pui-17-input" spellcheck="false">sandbox.innerHTML = `
+  <div class="card-like">
+    <div id="zone" class="ctx-zone">Right-click anywhere in this box</div>
+  </div>
+`;
+const zone = sandbox.querySelector("#zone");
+let menuEl = null;
+
+function closeMenu() {
+  if (menuEl) { menuEl.remove(); menuEl = null; }
+}
+
+function openMenuAt(x, y) {
+  closeMenu();
+  menuEl = document.createElement("div");
+  menuEl.className = "ctx-menu";
+  menuEl.innerHTML = `
+    <div class="menu-item" data-action="rename">Rename</div>
+    <div class="menu-item" data-action="duplicate">Duplicate</div>
+    <div class="menu-item" data-action="delete" style="color:#c0392b;">Delete</div>
+  `;
+  // position relative to the viewport since the menu itself is position:fixed
+  menuEl.style.left = x + "px";
+  menuEl.style.top = y + "px";
+  document.body.appendChild(menuEl);
+
+  menuEl.addEventListener("click", (e) => {
+    const action = e.target.dataset.action;
+    if (action) zone.textContent = "Last action: " + action;
+    closeMenu();
+  });
+}
+
+zone.addEventListener("contextmenu", (e) => {
+  e.preventDefault();   // stop the real browser menu from appearing
+  openMenuAt(e.clientX, e.clientY);
+});
+
+document.addEventListener("click", closeMenu);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+document.addEventListener("scroll", closeMenu, { passive: true });
+console.log("Right-click inside the dashed box above");</textarea>
+        </div>
+        <div class="cell-output" id="pui-17-output"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon"></span>Theme toggle (persisted)</h3>
+      <p>Reads a saved preference on load, then flips a single attribute to restyle everything — the exact mechanism real dark-mode toggles use, backed here by an in-memory stand-in for localStorage.</p>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('pui-18')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="pui-18-code"></code></pre>
+<textarea class="cell-input" id="pui-18-input" spellcheck="false">sandbox.innerHTML = `
+  <div class="card-like">
+    <div id="preview" class="theme-demo theme-light">
+      <p style="margin:0 0 10px;font-weight:600;">Preview card</p>
+      <p style="margin:0;font-size:12.5px;">This box restyles itself when the theme changes.</p>
+    </div>
+    <button id="theme-toggle" class="btn-secondary" style="margin-top:12px;">Switch to dark</button>
+  </div>
+`;
+const preview = sandbox.querySelector("#preview");
+const toggleBtn = sandbox.querySelector("#theme-toggle");
+
+// in a real app this would be localStorage.getItem("theme") — this sandbox
+// simulates that persisted read with a plain variable instead
+let savedTheme = "light";
+
+function applyTheme(theme) {
+  preview.classList.remove("theme-light", "theme-dark");
+  preview.classList.add("theme-" + theme);
+  toggleBtn.textContent = theme === "light" ? "Switch to dark" : "Switch to light";
+  savedTheme = theme;   // the "persistence" step — localStorage.setItem("theme", theme) in real code
+}
+
+toggleBtn.addEventListener("click", () => {
+  applyTheme(savedTheme === "light" ? "dark" : "light");
+});
+
+applyTheme(savedTheme);   // apply the "saved" preference immediately on load
+console.log("Click the button — the same on/off flag would persist across reloads via localStorage");</textarea>
+        </div>
+        <div class="cell-output" id="pui-18-output"></div>
       </div>
     </div>
   </div>
@@ -3365,9 +3485,318 @@ shapes.forEach(shape => {
   </div>
 </section>
 
+<section class="stage" id="debugging">
+  <div class="stage-head"><span class="stage-num">13</span><h2>Debugging mastery</h2></div>
+  <p class="stage-sub">Almost everybody learns syntax. Almost nobody trains the skill of <em>finding</em> a problem. This section is that missing skill — a real setup, a real workflow, and real bugs to hunt down below.</p>
+
+  <div class="debug-block">
+    <h4><span class="num">1</span>VS Code setup for serious JavaScript</h4>
+    <p>A few settings turn VS Code from a text editor into a debugger's cockpit. Create <span class="inline-code">.vscode/settings.json</span> in your project with this:</p>
+    <div class="mini-tip">💡 <b>Where that actually goes:</b> "your project" = the folder you opened with File → Open Folder in VS Code. In its file list on the left, right-click → New Folder → type <span class="inline-code">.vscode</span> → Enter. Then right-click that folder → New File → type <span class="inline-code">settings.json</span> → Enter, and paste the code below into it. The dot just means "hidden by default" — nothing magic.</div>
+    <pre><code class="language-javascript">{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "debug.javascript.autoAttachFilter": "smart",
+  "editor.linkedEditing": true,
+  "editor.inlineSuggest.enabled": true,
+  "files.trimTrailingWhitespace": true
+}</code></pre>
+    <p>Key shortcuts worth burning into muscle memory:</p>
+    <div class="shortcut-grid">
+      <div class="shortcut"><span>Toggle breakpoint</span><kbd>F9</kbd></div>
+      <div class="shortcut"><span>Start / continue debugging</span><kbd>F5</kbd></div>
+      <div class="shortcut"><span>Step over</span><kbd>F10</kbd></div>
+      <div class="shortcut"><span>Step into</span><kbd>F11</kbd></div>
+      <div class="shortcut"><span>Step out</span><kbd>Shift F11</kbd></div>
+      <div class="shortcut"><span>Quick fix</span><kbd>Cmd/Ctrl .</kbd></div>
+      <div class="shortcut"><span>Go to definition</span><kbd>F12</kbd></div>
+      <div class="shortcut"><span>Find all references</span><kbd>Shift F12</kbd></div>
+      <div class="shortcut"><span>Command palette</span><kbd>Cmd/Ctrl Shift P</kbd></div>
+      <div class="shortcut"><span>Rename symbol everywhere</span><kbd>F2</kbd></div>
+    </div>
+    <div class="mini-tip">💡 <b>New terms here:</b> a "breakpoint" is a marker you place on a line that pauses your code exactly there so you can look around. "Step over/into/out" control how you move through the code one line at a time once you're paused — over skips past a function call, into follows it, out finishes the current function and pops back up.</div>
+  </div>
+
+  <div class="debug-block">
+    <h4><span class="num">2</span>Must-have extensions</h4>
+    <p>A short, high-signal list — not a hundred extensions you'll never open the settings for.</p>
+    <div class="ext-list">
+      <div class="ext-item"><b>ESLint</b><span>Catches real bugs — unused variables, unreachable code, undefined globals — before you ever run the file.</span></div>
+      <div class="ext-item"><b>Prettier</b><span>Formats on save so diffs show logic changes, not spacing arguments.</span></div>
+      <div class="ext-item"><b>Error Lens</b><span>Prints the error message inline, right next to the broken line — no more hunting the Problems tab.</span></div>
+      <div class="ext-item"><b>Console Ninja</b><span>Shows console.log output as inline text next to the line that logged it, live, without opening DevTools.</span></div>
+      <div class="ext-item"><b>Path Intellisense</b><span>Autocompletes file paths in imports — kills a whole category of "module not found" typos.</span></div>
+      <div class="ext-item"><b>Auto Rename Tag</b><span>Renaming an opening HTML tag renames its matching close tag automatically.</span></div>
+      <div class="ext-item"><b>GitLens</b><span>Blame + history inline — "who changed this line, and why" without leaving the file.</span></div>
+      <div class="ext-item"><b>Todo Tree</b><span>Collects every <span class="inline-code">// TODO</span> and <span class="inline-code">// FIXME</span> comment across the whole project into one sidebar list.</span></div>
+    </div>
+    <div class="mini-tip">💡 <b>What "install an extension" means:</b> open VS Code's Extensions panel (the icon in the left sidebar that looks like four squares, one detached), search each name above, click Install. Do this once — it's a setting on your editor, not a file in your project.</div>
+    <p>Drop this in <span class="inline-code">.vscode/extensions.json</span> — same folder as <span class="inline-code">settings.json</span> above, just a second file in it — so anyone opening the project gets prompted to install the same set:</p>
+    <pre><code class="language-javascript">{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "usernamehw.errorlens",
+    "wallabyjs.console-ninja",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "eamodio.gitlens",
+    "gruntfuggly.todo-tree"
+  ]
+}</code></pre>
+  </div>
+
+  <div class="debug-block">
+    <h4><span class="num">3</span>Browser DevTools — the real battlefield</h4>
+    <p>VS Code helps you avoid bugs. DevTools is where you actually catch the ones that got through — open it with <kbd style="font-family:var(--mono);color:var(--amber);background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:2px 6px;">F12</kbd> or right-click → Inspect.</p>
+    <div class="mini-tip">💡 <b>This isn't in VS Code or your project at all</b> — it's a panel built into the browser itself (Chrome, Edge, Firefox). Press F12 with any webpage open, including this one, and it appears docked to the side or bottom of the window. Nothing to install.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3><span class="icon"></span>Elements</h3>
+        <p>Live HTML/CSS, editable in place. Every DOM/Events example on this page can be inspected here — right-click a sandbox demo above and pick "Inspect" to see exactly what your code built.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Console — beyond console.log</h3>
+        <p><span class="inline-code">console.table(arr)</span> for arrays of objects, <span class="inline-code">console.group()</span> to nest related logs, <span class="inline-code">console.trace()</span> to print a call stack on demand, and <span class="inline-code">$0</span> to reference whatever element is currently selected in Elements.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Sources — real breakpoints</h3>
+        <p>Click a line number to set a breakpoint that pauses actual execution — not a printed log, a frozen moment where every variable in scope is inspectable. Conditional breakpoints (right-click the line number) only pause when an expression you write is true.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Network</h3>
+        <p>Every request, its status code, timing, and response body. The "Slow 3G" throttle setting reveals loading-state bugs that never show up on a fast connection.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Application</h3>
+        <p>Inspect localStorage, sessionStorage, cookies, and service workers directly — read and edit stored values without writing a single line of code to check them.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Debugging THIS page</h3>
+        <p>Every live cell above runs through <span class="inline-code">new Function()</span> — open Sources, search for <span class="inline-code">runJsCell</span>, and set a breakpoint inside it to watch any example on this page execute step by step.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-block">
+    <h4><span class="num">4</span>Techniques that separate pros from beginners</h4>
+    <div class="mini-tip">💡 A "stack trace" is the red error text the browser prints in the Console tab (see DevTools above) — it's not something you generate, it just appears whenever code throws an error. <span class="inline-code">debugger;</span> is a real line of JavaScript you type directly into your own code file, wherever you want execution to pause.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3><span class="icon"></span>Reading a stack trace</h3>
+        <p>Read top to bottom: the top line is where it actually broke; each line below is who called who to get there. The FIRST line of your own code (not a library's) is almost always where the real fix belongs.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Breakpoints vs. debugger vs. logging</h3>
+        <p>A breakpoint set in DevTools needs no code change. <span class="inline-code">debugger;</span> is the same thing, written INTO the source, so it travels with the file. <span class="inline-code">console.log</span> is fastest for a quick check, but leaves cleanup behind — breakpoints don't.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Debugging async code</h3>
+        <p>Set "Async" call stacks stay on in DevTools (default) so a breakpoint inside a <span class="inline-code">.then()</span> or after an <span class="inline-code">await</span> still shows you the ORIGINAL caller — otherwise the trace just shows "Promise" and nothing useful.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Common error patterns</h3>
+        <p><span class="inline-code">Cannot read properties of undefined</span> → something you expected to exist doesn't yet (often a race with async data). <span class="inline-code">is not a function</span> → check the actual type at that line, not what you assumed it was. <span class="inline-code">Maximum call stack</span> → a recursive function with no base case.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Source maps</h3>
+        <p>When code is minified or transpiled, a source map lets DevTools show you the ORIGINAL source instead of the compiled mess — so breakpoints and stack traces still point at lines you actually wrote.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon"></span>Defensive habits</h3>
+        <p>Validate function inputs early and throw with a clear message (Part 11). Prefer <span class="inline-code">const</span> so a value can't silently change underneath you. Never swallow an error in an empty <span class="inline-code">catch {}</span> — log or rethrow it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-block">
+    <h4><span class="num">5</span>Live error hunts</h4>
+    <p>Each cell below has a real, realistic bug baked in. Open your browser's DevTools console (F12) alongside this page, hit Run, read the actual error, then fix the code in the editor and Run again until it's clean.</p>
+    <div class="mini-tip">💡 "The editor" here just means the text box directly below each Run button — it's live code you can type in and change, right on this page, no separate app needed for these exercises.</div>
+    <div class="grid2">
+      <div class="card">
+        <span class="bug-badge">🐛 undefined property access</span>
+        <h3><span class="icon"></span>Hunt #1 — the missing property</h3>
+        <p>A classic: reading a property from something that might not have loaded yet.</p>
+        <div class="cell" data-cell>
+          <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('bug-1')">▶ Run</button></div>
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="bug-1-code"></code></pre>
+<textarea class="cell-input" id="bug-1-input" spellcheck="false">function getDisplayName(user) {
+  // bug: this assumes "user" always has a "profile" object.
+  // fix it with optional chaining and a fallback (Part 2)
+  return user.profile.displayName;
+}
+
+const users = [
+  { profile: { displayName: "Ada" } },
+  { },   // this user has no profile yet — a real, common shape from an API
+];
+
+users.forEach(u => console.log(getDisplayName(u)));</textarea>
+          </div>
+          <div class="cell-output" id="bug-1-output"></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="bug-badge">🐛 wrong equality</span>
+        <h3><span class="icon"></span>Hunt #2 — the comparison that lies</h3>
+        <p>The filter below is supposed to find products under $20 that are in stock, but it returns the wrong items.</p>
+        <div class="cell" data-cell>
+          <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('bug-2')">▶ Run</button></div>
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="bug-2-code"></code></pre>
+<textarea class="cell-input" id="bug-2-input" spellcheck="false">const products = [
+  { name: "Mug", price: 10, inStock: "1" },   // note: "1" is a STRING here
+  { name: "Hat", price: 15, inStock: 0 },
+  { name: "Pen", price: 3, inStock: 1 },
+];
+
+// bug: == coerces "1" to truthy-equal 1, so an out-of-stock item with
+// inStock: 0 might slip through depending on how it's written below —
+// switch this comparison to be strict and explicit about what "in stock" means
+const affordable = products.filter(p => p.price < 20 && p.inStock == true);
+
+console.log(affordable.map(p => p.name));
+// expected: ["Mug", "Pen"] — Hat has inStock: 0 (falsy) and should be excluded</textarea>
+          </div>
+          <div class="cell-output" id="bug-2-output"></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="bug-badge">🐛 closure-in-a-loop</span>
+        <h3><span class="icon"></span>Hunt #3 — every button says the same thing</h3>
+        <p>Three buttons are built in a loop — clicking any of them should log that button's OWN number, but right now they all log the same wrong value.</p>
+        <div class="cell" data-cell>
+          <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('bug-3')">▶ Run</button></div>
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="bug-3-code"></code></pre>
+<textarea class="cell-input" id="bug-3-input" spellcheck="false">sandbox.innerHTML = `<div id="btns"></div><p id="out"></p>`;
+const btns = sandbox.querySelector("#btns");
+const out = sandbox.querySelector("#out");
+
+// bug: "var" is function-scoped, not block-scoped, so by the time any
+// button is actually clicked, the loop has already finished and "i"
+// holds its FINAL value for every single handler. Part 1 covers why
+// let/const don't have this problem — try swapping var for let.
+for (var i = 1; i <= 3; i++) {
+  const btn = document.createElement("button");
+  btn.textContent = "Button " + i;
+  btn.style.marginRight = "6px";
+  btn.addEventListener("click", () => {
+    out.textContent = "You clicked button " + i;
+  });
+  btns.appendChild(btn);
+}
+console.log("Click each button — each should report ITS OWN number");</textarea>
+          </div>
+          <div class="cell-output" id="bug-3-output"></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="bug-badge">🐛 async race condition</span>
+        <h3><span class="icon"></span>Hunt #4 — the result that arrives too early</h3>
+        <p>This "search" logs a result before the fake network request actually finishes — a missing <span class="inline-code">await</span>, the single most common async bug.</p>
+        <div class="cell" data-cell>
+          <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('bug-4')">▶ Run</button></div>
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="bug-4-code"></code></pre>
+<textarea class="cell-input" id="bug-4-input" spellcheck="false">function fakeSearch(query) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(["result A", "result B"]), 400);
+  });
+}
+
+async function runSearch(query) {
+  console.log("Searching for:", query);
+  // bug: this line doesn't wait for the promise to settle —
+  // it logs the Promise object itself, not the actual results.
+  // add "await" in front of the call to fix it
+  const results = fakeSearch(query);
+  console.log("Results:", results);
+}
+
+runSearch("javascript tutorials");</textarea>
+          </div>
+          <div class="cell-output" id="bug-4-output"></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="bug-badge">🐛 mutation bug</span>
+        <h3><span class="icon"></span>Hunt #5 — the original array keeps changing</h3>
+        <p><span class="inline-code">sortLowToHigh</span> is supposed to return a NEW sorted array and leave the original alone — but the original list keeps getting reordered too.</p>
+        <div class="cell" data-cell>
+          <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('bug-5')">▶ Run</button></div>
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="bug-5-code"></code></pre>
+<textarea class="cell-input" id="bug-5-input" spellcheck="false">function sortLowToHigh(numbers) {
+  // bug: .sort() mutates the array IN PLACE and returns a reference
+  // to that SAME array — it never made a copy. Spread it into a new
+  // array first ([...numbers].sort(...)) so the original is untouched.
+  return numbers.sort((a, b) => a - b);
+}
+
+const original = [5, 1, 4, 2, 3];
+const sorted = sortLowToHigh(original);
+
+console.log("sorted:", sorted);
+console.log("original:", original);
+// expected: "original" should still read [5, 1, 4, 2, 3] — unchanged</textarea>
+          </div>
+          <div class="cell-output" id="bug-5-output"></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="bug-badge">🐛 off-by-one</span>
+        <h3><span class="icon"></span>Hunt #6 — the last item never shows</h3>
+        <p>A pagination helper is meant to return exactly <span class="inline-code">pageSize</span> items, but the last item of every page is always missing.</p>
+        <div class="cell" data-cell>
+          <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('bug-6')">▶ Run</button></div>
+          <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="bug-6-code"></code></pre>
+<textarea class="cell-input" id="bug-6-input" spellcheck="false">function getPage(items, pageNumber, pageSize) {
+  const start = pageNumber * pageSize;
+  // bug: slice's second argument is EXCLUSIVE, so this cuts off one
+  // item early. Compare against Part 5's slice/splice notes — the
+  // fix is "start + pageSize", not "start + pageSize - 1"
+  const end = start + pageSize - 1;
+  return items.slice(start, end);
+}
+
+const items = Array.from({ length: 10 }, (_, i) => "Item " + (i + 1));
+const page = getPage(items, 0, 4);
+
+console.log(page);
+console.log("Expected 4 items, got:", page.length);</textarea>
+          </div>
+          <div class="cell-output" id="bug-6-output"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-block">
+    <h4><span class="num">6</span>Pro debugging workflow checklist</h4>
+    <p>A short process worth internalizing for life — run through it in order before you start guessing.</p>
+    <div class="mini-tip">💡 This is a mental checklist, not a file or a tool — nothing to create or open. Next time something breaks, come back and walk down this list in order.</div>
+    <ol class="checklist">
+      <li>Read the actual error message and the FIRST line of the stack trace that points to your own code — don't skim past it.</li>
+      <li>Reproduce it reliably. If you can't make it happen on demand, you can't confirm it's fixed either.</li>
+      <li>Form one specific hypothesis about the cause — not "something's wrong," but "I think X is undefined at this point."</li>
+      <li>Set a breakpoint (or a <span class="inline-code">debugger;</span> statement) at the earliest point your hypothesis can be checked.</li>
+      <li>Inspect the actual values in scope — don't assume, look.</li>
+      <li>Fix the smallest thing that addresses the real cause, not just the symptom.</li>
+      <li>Re-run the exact steps that reproduced it, to confirm it's actually gone.</li>
+      <li>Ask whether the same mistake could exist anywhere else in the codebase, and check there too.</li>
+    </ol>
+  </div>
+</section>
+
+
 <section class="stage" id="roadmap">
-  <div class="stage-head"><span class="stage-num">13</span><h2>What to build next</h2></div>
-  <p class="stage-sub">Six small projects, in order — each one forces you to combine several parts above instead of using them in isolation. Every one of them is actually built, running, and fully coded in the <a href="#projects">Projects</a> section below.</p>
+  <div class="stage-head"><span class="stage-num">14</span><h2>What to build next</h2></div>
+  <p class="stage-sub">Ten small-to-large projects, in order — each one forces you to combine several parts above instead of using them in isolation. Every one of them is actually built, running, and fully coded in the <a href="#projects">Projects</a> section below.</p>
   <div class="roadmap" id="roadmap-list">
     <div class="road-item" data-idx="0"><div class="road-check">1</div><div class="road-body"><h4>A to-do list</h4><p>Arrays, DOM creation, and events — add, remove, and mark items complete.</p></div></div>
     <div class="road-item" data-idx="1"><div class="road-check">2</div><div class="road-body"><h4>A form with live validation</h4><p>Events, string methods, and error handling — validate as the user types, not just on submit.</p></div></div>
@@ -3375,11 +3804,15 @@ shapes.forEach(shape => {
     <div class="road-item" data-idx="3"><div class="road-check">4</div><div class="road-body"><h4>A simulated API dashboard</h4><p>async/await, Promise.all, and try/catch — loading states and error states, not just the happy path.</p></div></div>
     <div class="road-item" data-idx="4"><div class="road-check">5</div><div class="road-body"><h4>A small class-based app</h4><p>A Cart class with private fields and methods — this is where classes stop feeling academic.</p></div></div>
     <div class="road-item" data-idx="5"><div class="road-check">6</div><div class="road-body"><h4>Refactor project 1 using everything above</h4><p>Rebuild the to-do list with classes, closures, and proper error handling — the same feature, visibly more solid code.</p></div></div>
+    <div class="road-item" data-idx="6"><div class="road-check">7</div><div class="road-body"><h4>A Kanban board</h4><p>Drag-and-drop across columns, a persisted board, and a data model that has to track "which column" for every card.</p></div></div>
+    <div class="road-item" data-idx="7"><div class="road-check">8</div><div class="road-body"><h4>A notes app with search and tags</h4><p>Filtering combined state (text + tag), auto-save on a debounce, and a real "no results" empty state.</p></div></div>
+    <div class="road-item" data-idx="8"><div class="road-check">9</div><div class="road-body"><h4>An expense tracker</h4><p>Derived state — totals and category breakdowns computed FROM a list, never stored separately from it.</p></div></div>
+    <div class="road-item" data-idx="9"><div class="road-check">10</div><div class="road-body"><h4>A tiny hash router</h4><p>Multiple "pages" in one file, driven by <span class="inline-code">location.hash</span> — the real idea behind every client-side router, stripped to its essentials.</p></div></div>
   </div>
 </section>
 
 <section class="stage" id="projects">
-  <div class="stage-head"><span class="stage-num">14</span><h2>The projects, actually built</h2></div>
+  <div class="stage-head"><span class="stage-num">15</span><h2>The projects, actually built</h2></div>
   <p class="stage-sub">Not descriptions — real, running apps, built from the parts above. Each one is live and editable, exactly like every example on this page: change the code, hit Run, see it update.</p>
 
   <div class="projects-stack">
@@ -3410,13 +3843,11 @@ const input = sandbox.querySelector("#todo-input");
 const list = sandbox.querySelector("#todo-list");
 const stats = sandbox.querySelector("#todo-stats");
 
-// tasks is the ONLY source of truth — render() always rebuilds the <ul>
-// from this array, so the DOM never drifts out of sync with the data
 let tasks = [
   { id: 1, text: "Learn arrays", done: true },
   { id: 2, text: "Learn the DOM", done: false },
 ];
-let nextId = 3;   // simple incrementing id, separate from the array's positions
+let nextId = 3;
 
 function render() {
   list.innerHTML = tasks.map(t => `
@@ -3432,26 +3863,22 @@ function render() {
 }
 
 form.addEventListener("submit", (e) => {
-  e.preventDefault();   // stop the browser's default full-page reload on submit
+  e.preventDefault();
   const text = input.value.trim();
-  if (!text) return;   // silently ignore empty submissions
+  if (!text) return;
   tasks.push({ id: nextId++, text, done: false });
   input.value = "";
   render();
 });
 
 // one listener on the <ul> handles every checkbox and delete button,
-// current AND future — this is event delegation from Part 9. Without it
-// we'd have to add a fresh listener to every new <li> render() creates.
+// current AND future — this is event delegation from Part 9
 list.addEventListener("click", (e) => {
   const li = e.target.closest("li");
   if (!li) return;
   const id = Number(li.dataset.id);
 
   if (e.target.classList.contains("todo-check")) {
-    // rebuild the array with this one task's "done" flipped, rather than
-    // mutating the object in place — keeps the update pattern consistent
-    // with how map/filter are used everywhere else on this page
     tasks = tasks.map(t => t.id === id ? { ...t, done: e.target.checked } : t);
     render();
   }
@@ -3506,17 +3933,13 @@ const passEl = sandbox.querySelector("#f-password");
 const submitBtn = sandbox.querySelector("#f-submit");
 const out = sandbox.querySelector("#f-out");
 
-// one rule per field — each returns "" when valid, or an error message.
-// keeping validation as small pure functions like this makes it trivial
-// to add a fourth field later without touching the logic below
+// one rule per field — each returns "" when valid, or an error message
 const rules = {
   name: (v) => v.trim().length >= 2 ? "" : "Name needs at least 2 characters",
   email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "" : "Enter a valid email",
   password: (v) => v.length >= 8 && /\d/.test(v) ? "" : "8+ characters, with at least one number",
 };
 
-// state mirrors what's currently in each input — kept separate from the
-// DOM so the submit-button check below can read it without touching the page
 const state = { name: "", email: "", password: "" };
 
 function validateField(field, value, inputEl, errEl) {
@@ -3524,9 +3947,6 @@ function validateField(field, value, inputEl, errEl) {
   const message = rules[field](value);
   errEl.textContent = message;
   inputEl.style.borderColor = message ? "#c0392b" : (value ? "#2DD4BF" : "");
-  // re-check EVERY field, not just this one — .some() short-circuits as
-  // soon as it finds one still-invalid field, so the button re-enables
-  // only once all three pass at the same time
   submitBtn.disabled = Object.keys(rules).some(f => rules[f](state[f]));
 }
 
@@ -3576,10 +3996,9 @@ const pauseBtn = sandbox.querySelector("#t-pause");
 const resetBtn = sandbox.querySelector("#t-reset");
 
 let totalSeconds = 60;
-let intervalId = null;   // null means "not running" — this doubles as our running/paused flag
+let intervalId = null;
 
 function formatTime(s) {
-  // padStart(2, "0") turns 5 into "05" — without it you'd see "1:5" instead of "01:05"
   const m = Math.floor(s / 60).toString().padStart(2, "0");
   const sec = (s % 60).toString().padStart(2, "0");
   return `${m}:${sec}`;
@@ -3590,12 +4009,12 @@ function updateDisplay() {
 }
 
 startBtn.addEventListener("click", () => {
-  if (intervalId) return;   // already running — don't stack a second interval on top
+  if (intervalId) return;   // already running — don't stack intervals
   intervalId = setInterval(() => {
     totalSeconds--;
     updateDisplay();
     if (totalSeconds <= 0) {
-      clearInterval(intervalId);   // stop ticking once we hit zero
+      clearInterval(intervalId);
       intervalId = null;
       display.textContent = "Time's up!";
     }
@@ -3603,7 +4022,6 @@ startBtn.addEventListener("click", () => {
 });
 
 pauseBtn.addEventListener("click", () => {
-  // clearInterval is safe to call even if intervalId is already null
   clearInterval(intervalId);
   intervalId = null;
 });
@@ -3648,8 +4066,6 @@ const refreshBtn = sandbox.querySelector("#d-refresh");
 const out = sandbox.querySelector("#d-out");
 
 function simulatedFetch(endpoint, shouldFail) {
-  // stands in for a real network request — random-ish delay, and can be
-  // told to fail on purpose so we have something real to catch below
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (shouldFail) reject(new Error(endpoint + " failed to load"));
@@ -3668,9 +4084,6 @@ async function loadDashboard() {
     { name: "Revenue", fail: Math.random() < 0.3, value: "$4,820" },  // fails ~30% of the time, on purpose
   ];
 
-  // Promise.allSettled (not Promise.all) is the key choice here — it waits
-  // for every request and tells you which succeeded or failed individually,
-  // instead of the whole batch rejecting the instant ONE request fails
   const results = await Promise.allSettled(
     endpoints.map(e => simulatedFetch(e.name, e.fail).then(() => e))
   );
@@ -3682,8 +4095,6 @@ async function loadDashboard() {
     if (result.status === "fulfilled") {
       card.innerHTML = `<b>${result.value.name}</b>: ${result.value.value}`;
     } else {
-      // result.reason is the Error object that was rejected with —
-      // each failed card shows its own message instead of one generic banner
       card.style.background = "#fdecea";
       card.style.color = "#c0392b";
       card.innerHTML = `<b>${endpoints[i].name}</b>: ${result.reason.message}`;
@@ -3724,11 +4135,9 @@ console.log("Click 'Load dashboard' — Revenue randomly fails about 30% of the 
 `;
 
 class Cart {
-  #items = [];   // truly private — inaccessible from outside the class, not just a naming convention
+  #items = [];   // truly private — inaccessible from outside the class
 
   addItem(name, price) {
-    // if it's already in the cart, bump the quantity instead of adding
-    // a duplicate row — this is the whole "already have one?" check
     const existing = this.#items.find(i => i.name === name);
     if (existing) existing.qty++;
     else this.#items.push({ name, price, qty: 1 });
@@ -3739,7 +4148,7 @@ class Cart {
   }
 
   get items() {
-    return [...this.#items];   // a COPY — callers can read the list but can't mutate the private array through it
+    return [...this.#items];   // a copy — callers can't mutate the private array
   }
 
   get total() {
@@ -3764,15 +4173,11 @@ function render() {
 
 sandbox.querySelectorAll(".add-item").forEach(btn => {
   btn.addEventListener("click", () => {
-    // the product's name and price live right on the button as data-*
-    // attributes — no separate lookup table needed to know what was clicked
     cart.addItem(btn.dataset.name, Number(btn.dataset.price));
     render();
   });
 });
 
-// one listener on the whole list, not one per "✕" button — event
-// delegation again, same pattern as the to-do list projects
 list.addEventListener("click", (e) => {
   if (e.target.classList.contains("remove-item")) {
     const li = e.target.closest("li");
@@ -3833,7 +4238,7 @@ class TodoList {
   }
 
   get all() {
-    return [...this.#todos];   // a copy, same reasoning as Cart's #items above
+    return [...this.#todos];
   }
 
   get remainingCount() {
@@ -3862,9 +4267,6 @@ function render() {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   try {
-    // .add() either returns a new todo or throws — try/catch is what
-    // lets the UI react to a rejected task without a special return value
-    // like `false` or `null` that callers might forget to check for
     todoList.add(input.value);
     input.value = "";
     errorEl.textContent = "";
@@ -3895,15 +4297,390 @@ console.log("Same to-do list as Project 1 — now backed by a class with a priva
       </div>
     </div>
 
+    <div class="project-card">
+      <div class="project-head">
+        <div class="project-title"><span class="project-num">Project 7</span><h3>Kanban Board</h3></div>
+      </div>
+      <p class="project-desc">Why this gives you power: real drag-and-drop across MULTIPLE containers, not just reordering one list — the data model has to track which column a card is in, and the DOM has to stay perfectly in sync with that model on every drop.</p>
+      <div class="skill-tags">
+        <span class="skill-tag">HTML5 drag-and-drop</span><span class="skill-tag">Data modeling</span><span class="skill-tag">Event delegation</span><span class="skill-tag">Closures</span>
+      </div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('proj-7')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="proj-7-code"></code></pre>
+<textarea class="cell-input" id="proj-7-input" spellcheck="false">sandbox.innerHTML = `
+  <div id="board" style="display:flex;gap:10px;overflow-x:auto;"></div>
+`;
+const board = sandbox.querySelector("#board");
+
+// one flat array is the ENTIRE source of truth — each card just knows
+// which column it belongs to. The three visual lists are only a render.
+const columns = [
+  { id: "todo", title: "To Do" },
+  { id: "doing", title: "In Progress" },
+  { id: "done", title: "Done" },
+];
+let cards = [
+  { id: 1, text: "Design the schema", col: "done" },
+  { id: 2, text: "Build the API", col: "doing" },
+  { id: 3, text: "Write tests", col: "todo" },
+  { id: 4, text: "Deploy to staging", col: "todo" },
+];
+
+function render() {
+  board.innerHTML = columns.map(col => `
+    <div class="card-like" data-col="${col.id}" style="min-width:180px;flex:1;">
+      <p class="field-label">${col.title} (${cards.filter(c => c.col === col.id).length})</p>
+      <div class="col-body" style="min-height:60px;"></div>
+    </div>
+  `).join("");
+
+  columns.forEach(col => {
+    const body = board.querySelector(`[data-col="${col.id}"] .col-body`);
+    cards.filter(c => c.col === col.id).forEach(card => {
+      const el = document.createElement("div");
+      el.className = "drag-item";
+      el.draggable = true;
+      el.dataset.id = card.id;
+      el.textContent = card.text;
+      body.appendChild(el);
+    });
+  });
+}
+
+let draggedId = null;
+
+board.addEventListener("dragstart", (e) => {
+  const item = e.target.closest(".drag-item");
+  if (!item) return;
+  draggedId = Number(item.dataset.id);
+  item.classList.add("dragging");
+});
+
+board.addEventListener("dragend", (e) => {
+  const item = e.target.closest(".drag-item");
+  if (item) item.classList.remove("dragging");
+});
+
+// dragover has to fire on the WHOLE column (not just other cards) so
+// you can drop into an empty column too
+board.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  const colEl = e.target.closest("[data-col]");
+  if (colEl) colEl.style.background = "#eef8f6";
+});
+
+board.addEventListener("dragleave", (e) => {
+  const colEl = e.target.closest("[data-col]");
+  if (colEl) colEl.style.background = "";
+});
+
+board.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const colEl = e.target.closest("[data-col]");
+  if (!colEl || draggedId === null) return;
+  colEl.style.background = "";
+
+  // this is the ENTIRE reorder operation — just update which column
+  // this card's id belongs to, then re-render everything from the array
+  const card = cards.find(c => c.id === draggedId);
+  if (card) card.col = colEl.dataset.col;
+  draggedId = null;
+  render();
+});
+
+render();
+console.log("Drag any card between columns — one flat array tracks every card's column");</textarea>
+        </div>
+        <div class="cell-output" id="proj-7-output"></div>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-head">
+        <div class="project-title"><span class="project-num">Project 8</span><h3>Notes App with Search &amp; Tags</h3></div>
+      </div>
+      <p class="project-desc">Why this gives you power: filtering on TWO combined conditions at once (a search string AND a selected tag), with a debounced "auto-save" indicator — the exact shape of a real notes or CMS product, not a toy list.</p>
+      <div class="skill-tags">
+        <span class="skill-tag">Combined filters</span><span class="skill-tag">Debounce</span><span class="skill-tag">Derived state</span><span class="skill-tag">Empty states</span>
+      </div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('proj-8')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="proj-8-code"></code></pre>
+<textarea class="cell-input" id="proj-8-input" spellcheck="false">sandbox.innerHTML = `
+  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+    <input id="n-search" placeholder="Search notes..." style="flex:1;min-width:160px;" />
+    <select id="n-tag" style="border:1px solid #ddd;border-radius:8px;padding:8px;"></select>
+  </div>
+  <input id="n-new" placeholder="Write a new note, then press Enter to save..." style="width:100%;" />
+  <p id="n-save-state" class="hint"></p>
+  <div id="n-list" style="display:grid;gap:8px;margin-top:10px;"></div>
+`;
+
+const searchInput = sandbox.querySelector("#n-search");
+const tagSelect = sandbox.querySelector("#n-tag");
+const newNote = sandbox.querySelector("#n-new");
+const saveState = sandbox.querySelector("#n-save-state");
+const listEl = sandbox.querySelector("#n-list");
+
+let notes = [
+  { id: 1, text: "Ship the landing page redraft", tag: "work" },
+  { id: 2, text: "Buy flour and eggs", tag: "personal" },
+  { id: 3, text: "Review pull request #42", tag: "work" },
+];
+let nextId = 4;
+let filters = { query: "", tag: "all" };
+
+function renderTagOptions() {
+  const tags = ["all", ...new Set(notes.map(n => n.tag))];
+  tagSelect.innerHTML = tags.map(t => `<option value="${t}">${t === "all" ? "All tags" : t}</option>`).join("");
+  tagSelect.value = filters.tag;
+}
+
+function renderNotes() {
+  // BOTH conditions apply together — this is what makes it a real filter, not two separate ones
+  const visible = notes.filter(n =>
+    (filters.tag === "all" || n.tag === filters.tag) &&
+    n.text.toLowerCase().includes(filters.query.toLowerCase())
+  );
+
+  listEl.innerHTML = visible.length
+    ? visible.map(n => `
+        <div class="card-like" data-id="${n.id}" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div>
+            <p style="margin:0;font-size:13px;">${n.text}</p>
+            <span class="pill" style="margin-top:6px;">${n.tag}</span>
+          </div>
+          <button class="btn-icon n-delete" aria-label="Delete note">✕</button>
+        </div>
+      `).join("")
+    : `<p class="empty-state">No notes match "${filters.query}"${filters.tag !== "all" ? ` in "${filters.tag}"` : ""}</p>`;
+}
+
+let debounceTimer;
+searchInput.addEventListener("input", (e) => {
+  clearTimeout(debounceTimer);
+  saveState.textContent = "Searching...";
+  debounceTimer = setTimeout(() => {
+    filters.query = e.target.value;
+    renderNotes();
+    saveState.textContent = "";
+  }, 250);
+});
+
+tagSelect.addEventListener("change", (e) => {
+  filters.tag = e.target.value;
+  renderNotes();
+});
+
+newNote.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const text = newNote.value.trim();
+    if (!text) return;
+    notes.unshift({ id: nextId++, text, tag: "personal" });
+    newNote.value = "";
+    saveState.textContent = "Saved ✓";
+    renderTagOptions();
+    renderNotes();
+    setTimeout(() => saveState.textContent = "", 1200);
+  }
+});
+
+listEl.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("n-delete")) return;
+  const id = Number(e.target.closest("[data-id]").dataset.id);
+  notes = notes.filter(n => n.id !== id);
+  renderTagOptions();
+  renderNotes();
+});
+
+renderTagOptions();
+renderNotes();
+console.log("Type to search, pick a tag, or write a note and press Enter — both filters apply together");</textarea>
+        </div>
+        <div class="cell-output" id="proj-8-output"></div>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-head">
+        <div class="project-title"><span class="project-num">Project 9</span><h3>Expense Tracker</h3></div>
+      </div>
+      <p class="project-desc">Why this gives you power: the total and the per-category breakdown are never stored anywhere — they're recomputed with <span class="inline-code">reduce()</span> from the raw expense list every single render. That's derived state, the mental model behind every real dashboard.</p>
+      <div class="skill-tags">
+        <span class="skill-tag">reduce()</span><span class="skill-tag">Derived state</span><span class="skill-tag">Grouping</span><span class="skill-tag">Number formatting</span>
+      </div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('proj-9')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="proj-9-code"></code></pre>
+<textarea class="cell-input" id="proj-9-input" spellcheck="false">sandbox.innerHTML = `
+  <form id="e-form" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <input id="e-desc" placeholder="What did you buy?" style="flex:1;min-width:140px;" />
+    <input id="e-amount" type="number" min="0" step="0.01" placeholder="Amount" style="width:100px;" />
+    <select id="e-cat" style="border:1px solid #ddd;border-radius:8px;padding:8px;">
+      <option>Food</option><option>Transport</option><option>Rent</option><option>Other</option>
+    </select>
+    <button type="submit">Add</button>
+  </form>
+  <p style="font-size:22px;font-weight:700;margin:0 0 4px;" id="e-total"></p>
+  <div id="e-breakdown" style="display:grid;gap:6px;margin-bottom:12px;"></div>
+  <div id="e-list" style="display:grid;gap:6px;"></div>
+`;
+
+const form = sandbox.querySelector("#e-form");
+const descInput = sandbox.querySelector("#e-desc");
+const amountInput = sandbox.querySelector("#e-amount");
+const catSelect = sandbox.querySelector("#e-cat");
+const totalEl = sandbox.querySelector("#e-total");
+const breakdownEl = sandbox.querySelector("#e-breakdown");
+const listEl = sandbox.querySelector("#e-list");
+
+// this array is the ONLY state — every number shown on screen is computed from it
+let expenses = [
+  { id: 1, desc: "Groceries", amount: 42.5, cat: "Food" },
+  { id: 2, desc: "Bus pass", amount: 18, cat: "Transport" },
+  { id: 3, desc: "Rent share", amount: 300, cat: "Rent" },
+];
+let nextId = 4;
+
+function money(n) {
+  return "$" + n.toFixed(2);
+}
+
+function render() {
+  // the grand total is DERIVED — never stored, always recomputed
+  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+  totalEl.textContent = "Total: " + money(total);
+
+  // group into a { category: sum } object with reduce, then render it
+  const byCategory = expenses.reduce((acc, e) => {
+    acc[e.cat] = (acc[e.cat] || 0) + e.amount;
+    return acc;
+  }, {});
+
+  breakdownEl.innerHTML = Object.entries(byCategory).map(([cat, amount]) => {
+    const pct = total ? Math.round((amount / total) * 100) : 0;
+    return `
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#444;margin-bottom:3px;">
+          <span>${cat}</span><span>${money(amount)} · ${pct}%</span>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%;"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  listEl.innerHTML = expenses.slice().reverse().map(e => `
+    <div class="card-like" data-id="${e.id}" style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;">${e.desc} <span class="pill" style="margin-left:6px;">${e.cat}</span></span>
+      <span style="display:flex;align-items:center;gap:8px;">
+        <b>${money(e.amount)}</b>
+        <button class="btn-icon e-delete" aria-label="Delete">✕</button>
+      </span>
+    </div>
+  `).join("") || "<p class='empty-state'>No expenses yet</p>";
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const desc = descInput.value.trim();
+  const amount = Number(amountInput.value);
+  if (!desc || !(amount > 0)) return;   // defensive validation from Part 11
+  expenses.push({ id: nextId++, desc, amount, cat: catSelect.value });
+  descInput.value = "";
+  amountInput.value = "";
+  render();
+});
+
+listEl.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("e-delete")) return;
+  const id = Number(e.target.closest("[data-id]").dataset.id);
+  expenses = expenses.filter(x => x.id !== id);
+  render();
+});
+
+render();
+console.log("Add an expense — the total and category breakdown are recomputed from the list every time, never stored separately");</textarea>
+        </div>
+        <div class="cell-output" id="proj-9-output"></div>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-head">
+        <div class="project-title"><span class="project-num">Project 10</span><h3>Tiny Hash Router (mini SPA)</h3></div>
+      </div>
+      <p class="project-desc">Why this gives you power: this is the actual idea behind every client-side router (React Router included), stripped down to what it really is — listen for <span class="inline-code">hashchange</span>, look up a render function by the current hash, and swap what's on screen. No library, no build step, no magic.</p>
+      <div class="skill-tags">
+        <span class="skill-tag">location.hash</span><span class="skill-tag">hashchange event</span><span class="skill-tag">Shared layout</span><span class="skill-tag">Route params</span>
+      </div>
+      <div class="cell" data-cell>
+        <div class="cell-bar"><span class="cell-lang">js</span><button class="btn small run-btn" onclick="runJsCell('proj-10')">▶ Run</button></div>
+        <div class="cell-input-wrap">
+<pre class="cell-highlight" aria-hidden="true"><code class="language-javascript" id="proj-10-code"></code></pre>
+<textarea class="cell-input" id="proj-10-input" spellcheck="false">sandbox.innerHTML = `
+  <nav style="display:flex;gap:6px;margin-bottom:12px;">
+    <a href="#/" class="btn-secondary" style="text-decoration:none;display:inline-block;">Home</a>
+    <a href="#/about" class="btn-secondary" style="text-decoration:none;display:inline-block;">About</a>
+    <a href="#/users/7" class="btn-secondary" style="text-decoration:none;display:inline-block;">User #7</a>
+    <a href="#/nowhere" class="btn-secondary" style="text-decoration:none;display:inline-block;">Broken link</a>
+  </nav>
+  <div id="page" class="card-like"></div>
+`;
+const page = sandbox.querySelector("#page");
+
+// each route is just a function that returns the HTML for that "page" —
+// this object IS the router's route table
+const routes = {
+  "/": () => "<h4>Home</h4><p style='font-size:13px;color:#555;'>Welcome — pick a link above.</p>",
+  "/about": () => "<h4>About</h4><p style='font-size:13px;color:#555;'>A router built from four things: an object, one event, one string split, and one render call.</p>",
+};
+
+// a dynamic route: anything shaped like /users/:id
+function matchDynamicRoute(path) {
+  const parts = path.split("/");   // "/users/7" -> ["", "users", "7"]
+  if (parts[1] === "users" && parts[2]) {
+    return () => `<h4>User #${parts[2]}</h4><p style="font-size:13px;color:#555;">Loaded from the URL itself — no server needed for this demo.</p>`;
+  }
+  return null;
+}
+
+function currentPath() {
+  // "#/about" -> "/about"; a bare "#" or "" falls back to the home route
+  const hash = location.hash.slice(1);
+  return hash || "/";
+}
+
+function renderRoute() {
+  const path = currentPath();
+  const render = routes[path] || matchDynamicRoute(path);
+  page.innerHTML = render ? render() : "<h4>404</h4><p style='font-size:13px;color:#c0392b;'>No route matches '" + path + "'</p>";
+}
+
+// this ONE listener is the entire "routing engine" — every navigation
+// just changes the hash, which fires this, which re-renders the page div
+window.addEventListener("hashchange", renderRoute);
+renderRoute();   // also render whatever route we start on
+console.log("Click the links above — the URL hash changes and the page div re-renders, no page reload");</textarea>
+        </div>
+        <div class="cell-output" id="proj-10-output"></div>
+      </div>
+    </div>
+
   </div>
 </section>
+
 
 <footer>Vanilla JavaScript: Zero to Mastery — every example above ran in your actual browser, not a simulation.</footer>
 
 </main>
 
 <script>
-hljs.highlightAll();
+if (window.hljs) hljs.highlightAll();
 
 /* =========================================================
    LIVE SYNTAX HIGHLIGHTING (textarea + hljs overlay)
@@ -3912,7 +4689,7 @@ function highlightPair(inputEl, codeEl){
   codeEl.textContent = inputEl.value;
   delete codeEl.dataset.highlighted;
   codeEl.className = 'language-javascript';
-  hljs.highlightElement(codeEl);
+  if (window.hljs) hljs.highlightElement(codeEl);
 }
 function autoGrow(inputEl){
   inputEl.style.height = 'auto';
@@ -4105,7 +4882,7 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'Intersecti
         io.unobserve(entry.target);
       }
     });
-  }, {threshold:0.05, rootMargin:'0px 0px -60px 0px'});
+  }, {threshold:0, rootMargin:'0px 0px -60px 0px'});
   document.querySelectorAll('.stage').forEach(sec => io.observe(sec));
 }
 </script>
