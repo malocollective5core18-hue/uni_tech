@@ -2151,8 +2151,16 @@ const icon = sandbox.querySelector("#acc-icon");
 toggle.addEventListener("click", () => {
   const isOpen = toggle.getAttribute("aria-expanded") === "true";
   toggle.setAttribute("aria-expanded", String(!isOpen));
-  // aria-expanded IS the real state — animating max-height is purely cosmetic
+
+  // aria-expanded IS the real state — the max-height animation below is
+  // purely cosmetic. Even with CSS disabled, a screen reader still knows
+  // whether this section is open, because that attribute is the source
+  // of truth, not the visible height.
   body.style.maxHeight = isOpen ? "0px" : body.scrollHeight + "px";
+
+  // scrollHeight is the section's FULL height even while it's collapsed —
+  // that's what lets us animate TO an exact pixel value instead of "auto"
+  // (which CSS transitions can't animate directly).
   icon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
 });
 console.log("Click the header above — aria-expanded tracks the real state");</textarea>
@@ -2189,6 +2197,8 @@ const panels = {
 function selectTab(tab) {
   tabs.forEach(t => {
     const active = t === tab;
+    // aria-selected is what a screen reader actually announces — the
+    // inline colors below are just so sighted users see the same thing
     t.setAttribute("aria-selected", String(active));
     t.style.background = active ? "#2DD4BF" : "#fff";
     t.style.color = active ? "#fff" : "#333";
@@ -2196,12 +2206,14 @@ function selectTab(tab) {
   });
   Object.values(panels).forEach(p => p.hidden = true);
   panels[tab.dataset.tab].hidden = false;
-  tab.focus();
+  tab.focus();   // keep focus ON the tab that's now active, not wherever it was
 }
 
 tabs.forEach((tab, i) => {
   tab.addEventListener("click", () => selectTab(tab));
-  // arrow-key navigation is the expected keyboard behavior for a real tablist
+  // arrow-key navigation is the expected keyboard behavior for a real
+  // tablist — the % wraps around so ArrowRight on the last tab goes
+  // back to the first, and ArrowLeft on the first wraps to the last
   tab.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") selectTab(tabs[(i + 1) % tabs.length]);
     if (e.key === "ArrowLeft") selectTab(tabs[(i - 1 + tabs.length) % tabs.length]);
@@ -2238,9 +2250,19 @@ const dialog = sandbox.querySelector("#modal");
 const cancelBtn = sandbox.querySelector("#cancel");
 const confirmBtn = sandbox.querySelector("#confirm");
 
+// showModal() (not just .show()) is what makes this behave like a real
+// modal: it dims everything else with a backdrop, traps Tab inside the
+// dialog so focus can't escape to the page behind it, and wires up
+// Escape-to-close automatically — none of that is manual work here
 openBtn.addEventListener("click", () => dialog.showModal());
+
 cancelBtn.addEventListener("click", () => dialog.close());
+
+// dialog.close(value) sets dialog.returnValue to whatever you pass —
+// a clean way to tell WHY it closed without a separate variable
 confirmBtn.addEventListener("click", () => dialog.close("confirmed"));
+
+// fires no matter how it closed: Cancel, Delete, Escape, or the backdrop
 dialog.addEventListener("close", () => {
   console.log("Modal closed, returnValue:", dialog.returnValue || "(dismissed)");
 });
@@ -2279,10 +2301,18 @@ function openMenu() {
 }
 
 menuBtn.addEventListener("click", (e) => {
+  // without this, the click below (on sandbox) would immediately close
+  // the menu we just opened, because clicks bubble up from this button
+  // to the sandbox itself
   e.stopPropagation();
   menu.hidden ? openMenu() : closeMenu();
 });
+
+// closing on ANY other click, anywhere in the sandbox — this single
+// listener is what makes it feel like a real dropdown instead of
+// something that only closes via its own toggle button
 sandbox.addEventListener("click", closeMenu);
+
 sandbox.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeMenu();
 });
@@ -2314,7 +2344,9 @@ const tip = sandbox.querySelector("#tip");
 function showTip() { tip.hidden = false; }
 function hideTip() { tip.hidden = true; }
 
-// both mouse AND keyboard users need to be able to trigger this
+// both mouse AND keyboard users need to be able to trigger this — a
+// tooltip that only responds to mouseenter/mouseleave is invisible to
+// anyone tabbing through the page instead of using a mouse
 info.addEventListener("mouseenter", showTip);
 info.addEventListener("mouseleave", hideTip);
 info.addEventListener("focus", showTip);
@@ -2344,14 +2376,18 @@ const codeText = "npm install react";
 
 copyBtn.addEventListener("click", async () => {
   try {
+    // the real Clipboard API — this actually writes to the OS clipboard,
+    // it's not a fake simulation
     await navigator.clipboard.writeText(codeText);
     copyBtn.textContent = "Copied ✓";
     out.textContent = "Copied to clipboard!";
   } catch (err) {
     // clipboard access needs a real HTTPS page and user permission —
-    // this fallback is exactly what a real site shows when it's blocked
+    // this fallback is exactly what a real site shows when it's blocked,
+    // instead of just silently failing
     out.textContent = "Clipboard blocked here, but this is the exact real code for it";
   }
+  // reset the button label after a beat, so it doesn't say "Copied ✓" forever
   setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
 });
 console.log("Click 'Copy' above");</textarea>
@@ -2387,10 +2423,12 @@ function addToast(message, type) {
   toast.className = "toast" + (type ? " toast-" + type : "");
   toast.innerHTML = `<span class="toast-msg"></span><button class="btn-icon" aria-label="Dismiss">✕</button>`;
   toast.querySelector(".toast-msg").textContent = message;
-  toast.dataset.id = id;
+  toast.dataset.id = id;   // stash the id on the element so we can find it again later
   stack.appendChild(toast);
 
-  // cap the stack — drop the oldest toast once we're over the limit
+  // cap the stack — drop the oldest toast once we're over the limit,
+  // going through removeToast() so its timer gets cleared too, not just
+  // the element yanked out from under a still-running setTimeout
   while (stack.children.length > MAX_TOASTS) {
     removeToast(stack.firstElementChild.dataset.id);
   }
@@ -2402,7 +2440,7 @@ function addToast(message, type) {
 function removeToast(id) {
   id = Number(id);
   const toast = stack.querySelector(`[data-id="${id}"]`);
-  if (!toast) return;
+  if (!toast) return;   // already removed — e.g. its timer fired right as someone clicked ✕
   clearTimeout(timers.get(id));   // cancel the auto-dismiss timer — avoids a leaked timeout
   timers.delete(id);
   toast.remove();
@@ -2437,8 +2475,12 @@ const text = sandbox.querySelector("#text");
 const toggleBtn = sandbox.querySelector("#toggle-text");
 
 toggleBtn.addEventListener("click", () => {
+  // .toggle() both flips the class AND tells you whether it's now present —
+  // no separate "is it truncated?" check needed before or after
   const isTruncated = text.classList.toggle("truncated");
   toggleBtn.textContent = isTruncated ? "Read more" : "Read less";
+  // the paragraph's own text never changes — only the class (which CSS
+  // uses to clamp it) and this button's own accessible state do
   toggleBtn.setAttribute("aria-expanded", String(!isTruncated));
 });
 console.log("Click 'Read more' to expand the full paragraph");</textarea>
@@ -2463,6 +2505,8 @@ const loadBtn = sandbox.querySelector("#load");
 const content = sandbox.querySelector("#content");
 
 function renderSkeleton() {
+  // three bars at different widths reads as "text is coming" at a glance —
+  // matching the rough shape of what's about to load beats a plain spinner
   content.innerHTML = `
     <div class="skeleton-line" style="width:60%;"></div>
     <div class="skeleton-line" style="width:90%;"></div>
@@ -2471,6 +2515,8 @@ function renderSkeleton() {
 }
 
 function fakeFetchProfile() {
+  // stands in for a real network call — same shape as an actual fetch:
+  // something async that eventually resolves with data
   return new Promise(resolve => setTimeout(() => resolve({ name: "Ada Lovelace", role: "Engineer" }), 1200));
 }
 
@@ -2480,6 +2526,9 @@ loadBtn.addEventListener("click", async () => {
 
   const profile = await fakeFetchProfile();
 
+  // swap the skeleton for the real content only once it's actually ready —
+  // the layout doesn't jump because the skeleton occupied roughly the
+  // same space the real content now does
   content.innerHTML = `
     <p style="font-weight:600;font-size:14px;margin:0;">${profile.name}</p>
     <p style="font-size:12.5px;color:#666;margin-top:2px;">${profile.role}</p>
@@ -2508,7 +2557,8 @@ console.log("Click 'Load profile' — the skeleton keeps the layout stable while
 const search = sandbox.querySelector("#search");
 const results = sandbox.querySelector("#results");
 
-// the DATA lives here, completely separate from the DOM it's rendered into
+// the DATA lives here, completely separate from the DOM it's rendered into —
+// renderResults() is the only thing that ever touches the <ul>
 const fruits = ["Apple", "Apricot", "Banana", "Blueberry", "Cherry", "Cranberry", "Grape", "Grapefruit", "Mango", "Orange", "Peach", "Pear"];
 
 function renderResults(query) {
@@ -2520,9 +2570,12 @@ function renderResults(query) {
 
 let debounceTimer;
 search.addEventListener("input", (e) => {
+  // every keystroke cancels whatever was scheduled before it —
   clearTimeout(debounceTimer);
   const query = e.target.value;
-  // wait for 300ms of silence before actually filtering — this IS the debounce
+  // ...and schedules a fresh 300ms wait. Only once you stop typing for a
+  // full 300ms does that last scheduled call actually survive to run —
+  // this IS the debounce, no external helper needed
   debounceTimer = setTimeout(() => renderResults(query), 300);
 });
 
@@ -2554,12 +2607,16 @@ console.log("Type in the box — filtering runs 300ms after you stop typing, not
 
 function wireSwitch(el) {
   function toggle() {
+    // aria-checked is a STRING attribute ("true"/"false"), not a real
+    // boolean — that's why it's compared and set with String() below
     const isOn = el.getAttribute("aria-checked") === "true";
     el.setAttribute("aria-checked", String(!isOn));
   }
   el.addEventListener("click", toggle);
   // Space and Enter both need to work — that's what makes this a real
-  // control, not just a styled div that happens to look like a switch
+  // control, not just a styled div that happens to look like a switch.
+  // preventDefault() on Space stops the page from also scrolling down,
+  // which is the browser's default behavior for Space on a button.
   el.addEventListener("keydown", (e) => {
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
@@ -2597,9 +2654,13 @@ const stepContent = sandbox.querySelector("#step-content");
 const prevBtn = sandbox.querySelector("#prev");
 const nextBtn = sandbox.querySelector("#next");
 
-// an explicit state machine — one source of truth for "where am I" and "what have I entered"
+// an explicit state machine — one object holding "where am I" (step) and
+// "what have I entered" (data). Every render reads FROM this; nothing
+// else stores the wizard's progress anywhere
 const wizard = { step: 0, data: { name: "", email: "" } };
 
+// each step knows how to render itself AND how to validate its own input —
+// the wizard driver below doesn't need to know anything field-specific
 const steps = [
   {
     render: () => `
@@ -2624,12 +2685,14 @@ const steps = [
     },
   },
   {
+    // the final step is just a summary — always valid, nothing to check
     render: () => `<p style="font-size:13px;color:#333;">All set, <b>${wizard.data.name}</b>. We'll reach you at <b>${wizard.data.email}</b>.</p>`,
     validate: () => "",
   },
 ];
 
 function renderStep() {
+  // a filled-in segment for every step up to and including the current one
   progress.innerHTML = steps.map((_, i) => `<div class="progress-step ${i <= wizard.step ? "done" : ""}"></div>`).join("");
   stepContent.innerHTML = steps[wizard.step].render();
   prevBtn.disabled = wizard.step === 0;
@@ -2652,6 +2715,7 @@ nextBtn.addEventListener("click", () => {
     wizard.step++;
     renderStep();
   } else {
+    // last step's Next is really "Finish" — end the flow instead of advancing
     stepContent.innerHTML = `<p class="pill">Submitted ✓</p>`;
     nextBtn.disabled = true;
     prevBtn.disabled = true;
@@ -2679,7 +2743,8 @@ console.log("Fill each step — Next is blocked until the current step passes va
 `;
 const dragList = sandbox.querySelector("#drag-list");
 
-// the ORDER lives in this array — dragging only ever reorders the array
+// the ORDER lives in this array — dragging only ever reorders the array,
+// then renderList() rebuilds the <li> elements from scratch to match it
 let items = ["Design", "Develop", "Test", "Deploy"];
 
 function renderList() {
@@ -2690,33 +2755,37 @@ function renderList() {
   `).join("");
 }
 
-let draggedItem = null;
+let draggedItem = null;   // remembers WHICH item is mid-drag, across all four events below
 
 dragList.addEventListener("dragstart", (e) => {
   const li = e.target.closest(".drag-item");
   if (!li) return;
   draggedItem = li.dataset.item;
-  li.classList.add("dragging");
+  li.classList.add("dragging");   // just a visual "this one is being dragged" cue
 });
 
 dragList.addEventListener("dragend", (e) => {
+  // fires whether the drop succeeded or the drag was cancelled — always
+  // clean up the visual classes here, not inside "drop"
   const li = e.target.closest(".drag-item");
   if (li) li.classList.remove("dragging");
   dragList.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
 });
 
 dragList.addEventListener("dragover", (e) => {
-  e.preventDefault();   // required — without this, "drop" never fires
+  e.preventDefault();   // required — without this, "drop" never fires at all
   const li = e.target.closest(".drag-item");
   if (!li || li.dataset.item === draggedItem) return;
   dragList.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
-  li.classList.add("drag-over");
+  li.classList.add("drag-over");   // highlight whichever item you're currently over
 });
 
 dragList.addEventListener("drop", (e) => {
   e.preventDefault();
   const li = e.target.closest(".drag-item");
   if (!li || !draggedItem) return;
+  // pull the dragged item out of its old spot, then insert it at the new
+  // spot — this is the entire reordering logic, just two array ops
   const from = items.indexOf(draggedItem);
   const to = items.indexOf(li.dataset.item);
   items.splice(from, 1);
@@ -2746,6 +2815,8 @@ console.log("Drag any item onto another to reorder — the array itself is the s
 const pageList = sandbox.querySelector("#page-list");
 const loadMoreBtn = sandbox.querySelector("#load-more");
 
+// the full dataset already exists in memory — a REAL app would fetch each
+// page from a server instead, but the rendering logic below is identical
 const allItems = Array.from({ length: 23 }, (_, i) => `Item ${i + 1}`);
 const PAGE_SIZE = 5;
 let visibleCount = PAGE_SIZE;
@@ -2756,10 +2827,12 @@ function renderPage() {
 
   const remaining = allItems.length - visibleCount;
   loadMoreBtn.textContent = remaining > 0 ? `Load more (${remaining} left)` : "That's everything";
-  loadMoreBtn.disabled = remaining <= 0;
+  loadMoreBtn.disabled = remaining <= 0;   // nothing left to load — grey it out instead of hiding it
 }
 
 loadMoreBtn.addEventListener("click", () => {
+  // Math.min caps it at the total length, so the last click never tries
+  // to reveal more items than actually exist
   visibleCount = Math.min(allItems.length, visibleCount + PAGE_SIZE);
   renderPage();
 });
@@ -2790,16 +2863,18 @@ const ratingOut = sandbox.querySelector("#rating-out");
 let rating = 0;   // the controlled value — the DOM is always redrawn FROM this, never edited directly
 
 function renderStars(previewValue) {
+  // hovering passes a preview value (e.g. 3) without touching "rating"
+  // itself — moving the mouse away just re-renders from the real value
   const value = previewValue === undefined ? rating : previewValue;
-  starsEl.innerHTML = "";
+  starsEl.innerHTML = "";   // full rebuild every time — simpler than tracking which stars changed
   for (let i = 1; i <= 5; i++) {
     const btn = document.createElement("button");
     btn.className = "star" + (i <= value ? " filled" : "");
     btn.textContent = "★";
     btn.setAttribute("role", "radio");
-    btn.setAttribute("aria-checked", String(i === rating));
+    btn.setAttribute("aria-checked", String(i === rating));   // only the ACTUAL rating is "checked", never the hover preview
     btn.addEventListener("mouseenter", () => renderStars(i));
-    btn.addEventListener("mouseleave", () => renderStars());
+    btn.addEventListener("mouseleave", () => renderStars());   // no argument = fall back to the real rating
     btn.addEventListener("click", () => {
       rating = i;
       renderStars();
@@ -3335,11 +3410,13 @@ const input = sandbox.querySelector("#todo-input");
 const list = sandbox.querySelector("#todo-list");
 const stats = sandbox.querySelector("#todo-stats");
 
+// tasks is the ONLY source of truth — render() always rebuilds the <ul>
+// from this array, so the DOM never drifts out of sync with the data
 let tasks = [
   { id: 1, text: "Learn arrays", done: true },
   { id: 2, text: "Learn the DOM", done: false },
 ];
-let nextId = 3;
+let nextId = 3;   // simple incrementing id, separate from the array's positions
 
 function render() {
   list.innerHTML = tasks.map(t => `
@@ -3355,22 +3432,26 @@ function render() {
 }
 
 form.addEventListener("submit", (e) => {
-  e.preventDefault();
+  e.preventDefault();   // stop the browser's default full-page reload on submit
   const text = input.value.trim();
-  if (!text) return;
+  if (!text) return;   // silently ignore empty submissions
   tasks.push({ id: nextId++, text, done: false });
   input.value = "";
   render();
 });
 
 // one listener on the <ul> handles every checkbox and delete button,
-// current AND future — this is event delegation from Part 9
+// current AND future — this is event delegation from Part 9. Without it
+// we'd have to add a fresh listener to every new <li> render() creates.
 list.addEventListener("click", (e) => {
   const li = e.target.closest("li");
   if (!li) return;
   const id = Number(li.dataset.id);
 
   if (e.target.classList.contains("todo-check")) {
+    // rebuild the array with this one task's "done" flipped, rather than
+    // mutating the object in place — keeps the update pattern consistent
+    // with how map/filter are used everywhere else on this page
     tasks = tasks.map(t => t.id === id ? { ...t, done: e.target.checked } : t);
     render();
   }
@@ -3425,13 +3506,17 @@ const passEl = sandbox.querySelector("#f-password");
 const submitBtn = sandbox.querySelector("#f-submit");
 const out = sandbox.querySelector("#f-out");
 
-// one rule per field — each returns "" when valid, or an error message
+// one rule per field — each returns "" when valid, or an error message.
+// keeping validation as small pure functions like this makes it trivial
+// to add a fourth field later without touching the logic below
 const rules = {
   name: (v) => v.trim().length >= 2 ? "" : "Name needs at least 2 characters",
   email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "" : "Enter a valid email",
   password: (v) => v.length >= 8 && /\d/.test(v) ? "" : "8+ characters, with at least one number",
 };
 
+// state mirrors what's currently in each input — kept separate from the
+// DOM so the submit-button check below can read it without touching the page
 const state = { name: "", email: "", password: "" };
 
 function validateField(field, value, inputEl, errEl) {
@@ -3439,6 +3524,9 @@ function validateField(field, value, inputEl, errEl) {
   const message = rules[field](value);
   errEl.textContent = message;
   inputEl.style.borderColor = message ? "#c0392b" : (value ? "#2DD4BF" : "");
+  // re-check EVERY field, not just this one — .some() short-circuits as
+  // soon as it finds one still-invalid field, so the button re-enables
+  // only once all three pass at the same time
   submitBtn.disabled = Object.keys(rules).some(f => rules[f](state[f]));
 }
 
@@ -3488,9 +3576,10 @@ const pauseBtn = sandbox.querySelector("#t-pause");
 const resetBtn = sandbox.querySelector("#t-reset");
 
 let totalSeconds = 60;
-let intervalId = null;
+let intervalId = null;   // null means "not running" — this doubles as our running/paused flag
 
 function formatTime(s) {
+  // padStart(2, "0") turns 5 into "05" — without it you'd see "1:5" instead of "01:05"
   const m = Math.floor(s / 60).toString().padStart(2, "0");
   const sec = (s % 60).toString().padStart(2, "0");
   return `${m}:${sec}`;
@@ -3501,12 +3590,12 @@ function updateDisplay() {
 }
 
 startBtn.addEventListener("click", () => {
-  if (intervalId) return;   // already running — don't stack intervals
+  if (intervalId) return;   // already running — don't stack a second interval on top
   intervalId = setInterval(() => {
     totalSeconds--;
     updateDisplay();
     if (totalSeconds <= 0) {
-      clearInterval(intervalId);
+      clearInterval(intervalId);   // stop ticking once we hit zero
       intervalId = null;
       display.textContent = "Time's up!";
     }
@@ -3514,6 +3603,7 @@ startBtn.addEventListener("click", () => {
 });
 
 pauseBtn.addEventListener("click", () => {
+  // clearInterval is safe to call even if intervalId is already null
   clearInterval(intervalId);
   intervalId = null;
 });
@@ -3558,6 +3648,8 @@ const refreshBtn = sandbox.querySelector("#d-refresh");
 const out = sandbox.querySelector("#d-out");
 
 function simulatedFetch(endpoint, shouldFail) {
+  // stands in for a real network request — random-ish delay, and can be
+  // told to fail on purpose so we have something real to catch below
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (shouldFail) reject(new Error(endpoint + " failed to load"));
@@ -3576,6 +3668,9 @@ async function loadDashboard() {
     { name: "Revenue", fail: Math.random() < 0.3, value: "$4,820" },  // fails ~30% of the time, on purpose
   ];
 
+  // Promise.allSettled (not Promise.all) is the key choice here — it waits
+  // for every request and tells you which succeeded or failed individually,
+  // instead of the whole batch rejecting the instant ONE request fails
   const results = await Promise.allSettled(
     endpoints.map(e => simulatedFetch(e.name, e.fail).then(() => e))
   );
@@ -3587,6 +3682,8 @@ async function loadDashboard() {
     if (result.status === "fulfilled") {
       card.innerHTML = `<b>${result.value.name}</b>: ${result.value.value}`;
     } else {
+      // result.reason is the Error object that was rejected with —
+      // each failed card shows its own message instead of one generic banner
       card.style.background = "#fdecea";
       card.style.color = "#c0392b";
       card.innerHTML = `<b>${endpoints[i].name}</b>: ${result.reason.message}`;
@@ -3627,9 +3724,11 @@ console.log("Click 'Load dashboard' — Revenue randomly fails about 30% of the 
 `;
 
 class Cart {
-  #items = [];   // truly private — inaccessible from outside the class
+  #items = [];   // truly private — inaccessible from outside the class, not just a naming convention
 
   addItem(name, price) {
+    // if it's already in the cart, bump the quantity instead of adding
+    // a duplicate row — this is the whole "already have one?" check
     const existing = this.#items.find(i => i.name === name);
     if (existing) existing.qty++;
     else this.#items.push({ name, price, qty: 1 });
@@ -3640,7 +3739,7 @@ class Cart {
   }
 
   get items() {
-    return [...this.#items];   // a copy — callers can't mutate the private array
+    return [...this.#items];   // a COPY — callers can read the list but can't mutate the private array through it
   }
 
   get total() {
@@ -3665,11 +3764,15 @@ function render() {
 
 sandbox.querySelectorAll(".add-item").forEach(btn => {
   btn.addEventListener("click", () => {
+    // the product's name and price live right on the button as data-*
+    // attributes — no separate lookup table needed to know what was clicked
     cart.addItem(btn.dataset.name, Number(btn.dataset.price));
     render();
   });
 });
 
+// one listener on the whole list, not one per "✕" button — event
+// delegation again, same pattern as the to-do list projects
 list.addEventListener("click", (e) => {
   if (e.target.classList.contains("remove-item")) {
     const li = e.target.closest("li");
@@ -3730,7 +3833,7 @@ class TodoList {
   }
 
   get all() {
-    return [...this.#todos];
+    return [...this.#todos];   // a copy, same reasoning as Cart's #items above
   }
 
   get remainingCount() {
@@ -3759,6 +3862,9 @@ function render() {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   try {
+    // .add() either returns a new todo or throws — try/catch is what
+    // lets the UI react to a rejected task without a special return value
+    // like `false` or `null` that callers might forget to check for
     todoList.add(input.value);
     input.value = "";
     errorEl.textContent = "";
